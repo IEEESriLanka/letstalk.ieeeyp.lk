@@ -1,151 +1,104 @@
-import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import { Sparkles } from "lucide-react";
+import { useEffect, useId, useState } from "react";
+import { UsersRound } from "lucide-react";
 import letsTalkLogo from "@/assets/lets-talk-logo.png";
+import "./preloader.css";
 
-export function Preloader() {
-  const [loading, setLoading] = useState(true);
-  const [progress, setProgress] = useState(0);
+type PreloaderProps = {
+  contentReady: boolean;
+  onComplete: () => void;
+};
+
+/** Progress counts resolved startup tasks, not elapsed time or downloaded bytes. */
+export function Preloader({ contentReady, onComplete }: PreloaderProps) {
+  const [assets, setAssets] = useState({ logo: false, fonts: false });
+  const [dismissed, setDismissed] = useState(false);
+  const id = useId();
+  const completed = Number(contentReady) + Number(assets.logo) + Number(assets.fonts);
+  const progress = Math.round((completed / 3) * 100);
 
   useEffect(() => {
-    // Lock body scroll during initial loading
-    document.body.style.overflow = "hidden";
-
-    const duration = 5000; // 5 seconds duration
-    const interval = 25; // update every 25ms
-    const step = 100 / (duration / interval);
-
-    const timer = setInterval(() => {
-      setProgress((prev) => {
-        const next = prev + step + (Math.random() * 0.4 - 0.2);
-        if (next >= 100) {
-          clearInterval(timer);
-          setTimeout(() => {
-            setLoading(false);
-            document.body.style.overflow = "";
-          }, 350);
-          return 100;
-        }
-        return next;
-      });
-    }, interval);
-
+    let active = true;
+    const logo = new Image();
+    const settleLogo = () => {
+      if (active) setAssets((previous) => ({ ...previous, logo: true }));
+    };
+    logo.onload = settleLogo;
+    logo.onerror = settleLogo;
+    logo.src = letsTalkLogo;
+    if (logo.complete) settleLogo();
+    const settleFonts = () => {
+      if (active) setAssets((previous) => ({ ...previous, fonts: true }));
+    };
+    // Failed resources settle too: the page can use its existing fallbacks.
+    if (document.fonts) void document.fonts.ready.then(settleFonts, settleFonts);
+    else settleFonts();
     return () => {
-      clearInterval(timer);
-      document.body.style.overflow = "";
+      active = false;
+      logo.onload = null;
+      logo.onerror = null;
     };
   }, []);
 
-  const getStatusText = (prog: number) => {
-    if (prog < 25) return "Connecting to IEEE Young Professionals network…";
-    if (prog < 50) return "Loading leadership talks & speaker sessions…";
-    if (prog < 75) return "Preparing interactive workshops & skill tracks…";
-    if (prog < 95) return "Where Future Professionals Meet Industry Leaders…";
-    return "Welcome to IEEE LETs talk";
-  };
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    // A safety deadline, never a minimum display duration or simulated progress.
+    const deadline = window.setTimeout(() => setDismissed(true), 12000);
+    return () => {
+      window.clearTimeout(deadline);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (completed === 3 || dismissed) onComplete();
+  }, [completed, dismissed, onComplete]);
 
   return (
-    <AnimatePresence>
-      {loading && (
-        <motion.div
-          key="preloader"
-          initial={{ opacity: 1 }}
-          exit={{
-            y: "-100%",
-            opacity: 0.9,
-            transition: {
-              duration: 0.85,
-              ease: [0.76, 0, 0.24, 1],
-            },
-          }}
-          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center overflow-hidden bg-[#00142B] text-white select-none"
-        >
-          {/* Ambient luminous glows */}
-          <div
-            aria-hidden
-            className="animate-pulse absolute -top-20 -left-20 size-96 rounded-full bg-[color-mix(in_oklab,var(--orange)_24%,transparent)] blur-[120px]"
-          />
-          <div
-            aria-hidden
-            className="animate-pulse absolute -bottom-20 -right-20 size-96 rounded-full bg-[color-mix(in_oklab,var(--ieee)_35%,transparent)] blur-[140px]"
-            style={{ animationDelay: "1s" }}
-          />
-          <div
-            aria-hidden
-            className="absolute inset-0 opacity-15 [background-image:radial-gradient(#ffffff_1px,transparent_1px)] [background-size:32px_32px]"
-          />
-
-          <div className="relative z-10 flex flex-col items-center px-6 text-center">
-            {/* Pulsing Emblem with expanding rings */}
-            <div className="relative mb-8 grid place-items-center">
-              <motion.div
-                animate={{ scale: [1, 1.45, 1], opacity: [0.35, 0, 0.35] }}
-                transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute size-24 rounded-full border border-orange/40"
-              />
-              <motion.div
-                animate={{ scale: [1, 1.85, 1], opacity: [0.2, 0, 0.2] }}
-                transition={{ duration: 2.5, repeat: Infinity, delay: 0.4, ease: "easeInOut" }}
-                className="absolute size-28 rounded-full border border-white/20"
-              />
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
-                className="relative grid size-20 place-items-center rounded-2xl border border-white/20 bg-white/95 p-3 shadow-[0_0_50px_rgba(255,107,0,0.45)] backdrop-blur-md"
-              >
-                <img
-                  src={letsTalkLogo}
-                  alt="IEEE LETs talk logo"
-                  className="size-full object-contain"
-                />
-              </motion.div>
-            </div>
-
-            {/* Brand Titles */}
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-              className="flex flex-col items-center"
-            >
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3.5 py-1 text-[0.7rem] font-medium tracking-wide text-white/70 backdrop-blur-md">
-                <Sparkles className="size-3 text-orange" />
-                IEEE Young Professionals Sri Lanka
-              </div>
-
-              <h1 className="font-display text-gradient-orange mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
-                IEEE LETs talk
-              </h1>
-            </motion.div>
-
-            {/* Status indicator */}
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="mt-6 h-5 text-xs font-medium tracking-wide text-white/70 sm:text-sm"
-            >
-              {getStatusText(progress)}
-            </motion.p>
-
-            {/* Progress Bar & Counter */}
-            <div className="mt-8 w-64 max-w-[80vw] sm:w-80">
-              <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-white/10 p-0.5">
-                <motion.div
-                  className="h-full rounded-full bg-[image:var(--gradient-orange)] shadow-[0_0_12px_rgba(255,107,0,0.8)]"
-                  style={{ width: `${Math.min(progress, 100)}%` }}
-                  transition={{ ease: "easeOut" }}
-                />
-              </div>
-              <div className="mt-3 flex items-center justify-between text-[0.7rem] font-semibold text-white/50">
-                <span>LOADING EXPERIENCE</span>
-                <span className="font-mono text-xs text-orange">{Math.round(progress)}%</span>
-              </div>
-            </div>
+    <section className="site-preloader" aria-labelledby={`${id}-title`} aria-busy="true">
+      <div className="preloader-orbit preloader-orbit-blue" aria-hidden="true" />
+      <div className="preloader-orbit preloader-orbit-orange" aria-hidden="true" />
+      <div className="preloader-dots preloader-dots-top" aria-hidden="true" />
+      <div className="preloader-dots preloader-dots-bottom" aria-hidden="true" />
+      <div className="preloader-content">
+        <div className="preloader-emblem">
+          <div className="preloader-ring" aria-hidden="true" />
+          <div className="preloader-logo">
+            <img src={letsTalkLogo} alt="LETs Talk logo" width="112" height="112" />
           </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        </div>
+        <p className="preloader-badge">
+          <UsersRound size={19} aria-hidden="true" />
+          IEEE Young Professionals Sri Lanka
+        </p>
+        <h1 id={`${id}-title`} className="preloader-title">
+          <span>IEEE</span> <span>LETs</span> <span>talk</span>
+        </h1>
+        <p className="preloader-message" role="status">
+          Loading leadership talks &amp; speaker sessions...
+        </p>
+        <div className="preloader-progress-row">
+          <div
+            className="preloader-track"
+            role="progressbar"
+            aria-label="Website initialization"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={progress}
+            aria-valuetext={`${completed} of 3 startup tasks resolved`}
+          >
+            <div className="preloader-fill" style={{ width: `${progress}%` }} />
+          </div>
+          <span className="preloader-percentage" aria-hidden="true">
+            {progress}%
+          </span>
+        </div>
+        <div className="preloader-segments" aria-hidden="true">
+          {[0, 1, 2].map((segment) => (
+            <span key={segment} data-active={segment === Math.min(completed, 2)} />
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }

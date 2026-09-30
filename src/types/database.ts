@@ -38,6 +38,19 @@ export type GalleryItem = {
   title: string;
   caption: string | null;
   image_url: string;
+  album_id: string | null;
+  display_order: number;
+  published: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type GalleryAlbum = {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  cover_image_url: string | null;
   display_order: number;
   published: boolean;
   created_at: string;
@@ -77,7 +90,7 @@ export type ContactMessageRecord = {
 };
 
 export type AdminManagedTable =
-  "events" | "programs" | "gallery_items" | "awards" | "partners" | "contact_messages";
+  "events" | "programs" | "gallery_albums" | "gallery_items" | "awards" | "partners" | "contact_messages";
 
 export type StorageBucket =
   "event-images" | "program-images" | "gallery-images" | "award-images" | "partner-logos";

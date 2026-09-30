@@ -1,66 +1,92 @@
-import { motion } from "motion/react";
-import { Sparkles } from "lucide-react";
+import { motion, useReducedMotion } from "motion/react";
+import { ArrowDown, ArrowRight } from "lucide-react";
 import { PhotoBackdrop } from "./photo-backdrop";
-import letsTalkLogo from "@/assets/lets-talk-logo.png";
 import type { SiteContent } from "@/lib/site-content";
 
 export function Hero({ content }: { content: SiteContent["hero"] }) {
+  const reduceMotion = useReducedMotion();
+  const hasPhotos = Boolean(content.backgroundImages?.length);
   return (
     <section
       id="top"
-      className="relative overflow-hidden bg-background pt-32 pb-20 lg:pt-44 lg:pb-32"
+      aria-labelledby="hero-title"
+      className="relative isolate overflow-hidden bg-[#fbfcff] pt-28 lg:min-h-svh lg:pt-[clamp(6rem,12svh,8rem)]"
     >
-      <PhotoBackdrop />
-
-      {/* mesh + grid background */}
-      <div aria-hidden className="absolute inset-0 bg-mesh opacity-70" />
       <div
         aria-hidden
-        className="absolute inset-0 bg-grid [mask-image:radial-gradient(70%_60%_at_50%_20%,black,transparent)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,#edf4ff,transparent_55%)]"
       />
       <div
         aria-hidden
-        className="absolute -top-24 -left-24 size-[420px] rounded-full bg-[color-mix(in_oklab,var(--orange)_18%,transparent)] blur-[110px]"
+        className="pointer-events-none absolute top-36 left-[45%] hidden h-24 w-24 bg-[radial-gradient(#cbd8ea_1.5px,transparent_1.5px)] [background-size:18px_18px] lg:block"
       />
-      <div
-        aria-hidden
-        className="absolute top-40 -right-20 size-[460px] rounded-full bg-[color-mix(in_oklab,var(--ieee)_15%,transparent)] blur-[120px]"
-      />
-
-      <div className="relative mx-auto max-w-4xl px-5 text-center">
-        {/* Main Logo Brand Badge */}
+      <div className="relative mx-auto max-w-7xl px-6 sm:px-10 lg:flex lg:min-h-[calc(100svh-clamp(6rem,12svh,8rem))] lg:max-w-none lg:items-center lg:px-[clamp(2rem,6vw,10rem)]">
         <motion.div
-          initial={{ opacity: 0, scale: 0.9, y: 14 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="mx-auto mb-6 inline-flex items-center gap-3 rounded-2xl border border-white/90 bg-white/85 px-4 py-2 shadow-soft backdrop-blur-md transition-all duration-300 hover:shadow-lift hover:scale-[1.02]"
-        >
-          <img src={letsTalkLogo} alt="IEEE LETs Talk Logo" className="h-9 w-auto object-contain" />
-          <div className="h-5 w-px bg-border" />
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-ieee uppercase tracking-wider">
-            <Sparkles className="size-3.5 text-orange" />
-            <span>{content.eyebrow}</span>
-          </div>
-        </motion.div>
-
-        <motion.h1
-          initial={{ opacity: 0, y: 24, filter: "blur(10px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          transition={{ duration: 0.8, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-7 text-[2.7rem] leading-[1.1] font-bold tracking-tight sm:text-5xl lg:text-[4.2rem]"
-        >
-          {content.title} <span className="text-gradient-orange">{content.highlightedTitle}</span>.
-        </motion.h1>
-
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
+          initial={reduceMotion ? false : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.2 }}
-          className="mx-auto mt-6 max-w-2xl text-[1.1rem] leading-relaxed text-body"
+          transition={{ duration: 0.7 }}
+          className={`relative z-10 py-10 sm:py-14 lg:py-[clamp(2rem,5svh,5rem)] ${hasPhotos ? "lg:w-1/2 lg:pr-[clamp(1rem,2vw,3rem)]" : "max-w-3xl"}`}
         >
-          {content.description}
-        </motion.p>
+          <p className="flex items-center gap-4 text-[0.65rem] font-bold tracking-[0.19em] text-[#53658b] uppercase sm:text-xs">
+            <span aria-hidden className="h-0.5 w-8 shrink-0 bg-orange" />
+            {content.eyebrow}
+          </p>
+          <h1
+            id="hero-title"
+            className="mt-6 text-[clamp(2.6rem,4.5vw,4.5rem)] leading-[1.04] font-bold tracking-[-0.045em] text-[#071638] lg:mt-[clamp(1rem,3svh,2rem)] lg:text-[clamp(2.5rem,min(4.3vw,7svh),6rem)]"
+          >
+            {content.title}{" "}
+            <span className="block text-[#ff6815]">
+              {content.highlightedTitle.replace(/\.$/, "")}.
+            </span>
+          </h1>
+          <p className="mt-6 max-w-xl text-base leading-relaxed text-[#596b8d] sm:text-lg lg:mt-[clamp(1rem,3svh,2rem)] lg:max-w-[38em] lg:text-[clamp(0.9375rem,min(1.1vw,2svh),1.25rem)]">
+            {content.description}
+          </p>
+          <div className="mt-8 flex flex-wrap gap-3 sm:gap-4 lg:mt-[clamp(1.25rem,3.5svh,2.5rem)]">
+            <a
+              href="/#journey"
+              className="inline-flex min-h-14 items-center justify-center gap-4 rounded-2xl bg-[#ff6815] px-6 text-sm font-semibold text-white shadow-[0_8px_24px_-10px_#ff6815] transition-colors hover:bg-[#ed5705] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange sm:text-base"
+            >
+              Explore Our Journey <ArrowRight className="size-5" />
+            </a>
+            <a
+              href="/team"
+              className="inline-flex min-h-14 items-center justify-center gap-4 rounded-2xl border border-[#254d80] bg-white/90 px-6 text-sm font-semibold text-[#102d58] transition-colors hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ieee sm:text-base"
+            >
+              Meet Our Team <ArrowRight className="size-5" />
+            </a>
+          </div>
+          <a
+            href="/#journey"
+            className="mt-12 inline-flex items-center gap-3 text-[10px] font-semibold tracking-[0.2em] text-[#53658b] uppercase lg:mt-[clamp(1.5rem,5svh,4rem)]"
+          >
+            <span className="grid size-8 place-items-center rounded-full border border-[#d5dfed]">
+              <ArrowDown className="size-4" />
+            </span>
+            Discover our story
+          </a>
+        </motion.div>
       </div>
+      {hasPhotos && (
+        <div className="relative h-[360px] sm:h-[460px] lg:absolute lg:top-[clamp(6rem,12svh,8rem)] lg:right-0 lg:bottom-0 lg:h-auto lg:w-[51%]">
+          <div className="absolute inset-0 lg:[clip-path:polygon(30%_0,100%_0,100%_100%,0_100%)] lg:[mask-image:radial-gradient(ellipse_80%_75%_at_0%_100%,transparent_0%,transparent_25%,black_80%)]">
+            <PhotoBackdrop images={content.backgroundImages} />
+          </div>
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -top-2 left-[22%] hidden h-24 w-10 skew-x-[-26deg] rounded-xl bg-gradient-to-b from-[#ff9954] to-[#ff6815] lg:block"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute right-[-30px] bottom-[-50px] h-24 w-64 skew-x-[-28deg] rounded-tl-3xl bg-[#092e58]/95"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute right-8 bottom-[-35px] h-16 w-16 skew-x-[-28deg] rounded-tl-xl bg-[#ff6815]"
+          />
+        </div>
+      )}
     </section>
   );
 }

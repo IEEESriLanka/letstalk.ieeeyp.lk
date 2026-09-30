@@ -23,6 +23,7 @@ import {
   deleteAward,
   deleteEvent,
   deleteGalleryItem,
+  deleteGalleryAlbum,
   deleteMessage,
   deletePartner,
   deleteProgram,
@@ -30,23 +31,26 @@ import {
   listAwards,
   listEvents,
   listGallery,
+  listGalleryAlbums,
   listMessages,
   listPartners,
   listPrograms,
   saveAward,
   saveEvent,
   saveGalleryItem,
+  saveGalleryAlbum,
   savePartner,
   saveProgram,
   saveSiteSettings,
   updateMessageStatus,
 } from "@/admin/services/admin-data";
-import { uploadImage } from "@/lib/storage";
+import { deleteImage, listPublicImages, uploadImage } from "@/lib/storage";
 import type {
   AwardRecord,
   ContactMessageRecord,
   EventRecord,
   GalleryItem,
+  GalleryAlbum,
   PartnerRecord,
   ProgramRecord,
   PublishStatus,
@@ -528,9 +532,36 @@ export function GalleryPage() {
   const [status, setStatus] = useState<PublishStatus>("all");
   const [modal, setModal] = useState<ModalMode<GalleryItem>>({ open: false, record: null });
   const [deleteTarget, setDeleteTarget] = useState<GalleryItem | null>(null);
+  const [albumDraft, setAlbumDraft] = useState("");
+  const [uploadAlbumId, setUploadAlbumId] = useState("");
   const query = useQuery({
     queryKey: ["gallery", search, status],
     queryFn: () => listGallery(search, status),
+  });
+  const albums = useQuery({ queryKey: ["gallery-albums-admin"], queryFn: listGalleryAlbums });
+  const createAlbum = useMutation({
+    mutationFn: () =>
+      saveGalleryAlbum({
+        title: albumDraft,
+        published: true,
+        display_order: albums.data?.length ?? 0,
+      }),
+    onSuccess: (album) => {
+      setAlbumDraft("");
+      setUploadAlbumId(album.id);
+      toast.success("Album created.");
+      void queryClient.invalidateQueries({ queryKey: ["gallery-albums-admin"] });
+    },
+    onError: (error) => toast.error(error.message),
+  });
+  const removeAlbum = useMutation({
+    mutationFn: deleteGalleryAlbum,
+    onSuccess: () => {
+      toast.success("Album deleted. Its images are now unassigned.");
+      void queryClient.invalidateQueries({ queryKey: ["gallery-albums-admin"] });
+      void queryClient.invalidateQueries({ queryKey: ["gallery"] });
+    },
+    onError: (error) => toast.error(error.message),
   });
   const remove = useMutation({
     mutationFn: deleteGalleryItem,
@@ -552,6 +583,7 @@ export function GalleryPage() {
             title: file.name.replace(/\.[^.]+$/, ""),
             caption: "",
             image_url,
+            album_id: uploadAlbumId || albums.data?.[0]?.id || null,
             display_order: (query.data?.length ?? 0) + index + 1,
             published: true,
           });
@@ -565,7 +597,48 @@ export function GalleryPage() {
   }
 
   return (
-    <PageShell title="Gallery" subtitle="Upload, caption, order, and publish gallery images.">
+    <PageShell
+      title="Gallery"
+      subtitle="Create albums, upload images, and publish separate collections."
+    >
+      <section className="mb-6 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <FormField label="Create album">
+            <input
+              className={fieldClass}
+              placeholder="e.g. LETs Talk 2026"
+              value={albumDraft}
+              onChange={(event) => setAlbumDraft(event.target.value)}
+            />
+          </FormField>
+          <button
+            type="button"
+            className={primaryButtonClass}
+            disabled={!albumDraft.trim() || createAlbum.isPending}
+            onClick={() => createAlbum.mutate()}
+          >
+            <Plus className="size-4" /> Create Album
+          </button>
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {albums.data?.map((album) => (
+            <div
+              key={album.id}
+              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 py-1 pr-1 pl-3 text-sm font-semibold text-slate-700"
+            >
+              {album.title}
+              <button
+                type="button"
+                aria-label={`Delete ${album.title}`}
+                className="rounded-full p-1 hover:bg-red-100 hover:text-red-700"
+                onClick={() => removeAlbum.mutate(album)}
+              >
+                <Trash2 className="size-3.5" />
+              </button>
+            </div>
+          ))}
+        </div>
+      </section>
       <Toolbar
         search={search}
         onSearch={setSearch}
@@ -574,17 +647,35 @@ export function GalleryPage() {
         addLabel="Add Image"
         onAdd={() => setModal({ open: true, record: null })}
         extra={
-          <label className={secondaryButtonClass}>
-            <UploadCloud className="size-4" />
-            Bulk Upload
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              multiple
-              className="sr-only"
-              onChange={(e) => uploadMany(e.target.files)}
-            />
-          </label>
+          <div className="flex flex-wrap gap-2">
+            <select
+              aria-label="Bulk upload album"
+              className={fieldClass}
+              value={uploadAlbumId}
+              onChange={(e) => setUploadAlbumId(e.target.value)}
+            >
+              <option value="">Select album</option>
+              {albums.data?.map((album) => (
+                <option key={album.id} value={album.id}>
+                  {album.title}
+                </option>
+              ))}
+            </select>
+            <label
+              className={`${secondaryButtonClass} ${!uploadAlbumId && albums.data?.length ? "opacity-60" : ""}`}
+            >
+              <UploadCloud className="size-4" />
+              Bulk Upload
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                className="sr-only"
+                disabled={!uploadAlbumId && Boolean(albums.data?.length)}
+                onChange={(e) => uploadMany(e.target.files)}
+              />
+            </label>
+          </div>
         }
       />
       {query.isLoading ? <LoadingSkeleton /> : null}
@@ -627,6 +718,7 @@ export function GalleryPage() {
         open={modal.open}
         record={modal.record}
         onClose={() => setModal({ open: false, record: null })}
+        albums={albums.data ?? []}
       />
       <ConfirmDialog
         open={Boolean(deleteTarget)}
@@ -643,10 +735,12 @@ function GalleryFormModal({
   open,
   record,
   onClose,
+  albums,
 }: {
   open: boolean;
   record: Partial<GalleryItem> | null;
   onClose: () => void;
+  albums: GalleryAlbum[];
 }) {
   const queryClient = useQueryClient();
   const [form, setForm] = useState<Partial<GalleryItem>>(
@@ -660,7 +754,7 @@ function GalleryFormModal({
         ? await uploadImage("gallery-images", file, "gallery")
         : form.image_url;
       validateRequired(image_url, "Image");
-      return saveGalleryItem({ ...form, image_url });
+      return saveGalleryItem({ ...form, image_url: image_url! });
     },
     onSuccess: () => {
       toast.success("Gallery item saved.");
@@ -698,8 +792,26 @@ function GalleryFormModal({
             onChange={(e) => setForm({ ...form, display_order: Number(e.target.value) })}
           />
         </FormField>
+        <FormField label="Album">
+          <select
+            className={fieldClass}
+            value={form.album_id ?? ""}
+            onChange={(e) => setForm({ ...form, album_id: e.target.value || null })}
+          >
+            <option value="">Unassigned</option>
+            {albums.map((album) => (
+              <option key={album.id} value={album.id}>
+                {album.title}
+              </option>
+            ))}
+          </select>
+        </FormField>
         <FormField label="Image" required>
-          <ImageUploader value={form.image_url} onFile={setFile} disabled={mutation.isPending} />
+          <ImageUploader
+            value={form.image_url ?? null}
+            onFile={setFile}
+            disabled={mutation.isPending}
+          />
         </FormField>
         <BooleanField
           label="Published"
@@ -979,7 +1091,13 @@ export function MessagesPage() {
 export function SettingsPage() {
   const queryClient = useQueryClient();
   const settings = useQuery({ queryKey: ["site-settings"], queryFn: getSiteSettings });
+  const uploadedBackgrounds = useQuery({
+    queryKey: ["hero-background-uploads"],
+    queryFn: () => listPublicImages("gallery-images", "hero-backgrounds"),
+  });
   const [draft, setDraft] = useState("");
+  const [backgroundSaving, setBackgroundSaving] = useState(false);
+  const [backgroundToRemove, setBackgroundToRemove] = useState<string | null>(null);
 
   const mutation = useMutation({
     mutationFn: () => saveSiteSettings(JSON.parse(draft)),
@@ -994,6 +1112,40 @@ export function SettingsPage() {
   useEffect(() => {
     if (settings.data) setDraft(JSON.stringify(settings.data, null, 2));
   }, [settings.data]);
+
+  async function uploadBackgroundImage(file: File) {
+    setBackgroundSaving(true);
+    try {
+      await uploadImage("gallery-images", file, "hero-backgrounds");
+      await queryClient.invalidateQueries({ queryKey: ["hero-background-uploads"] });
+      await queryClient.invalidateQueries({ queryKey: ["site-content"] });
+      toast.success("Hero image uploaded and published.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to upload background image.");
+    } finally {
+      setBackgroundSaving(false);
+    }
+  }
+
+  async function removeBackgroundImage(url: string) {
+    setBackgroundToRemove(null);
+    if (!uploadedBackgrounds.data?.includes(url)) {
+      toast.error("This image is not in the hero uploads folder.");
+      return;
+    }
+
+    setBackgroundSaving(true);
+    try {
+      await deleteImage("gallery-images", url);
+      await queryClient.invalidateQueries({ queryKey: ["hero-background-uploads"] });
+      await queryClient.invalidateQueries({ queryKey: ["site-content"] });
+      toast.success("Uploaded hero image removed.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to remove hero image.");
+    } finally {
+      setBackgroundSaving(false);
+    }
+  }
 
   return (
     <AdminLayout title="Settings" subtitle="Admin profile and website settings.">
@@ -1011,7 +1163,10 @@ export function SettingsPage() {
           <h2 className="text-lg font-bold text-slate-950">Website Settings</h2>
           {settings.isLoading ? <LoadingSkeleton /> : null}
           {settings.isError ? (
-            <ErrorState message="Unable to load website settings." onRetry={() => settings.refetch()} />
+            <ErrorState
+              message="Unable to load website settings."
+              onRetry={() => settings.refetch()}
+            />
           ) : null}
           {settings.data ? (
             <form
@@ -1021,19 +1176,102 @@ export function SettingsPage() {
                 mutation.mutate();
               }}
             >
+              <div className="mb-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <h3 className="font-bold text-slate-900">Hero background images</h3>
+                    <p className="mt-1 text-xs text-slate-500">
+                      Uploaded images appear behind the homepage heading automatically.
+                    </p>
+                  </div>
+                  <label
+                    className={`${secondaryButtonClass} cursor-pointer ${backgroundSaving ? "pointer-events-none opacity-60" : ""}`}
+                  >
+                    <UploadCloud className="size-4" />
+                    Upload image
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      disabled={backgroundSaving}
+                      className="sr-only"
+                      onChange={(event) => {
+                        const file = event.target.files?.[0];
+                        if (file) void uploadBackgroundImage(file);
+                        event.currentTarget.value = "";
+                      }}
+                    />
+                  </label>
+                </div>
+                <div className="mt-4">
+                  <h4 className="text-sm font-bold text-slate-900">Uploaded images</h4>
+                  {uploadedBackgrounds.isLoading ? (
+                    <p className="mt-3 text-xs text-slate-500">Loading uploaded images…</p>
+                  ) : null}
+                  {uploadedBackgrounds.isError ? (
+                    <p className="mt-3 text-xs font-semibold text-red-600">
+                      Unable to load uploaded images.
+                    </p>
+                  ) : null}
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    {uploadedBackgrounds.data?.map((url) => (
+                      <div
+                        key={url}
+                        className="overflow-hidden rounded-lg border border-slate-200 bg-white"
+                      >
+                        <img
+                          src={url}
+                          alt="Uploaded hero background"
+                          className="h-28 w-full object-cover"
+                        />
+                        <div className="flex flex-wrap items-center justify-between gap-2 p-2">
+                          <span className="text-xs font-bold text-emerald-700">On homepage</span>
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              className={secondaryButtonClass}
+                              disabled={backgroundSaving || mutation.isPending}
+                              onClick={() => setBackgroundToRemove(url)}
+                            >
+                              <Trash2 className="size-4" /> Remove
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {!uploadedBackgrounds.isLoading && uploadedBackgrounds.data?.length === 0 ? (
+                    <p className="mt-3 text-xs text-slate-500">
+                      No hero images have been uploaded yet.
+                    </p>
+                  ) : null}
+                </div>
+              </div>
               <textarea
                 value={draft}
                 onChange={(event) => setDraft(event.target.value)}
                 className={`${textAreaClass} min-h-96 font-mono text-xs`}
                 spellCheck={false}
               />
-              <button type="submit" disabled={mutation.isPending} className={`${primaryButtonClass} mt-4`}>
+              <button
+                type="submit"
+                disabled={mutation.isPending}
+                className={`${primaryButtonClass} mt-4`}
+              >
                 {mutation.isPending ? "Saving..." : "Save Settings"}
               </button>
             </form>
           ) : null}
         </section>
       </div>
+      <ConfirmDialog
+        open={Boolean(backgroundToRemove)}
+        title="Remove uploaded hero image?"
+        description="This removes the image from the homepage and deletes its uploaded file. This cannot be undone."
+        onCancel={() => setBackgroundToRemove(null)}
+        onConfirm={() => {
+          if (backgroundToRemove) void removeBackgroundImage(backgroundToRemove);
+        }}
+      />
     </AdminLayout>
   );
 }

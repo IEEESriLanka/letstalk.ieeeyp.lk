@@ -15,6 +15,7 @@ export const siteContentSchema: z.ZodType<SiteContent> = z.object({
     title: z.string().min(1),
     highlightedTitle: z.string().min(1),
     description: z.string().min(1),
+    backgroundImages: z.array(z.string().url()).max(8).optional(),
     stats: z.array(z.object({ value: z.string().min(1), label: z.string().min(1) })).min(1),
   }),
   about: z.object({
@@ -98,18 +99,24 @@ export const siteContentSchema: z.ZodType<SiteContent> = z.object({
   }),
   teamPage: z
     .object({
-      yearlyTeams: z.array(z.object({
-        year: z.string().regex(/^\d{4}$/),
-        members: z.array(z.object({
-          name: z.string().trim().min(1),
-          role: z.string().trim().min(1),
-          track: z.string(),
-          initials: z.string(),
-          imageUrl: z.string().nullable().optional(),
-          linkedinUrl: z.string().nullable().optional(),
-          email: z.string().nullable().optional(),
-        })),
-      })).optional(),
+      yearlyTeams: z
+        .array(
+          z.object({
+            year: z.string().regex(/^\d{4}$/),
+            members: z.array(
+              z.object({
+                name: z.string().trim().min(1),
+                role: z.string().trim().min(1),
+                track: z.string(),
+                initials: z.string(),
+                imageUrl: z.string().nullable().optional(),
+                linkedinUrl: z.string().nullable().optional(),
+                email: z.string().nullable().optional(),
+              }),
+            ),
+          }),
+        )
+        .optional(),
       eyebrow: z.string().min(1),
       title: z.string().min(1),
       highlightedTitle: z.string().min(1),
@@ -149,8 +156,14 @@ export const contactMessageSchema = z.object({
 });
 
 function getSupabase() {
-  const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  const url =
+    process.env.SUPABASE_URL ||
+    process.env.VITE_SUPABASE_URL ||
+    import.meta.env.VITE_SUPABASE_URL;
+  const key =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+    import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
   if (!url || !key) return null;
   return createClient(url, key, { auth: { persistSession: false } });
 }
@@ -172,7 +185,7 @@ export async function readSiteContent(): Promise<SiteContent> {
   const supabase = getSupabase();
   if (!supabase) return defaultSiteContent;
 
-  const [site, events, gallery, awards, partners] = await Promise.all([
+  const [site, events, gallery, awards, partners, heroBackgrounds] = await Promise.all([
     supabase.from("site_content").select("content").eq("id", "site").maybeSingle(),
     supabase
       .from("events")
@@ -184,8 +197,20 @@ export async function readSiteContent(): Promise<SiteContent> {
       .select("*")
       .eq("published", true)
       .order("display_order", { ascending: true }),
-    supabase.from("awards").select("*").eq("published", true).order("award_year", { ascending: false }),
-    supabase.from("partners").select("*").eq("active", true).order("display_order", { ascending: true }),
+    supabase
+      .from("awards")
+      .select("*")
+      .eq("published", true)
+      .order("award_year", { ascending: false }),
+    supabase
+      .from("partners")
+      .select("*")
+      .eq("active", true)
+      .order("display_order", { ascending: true }),
+    supabase.storage.from("gallery-images").list("hero-backgrounds", {
+      limit: 1000,
+      sortBy: { column: "created_at", order: "asc" },
+    }),
   ]);
 
   if (site.error) throw new Error(site.error.message);
@@ -193,12 +218,25 @@ export async function readSiteContent(): Promise<SiteContent> {
   if (gallery.error) throw new Error(gallery.error.message);
   if (awards.error) throw new Error(awards.error.message);
   if (partners.error) throw new Error(partners.error.message);
+  if (heroBackgrounds.error) throw new Error(heroBackgrounds.error.message);
 
-  const base = mergeContent(site.data?.content ? siteContentSchema.parse(site.data.content) : defaultSiteContent);
+  const base = mergeContent(
+    site.data?.content ? siteContentSchema.parse(site.data.content) : defaultSiteContent,
+  );
   const award = awards.data?.[0];
 
   return {
     ...base,
+    hero: {
+      ...base.hero,
+      backgroundImages: (heroBackgrounds.data ?? [])
+        .filter((image) => image.id && image.name)
+        .map(
+          (image) =>
+            supabase.storage.from("gallery-images").getPublicUrl(`hero-backgrounds/${image.name}`)
+              .data.publicUrl,
+        ),
+    },
     awards: award
       ? {
           ...base.awards,

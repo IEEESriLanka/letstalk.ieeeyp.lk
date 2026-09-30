@@ -7,6 +7,7 @@ import type {
   ContactMessageRecord,
   EventRecord,
   GalleryItem,
+  GalleryAlbum,
   PartnerRecord,
   ProgramRecord,
   PublishStatus,
@@ -139,6 +140,7 @@ export async function getDatabaseStatus(): Promise<DatabaseStatus> {
     "site_content",
     "events",
     "programs",
+    "gallery_albums",
     "gallery_items",
     "awards",
     "partners",
@@ -300,11 +302,45 @@ export async function listGallery(search = "", status: PublishStatus = "all") {
   return (data ?? []) as GalleryItem[];
 }
 
+export async function listGalleryAlbums() {
+  const { data, error } = await supabase
+    .from("gallery_albums")
+    .select("*")
+    .order("display_order", { ascending: true });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as GalleryAlbum[];
+}
+
+export async function saveGalleryAlbum(input: Partial<GalleryAlbum>) {
+  const slug = (input.slug || input.title || "")
+    .toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const payload = {
+    title: input.title,
+    slug,
+    description: input.description || "",
+    cover_image_url: input.cover_image_url || null,
+    display_order: Number(input.display_order ?? 0),
+    published: Boolean(input.published),
+  };
+  const request = input.id
+    ? supabase.from("gallery_albums").update(payload).eq("id", input.id).select("*").single()
+    : supabase.from("gallery_albums").insert(payload).select("*").single();
+  const { data, error } = await request;
+  if (error) throw new Error(error.message);
+  return requireData(data as GalleryAlbum | null, "Gallery album was not saved.");
+}
+
+export async function deleteGalleryAlbum(album: GalleryAlbum) {
+  const { error } = await supabase.from("gallery_albums").delete().eq("id", album.id);
+  if (error) throw new Error(error.message);
+}
+
 export async function saveGalleryItem(input: Partial<GalleryItem>) {
   const payload = {
     title: input.title,
     caption: input.caption || null,
     image_url: input.image_url,
+    album_id: input.album_id || null,
     display_order: Number(input.display_order ?? 0),
     published: Boolean(input.published),
   };

@@ -154,6 +154,41 @@
   background-size: 64px 64px;
 }
 
+/* One continuous canvas: section boundaries never restart the artwork. */
+.public-site {
+  position: relative;
+  isolation: isolate;
+  min-height: 100svh;
+  background: #fff;
+}
+
+.public-site::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: url("/site-vector-grid.svg") center / cover no-repeat;
+  opacity: 0.14;
+}
+
+.public-site main,
+.public-site main > section:not(.bg-ieee-deep) {
+  background-color: transparent;
+  background-image: none;
+}
+
+/* Remove local decorative washes that would cut off at section edges. */
+.public-site main > section:not(.bg-ieee-deep) > [aria-hidden="true"] {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .public-site::before {
+    opacity: 0.12;
+  }
+}
+
 @utility glass-panel {
   background: oklch(1 0 0 / 0.72);
   backdrop-filter: blur(18px) saturate(150%);

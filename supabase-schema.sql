@@ -56,6 +56,21 @@ create table if not exists public.gallery_items (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.gallery_albums (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  slug text not null unique check (slug ~ '^[a-z0-9]+(?:-[a-z0-9]+)*$'),
+  description text not null default '',
+  cover_image_url text,
+  display_order integer not null default 0,
+  published boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.gallery_items
+add column if not exists album_id uuid references public.gallery_albums(id) on delete set null;
+
 create table if not exists public.awards (
   id uuid primary key default gen_random_uuid(),
   title text not null,
@@ -81,6 +96,8 @@ create table if not exists public.partners (
 create index if not exists events_published_idx on public.events (published, event_date desc);
 create index if not exists programs_published_idx on public.programs (published, created_at desc);
 create index if not exists gallery_published_order_idx on public.gallery_items (published, display_order);
+create index if not exists gallery_items_album_order_idx on public.gallery_items (album_id, published, display_order);
+create index if not exists gallery_albums_published_order_idx on public.gallery_albums (published, display_order);
 create index if not exists awards_published_year_idx on public.awards (published, award_year desc);
 create index if not exists partners_active_order_idx on public.partners (active, display_order);
 create index if not exists contact_messages_read_idx on public.contact_messages (read, created_at desc);
@@ -108,6 +125,10 @@ drop trigger if exists gallery_items_set_updated_at on public.gallery_items;
 create trigger gallery_items_set_updated_at before update on public.gallery_items
 for each row execute function public.set_updated_at();
 
+drop trigger if exists gallery_albums_set_updated_at on public.gallery_albums;
+create trigger gallery_albums_set_updated_at before update on public.gallery_albums
+for each row execute function public.set_updated_at();
+
 drop trigger if exists awards_set_updated_at on public.awards;
 create trigger awards_set_updated_at before update on public.awards
 for each row execute function public.set_updated_at();
@@ -122,6 +143,7 @@ alter table public.admin_users enable row level security;
 alter table public.events enable row level security;
 alter table public.programs enable row level security;
 alter table public.gallery_items enable row level security;
+alter table public.gallery_albums enable row level security;
 alter table public.awards enable row level security;
 alter table public.partners enable row level security;
 
@@ -206,6 +228,17 @@ on public.gallery_items for all
 using (public.is_admin())
 with check (public.is_admin());
 
+drop policy if exists "Public reads published gallery albums" on public.gallery_albums;
+create policy "Public reads published gallery albums"
+on public.gallery_albums for select
+using (published = true or public.is_admin());
+
+drop policy if exists "Admins manage gallery albums" on public.gallery_albums;
+create policy "Admins manage gallery albums"
+on public.gallery_albums for all
+using (public.is_admin())
+with check (public.is_admin());
+
 drop policy if exists "Public reads published awards" on public.awards;
 create policy "Public reads published awards"
 on public.awards for select
@@ -286,6 +319,17 @@ grant insert, update, delete on public.programs to authenticated;
 
 grant select on public.gallery_items to anon, authenticated;
 grant insert, update, delete on public.gallery_items to authenticated;
+
+grant select on public.gallery_albums to anon, authenticated;
+grant insert, update, delete on public.gallery_albums to authenticated;
+
+insert into public.gallery_albums (title, slug, description, display_order, published)
+values ('General', 'general', 'Highlights from IEEE LETs Talk.', 0, true)
+on conflict (slug) do nothing;
+
+update public.gallery_items
+set album_id = (select id from public.gallery_albums where slug = 'general')
+where album_id is null;
 
 grant select on public.awards to anon, authenticated;
 grant insert, update, delete on public.awards to authenticated;

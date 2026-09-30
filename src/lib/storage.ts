@@ -37,6 +37,18 @@ export async function uploadImage(bucket: StorageBucket, file: File, folder: str
   return getPublicImageUrl(bucket, path);
 }
 
+export async function listPublicImages(bucket: StorageBucket, folder: string) {
+  const { data, error } = await supabase.storage.from(bucket).list(folder, {
+    limit: 1000,
+    sortBy: { column: "created_at", order: "asc" },
+  });
+  if (error) throw new Error(error.message);
+
+  return (data ?? [])
+    .filter((item) => item.name && !item.name.startsWith("."))
+    .map((item) => getPublicImageUrl(bucket, `${folder}/${item.name}`));
+}
+
 export function getPublicImageUrl(bucket: StorageBucket, path: string) {
   const { data } = supabase.storage.from(bucket).getPublicUrl(path);
   return data.publicUrl;

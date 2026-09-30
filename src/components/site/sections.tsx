@@ -1,6 +1,7 @@
 import { motion, useInView, useReducedMotion } from "motion/react";
 import { useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -21,6 +22,7 @@ import {
 } from "lucide-react";
 import { Reveal, RevealGroup, fadeUp } from "./motion-primitives";
 import { submitContactMessage } from "@/lib/content-actions";
+import { getPublishedGalleryAlbums } from "@/lib/gallery-albums";
 import type { SiteContent } from "@/lib/site-content";
 import g1 from "@/assets/gallery-1.jpg";
 import g2 from "@/assets/gallery-2.jpg";
@@ -69,19 +71,8 @@ const pillarIcons = {
   network: Network,
 };
 
-const galleryImages = {
-  "gallery-1": g1,
-  "gallery-2": g2,
-  "gallery-3": g3,
-  "gallery-4": g4,
-};
-
 const eventVisuals = [g1, g2, g3, g4];
 const journeyYears = ["2023", "2024", "2025", "2026"];
-
-function galleryImageSource(item: SiteContent["gallery"][number]) {
-  return item.imageUrl || galleryImages[item.image] || g1;
-}
 
 export function About({ content }: { content: SiteContent["about"] }) {
   return (
@@ -438,7 +429,13 @@ export function PastSessions({ events }: { events: SiteContent["events"] }) {
   );
 }
 
-export function Gallery({ shots }: { shots: SiteContent["gallery"] }) {
+export function Gallery() {
+  const { data: albums = [], isLoading, isError } = useQuery({
+    queryKey: ["gallery-albums"],
+    queryFn: getPublishedGalleryAlbums,
+  });
+  const visibleAlbums = albums.filter((album) => album.images.length > 0);
+
   return (
     <section id="gallery" className="bg-background py-24 lg:py-32">
       <div className="mx-auto max-w-6xl px-5">
@@ -452,29 +449,29 @@ export function Gallery({ shots }: { shots: SiteContent["gallery"] }) {
           }
           copy="Snapshots of passion, collaboration, and learning from IEEE LETs Talk sessions across Sri Lanka."
         />
-        <RevealGroup className="mt-14 grid auto-rows-[200px] grid-cols-1 gap-4 sm:grid-cols-4">
-          {shots.map((s) => (
-            <motion.figure
-              key={s.alt}
-              variants={fadeUp}
-              className={`group relative overflow-hidden rounded-3xl border border-border shadow-soft ${s.span ?? ""}`}
-            >
-              <img
-                src={galleryImageSource(s)}
-                alt={s.alt}
-                loading="lazy"
-                width={1000}
-                height={700}
-                className="size-full object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-108"
-              />
-              <div
-                aria-hidden
-                className="absolute inset-0 flex items-end bg-[linear-gradient(to_top,color-mix(in_oklab,var(--ieee-deep)_70%,transparent),transparent_60%)] p-6 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-              >
-                <p className="text-xs font-medium text-white/90">{s.caption}</p>
-              </div>
-            </motion.figure>
-          ))}
+        {isLoading ? <p className="mt-14 text-center text-body/70">Loading albums…</p> : null}
+        {isError ? <p className="mt-14 rounded-2xl border border-red-200 bg-red-50 p-5 text-center text-red-700">Unable to load gallery albums.</p> : null}
+        {!isLoading && !isError && visibleAlbums.length === 0 ? <p className="mt-14 text-center text-body/70">No uploaded album photos yet.</p> : null}
+        <RevealGroup className="mt-14 grid auto-rows-[220px] grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {visibleAlbums.map((album, index) => {
+            const cover = album.cover_image_url || album.images[0]!.image_url;
+            const size = index % 5 === 0 ? "sm:row-span-2 lg:col-span-2" : index % 5 === 3 ? "lg:col-span-2" : "";
+            return (
+              <motion.div key={album.id} variants={fadeUp} className={size}>
+                <Link
+                  to="/gallery/$albumSlug"
+                  params={{ albumSlug: album.slug }}
+                  className="group relative block size-full overflow-hidden rounded-3xl border border-border bg-ieee-deep shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-lift"
+                >
+                  <img src={cover} alt={album.title} loading="lazy" className="size-full object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-108" />
+                  <div className="absolute inset-0 flex flex-col justify-end bg-[linear-gradient(to_top,color-mix(in_oklab,var(--ieee-deep)_88%,transparent),transparent_68%)] p-6 text-white">
+                    <p className="text-xs font-bold tracking-[0.14em] text-orange-soft uppercase">{album.images.length} photos</p>
+                    <h3 className="mt-2 text-xl font-bold sm:text-2xl">{album.title}</h3>
+                  </div>
+                </Link>
+              </motion.div>
+            );
+          })}
         </RevealGroup>
         <Reveal delay={0.12} className="mt-10 text-center">
           <Link

@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useCallback, useState } from "react";
 import { motion } from "motion/react";
 import { Preloader } from "@/components/site/preloader";
 import { SiteNav } from "@/components/site/site-nav";
@@ -47,15 +48,23 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const { data: content = defaultSiteContent } = useQuery({
+  const [initializing, setInitializing] = useState(true);
+  const finishInitialization = useCallback(() => setInitializing(false), []);
+  const { data: content = defaultSiteContent, isPending, fetchStatus } = useQuery({
     queryKey: ["site-content"],
     queryFn: () => getSiteContent(),
   });
 
   return (
     <>
-      <Preloader />
+      {initializing && (
+        <Preloader
+          contentReady={!isPending || fetchStatus === "paused"}
+          onComplete={finishInitialization}
+        />
+      )}
       <motion.main
+        inert={initializing}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
@@ -66,7 +75,7 @@ function Index() {
         <Hero content={content.hero} />
         <Events events={content.events} />
         <PastSessions events={content.events} />
-        <Gallery shots={content.gallery} />
+        <Gallery />
         <Awards content={content.awards} />
         <Partners partners={content.partners} />
         <StayConnected content={content.connected} />

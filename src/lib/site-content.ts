@@ -28,6 +28,7 @@ export type SiteContent = {
     title: string;
     highlightedTitle: string;
     description: string;
+    backgroundImages?: string[];
     stats: Array<{ value: string; label: string }>;
   };
   about: {
@@ -129,6 +130,7 @@ export const defaultSiteContent: SiteContent = {
     highlightedTitle: "Industry Leaders",
     description:
       "From inspiring leadership talks to hands-on workshops, IEEE LETs talk brings students and industry together to learn, collaborate, and create what's next. Experience real stories, real leaders, and real opportunities that shape the next generation of professionals with us.",
+    backgroundImages: [],
     stats: [
       { value: "50+", label: "Events" },
       { value: "4000+", label: "Participants" },
