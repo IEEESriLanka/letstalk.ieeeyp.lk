@@ -24,9 +24,11 @@ import { Route as AdminGalleryRouteImport } from './routes/admin.gallery'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminMessagesRouteImport } from './routes/admin.messages'
 import { Route as AdminPartnersRouteImport } from './routes/admin.partners'
+import { Route as AdminPastEventsRouteImport } from './routes/admin.past-events'
 import { Route as AdminProgramsRouteImport } from './routes/admin.programs'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminTeamRouteImport } from './routes/admin.team'
+import { Route as AdminVideosRouteImport } from './routes/admin.videos'
 import { Route as GalleryAlbumSlugRouteImport } from './routes/gallery.$albumSlug'
 
 const IndexRoute = IndexRouteImport.update({
@@ -104,6 +106,11 @@ const AdminPartnersRoute = AdminPartnersRouteImport.update({
   path: '/partners',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminPastEventsRoute = AdminPastEventsRouteImport.update({
+  id: '/past-events',
+  path: '/past-events',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminProgramsRoute = AdminProgramsRouteImport.update({
   id: '/programs',
   path: '/programs',
@@ -117,6 +124,11 @@ const AdminSettingsRoute = AdminSettingsRouteImport.update({
 const AdminTeamRoute = AdminTeamRouteImport.update({
   id: '/team',
   path: '/team',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminVideosRoute = AdminVideosRouteImport.update({
+  id: '/videos',
+  path: '/videos',
   getParentRoute: () => AdminRoute,
 } as any)
 const GalleryAlbumSlugRoute = GalleryAlbumSlugRouteImport.update({
@@ -140,9 +152,11 @@ export interface FileRoutesByFullPath {
   '/admin/login': typeof AdminLoginRoute
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/partners': typeof AdminPartnersRoute
+  '/admin/past-events': typeof AdminPastEventsRoute
   '/admin/programs': typeof AdminProgramsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/team': typeof AdminTeamRoute
+  '/admin/videos': typeof AdminVideosRoute
   '/gallery/$albumSlug': typeof GalleryAlbumSlugRoute
   '/admin/': typeof AdminIndexRoute
 }
@@ -160,9 +174,11 @@ export interface FileRoutesByTo {
   '/admin/login': typeof AdminLoginRoute
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/partners': typeof AdminPartnersRoute
+  '/admin/past-events': typeof AdminPastEventsRoute
   '/admin/programs': typeof AdminProgramsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/team': typeof AdminTeamRoute
+  '/admin/videos': typeof AdminVideosRoute
   '/gallery/$albumSlug': typeof GalleryAlbumSlugRoute
   '/admin': typeof AdminIndexRoute
 }
@@ -182,9 +198,11 @@ export interface FileRoutesById {
   '/admin/login': typeof AdminLoginRoute
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/partners': typeof AdminPartnersRoute
+  '/admin/past-events': typeof AdminPastEventsRoute
   '/admin/programs': typeof AdminProgramsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/team': typeof AdminTeamRoute
+  '/admin/videos': typeof AdminVideosRoute
   '/gallery/$albumSlug': typeof GalleryAlbumSlugRoute
   '/admin/': typeof AdminIndexRoute
 }
@@ -205,9 +223,11 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/admin/messages'
     | '/admin/partners'
+    | '/admin/past-events'
     | '/admin/programs'
     | '/admin/settings'
     | '/admin/team'
+    | '/admin/videos'
     | '/gallery/$albumSlug'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
@@ -225,9 +245,11 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/admin/messages'
     | '/admin/partners'
+    | '/admin/past-events'
     | '/admin/programs'
     | '/admin/settings'
     | '/admin/team'
+    | '/admin/videos'
     | '/gallery/$albumSlug'
     | '/admin'
   id:
@@ -246,9 +268,11 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/admin/messages'
     | '/admin/partners'
+    | '/admin/past-events'
     | '/admin/programs'
     | '/admin/settings'
     | '/admin/team'
+    | '/admin/videos'
     | '/gallery/$albumSlug'
     | '/admin/'
   fileRoutesById: FileRoutesById
@@ -369,6 +393,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPartnersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/past-events': {
+      id: '/admin/past-events'
+      path: '/past-events'
+      fullPath: '/admin/past-events'
+      preLoaderRoute: typeof AdminPastEventsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/programs': {
       id: '/admin/programs'
       path: '/programs'
@@ -390,6 +421,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminTeamRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/videos': {
+      id: '/admin/videos'
+      path: '/videos'
+      fullPath: '/admin/videos'
+      preLoaderRoute: typeof AdminVideosRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/gallery/$albumSlug': {
       id: '/gallery/$albumSlug'
       path: '/$albumSlug'
@@ -409,9 +447,11 @@ interface AdminRouteChildren {
   AdminLoginRoute: typeof AdminLoginRoute
   AdminMessagesRoute: typeof AdminMessagesRoute
   AdminPartnersRoute: typeof AdminPartnersRoute
+  AdminPastEventsRoute: typeof AdminPastEventsRoute
   AdminProgramsRoute: typeof AdminProgramsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminTeamRoute: typeof AdminTeamRoute
+  AdminVideosRoute: typeof AdminVideosRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -424,9 +464,11 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminLoginRoute: AdminLoginRoute,
   AdminMessagesRoute: AdminMessagesRoute,
   AdminPartnersRoute: AdminPartnersRoute,
+  AdminPastEventsRoute: AdminPastEventsRoute,
   AdminProgramsRoute: AdminProgramsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminTeamRoute: AdminTeamRoute,
+  AdminVideosRoute: AdminVideosRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 

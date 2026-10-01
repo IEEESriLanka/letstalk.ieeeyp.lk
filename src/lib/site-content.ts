@@ -82,6 +82,8 @@ export type SiteContent = {
     label: string;
   };
   partners: string[];
+  videoLinks?: Array<{ url: string; title: string }>;
+  partnerLogos?: Array<{ name: string; logoUrl: string }>;
   connected: {
     title: string;
     copy: string;

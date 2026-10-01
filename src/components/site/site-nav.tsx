@@ -9,9 +9,7 @@ const links = [
   { label: "About Us", href: "/about-us" },
   { label: "Team", href: "/team" },
   { label: "Events", href: "/events" },
-  { label: "Our Journey", href: "/#journey" },
   { label: "Gallery", href: "/#gallery" },
-  { label: "Awards", href: "/#awards" },
   { label: "Contact", href: "/#contact" },
 ];
 
@@ -103,9 +101,8 @@ export function SiteNav() {
           </div>
           <div className="flex flex-col">
             <span className="font-display text-[0.95rem] leading-tight font-bold tracking-tight text-heading">
-              IEEE <span className="text-ieee">LETs</span> talk
+              IEEE <span className="text-[#006fa6]">LETs</span> <span className="text-orange">talk</span>
             </span>
-            <span className="text-[0.62rem] font-medium text-body">YP Sri Lanka</span>
           </div>
         </a>
 

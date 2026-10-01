@@ -112,7 +112,7 @@ function PageShell({
   );
 }
 
-export function EventsPage() {
+export function EventsPage({ pastOnly = false }: { pastOnly?: boolean }) {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<PublishStatus>("all");
@@ -122,6 +122,8 @@ export function EventsPage() {
     queryKey: ["events", search, status],
     queryFn: () => listEvents(search, status),
   });
+  const today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Colombo" });
+  const events = query.data?.filter((event) => !pastOnly || event.event_date < today);
 
   const remove = useMutation({
     mutationFn: deleteEvent,
@@ -135,21 +137,24 @@ export function EventsPage() {
   });
 
   return (
-    <PageShell title="Events" subtitle="Create, publish, and maintain event listings.">
+    <PageShell
+      title={pastOnly ? "Past Events" : "Events"}
+      subtitle={pastOnly ? "Add past events and publish them in Our journey so far." : "Create, publish, and maintain event listings."}
+    >
       <Toolbar
         search={search}
         onSearch={setSearch}
         status={status}
         onStatus={setStatus}
-        addLabel="Add Event"
+        addLabel={pastOnly ? "Add Past Event" : "Add Event"}
         onAdd={() => setModal({ open: true, record: null })}
       />
       {query.isLoading ? <LoadingSkeleton /> : null}
       {query.isError ? (
         <ErrorState message="Unable to load events." onRetry={() => query.refetch()} />
       ) : null}
-      {query.data?.length === 0 ? <EmptyState title="No events yet." /> : null}
-      {query.data && query.data.length > 0 ? (
+      {events?.length === 0 ? <EmptyState title={pastOnly ? "No past events match your filters." : "No events yet."} /> : null}
+      {events && events.length > 0 ? (
         <div className="overflow-hidden rounded-lg border border-slate-200">
           <div className="hidden grid-cols-[80px_1.4fr_.8fr_.8fr_.7fr_.7fr] bg-slate-50 px-4 py-3 text-xs font-bold tracking-wide text-slate-500 uppercase md:grid">
             <span>Image</span>
@@ -160,7 +165,7 @@ export function EventsPage() {
             <span>Actions</span>
           </div>
           <div className="divide-y divide-slate-100">
-            {query.data.map((event) => (
+            {events.map((event) => (
               <div
                 key={event.id}
                 className="grid gap-3 px-4 py-4 md:grid-cols-[80px_1.4fr_.8fr_.8fr_.7fr_.7fr] md:items-center"
@@ -183,6 +188,7 @@ export function EventsPage() {
         </div>
       ) : null}
       <EventFormModal
+        pastOnly={pastOnly}
         key={modal.open ? (modal.record?.id ?? "new") : "closed"}
         open={modal.open}
         record={modal.record}
@@ -203,10 +209,12 @@ function EventFormModal({
   open,
   record,
   onClose,
+  pastOnly = false,
 }: {
   open: boolean;
   record: Partial<EventRecord> | null;
   onClose: () => void;
+  pastOnly?: boolean;
 }) {
   const queryClient = useQueryClient();
   const [form, setForm] = useState<Partial<EventRecord>>(record ?? { published: false });
@@ -217,10 +225,13 @@ function EventFormModal({
       validateRequired(form.title, "Title");
       validateRequired(form.description, "Description");
       validateRequired(form.event_date, "Event date");
+      if (pastOnly && form.event_date! >= new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Colombo" })) {
+        throw new Error("Choose a date before today for a past event.");
+      }
       validateRequired(form.location, "Location");
       validateUrl(form.registration_url);
       const cover = file ? await uploadImage("event-images", file, "events") : form.cover_image_url;
-      return saveEvent({ ...form, cover_image_url: cover });
+      return saveEvent({ ...form, cover_image_url: cover ?? null });
     },
     onSuccess: () => {
       toast.success("Event saved.");
@@ -232,7 +243,8 @@ function EventFormModal({
   });
 
   return (
-    <AdminModal open={open} title={record?.id ? "Edit Event" : "Add Event"} onClose={onClose}>
+    <AdminModal open={open} title={record?.id ? "Edit Event" : pastOnly ? "Add Past Event" : "Add Event"} onClose={onClose}>
+      {pastOnly ? <p className="px-6 pt-4 text-sm text-slate-600">Choose the original event date and upload its poster. Enable Published to show it under the matching year in Our journey so far.</p> : null}
       <ManagedForm onSubmit={() => mutation.mutate()} submitting={mutation.isPending}>
         <FormField label="Title" required>
           <input
@@ -280,7 +292,7 @@ function EventFormModal({
         </FormField>
         <FormField label="Cover Image">
           <ImageUploader
-            value={form.cover_image_url}
+            value={form.cover_image_url ?? null}
             onFile={setFile}
             disabled={mutation.isPending}
           />
@@ -533,12 +545,27 @@ export function GalleryPage() {
   const [modal, setModal] = useState<ModalMode<GalleryItem>>({ open: false, record: null });
   const [deleteTarget, setDeleteTarget] = useState<GalleryItem | null>(null);
   const [albumDraft, setAlbumDraft] = useState("");
+  const [albumFilter, setAlbumFilter] = useState("");
+  const [editingAlbum, setEditingAlbum] = useState<GalleryAlbum | null>(null);
+  const [deletingAlbum, setDeletingAlbum] = useState<GalleryAlbum | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [uploadAlbumId, setUploadAlbumId] = useState("");
   const query = useQuery({
     queryKey: ["gallery", search, status],
     queryFn: () => listGallery(search, status),
   });
   const albums = useQuery({ queryKey: ["gallery-albums-admin"], queryFn: listGalleryAlbums });
+  const visiblePhotos = query.data?.filter((item) => !albumFilter || (albumFilter === "unassigned" ? !item.album_id : item.album_id === albumFilter));
+  function refreshAlbums() {
+    for (const key of ["gallery", "gallery-albums-admin", "gallery-albums", "gallery-album"]) {
+      void queryClient.invalidateQueries({ queryKey: [key] });
+    }
+  }
+  const updateAlbum = useMutation({
+    mutationFn: saveGalleryAlbum,
+    onSuccess: () => { setEditingAlbum(null); refreshAlbums(); toast.success("Album saved."); },
+    onError: (error) => toast.error(error.message),
+  });
   const createAlbum = useMutation({
     mutationFn: () =>
       saveGalleryAlbum({
@@ -549,6 +576,8 @@ export function GalleryPage() {
     onSuccess: (album) => {
       setAlbumDraft("");
       setUploadAlbumId(album.id);
+      setAlbumFilter(album.id);
+      refreshAlbums();
       toast.success("Album created.");
       void queryClient.invalidateQueries({ queryKey: ["gallery-albums-admin"] });
     },
@@ -558,6 +587,10 @@ export function GalleryPage() {
     mutationFn: deleteGalleryAlbum,
     onSuccess: () => {
       toast.success("Album deleted. Its images are now unassigned.");
+      setDeletingAlbum(null);
+      setAlbumFilter("");
+      setUploadAlbumId("");
+      refreshAlbums();
       void queryClient.invalidateQueries({ queryKey: ["gallery-albums-admin"] });
       void queryClient.invalidateQueries({ queryKey: ["gallery"] });
     },
@@ -567,6 +600,7 @@ export function GalleryPage() {
     mutationFn: deleteGalleryItem,
     onSuccess: () => {
       toast.success("Gallery item deleted.");
+      refreshAlbums();
       setDeleteTarget(null);
       void queryClient.invalidateQueries({ queryKey: ["gallery"] });
     },
@@ -575,6 +609,8 @@ export function GalleryPage() {
 
   async function uploadMany(files: FileList | null) {
     if (!files?.length) return;
+    if (!uploadAlbumId) { toast.error("Select an album first."); return; }
+    setUploading(true);
     try {
       await Promise.all(
         Array.from(files).map(async (file, index) => {
@@ -583,16 +619,19 @@ export function GalleryPage() {
             title: file.name.replace(/\.[^.]+$/, ""),
             caption: "",
             image_url,
-            album_id: uploadAlbumId || albums.data?.[0]?.id || null,
+            album_id: uploadAlbumId,
             display_order: (query.data?.length ?? 0) + index + 1,
             published: true,
           });
         }),
       );
       toast.success("Gallery images uploaded.");
+      refreshAlbums();
       void queryClient.invalidateQueries({ queryKey: ["gallery"] });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Unable to upload images.");
+    } finally {
+      setUploading(false);
     }
   }
 
@@ -626,12 +665,13 @@ export function GalleryPage() {
               key={album.id}
               className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 py-1 pr-1 pl-3 text-sm font-semibold text-slate-700"
             >
-              {album.title}
+              <button type="button" className={albumFilter === album.id ? "text-blue-700 underline" : "hover:text-blue-700"} onClick={() => { setAlbumFilter(album.id); setUploadAlbumId(album.id); }}>{album.title}</button>
+              <button type="button" aria-label={`Edit ${album.title}`} className="rounded-full p-1 hover:bg-blue-100" onClick={() => setEditingAlbum(album)}><Edit className="size-3.5" /></button>
               <button
                 type="button"
                 aria-label={`Delete ${album.title}`}
                 className="rounded-full p-1 hover:bg-red-100 hover:text-red-700"
-                onClick={() => removeAlbum.mutate(album)}
+                onClick={() => setDeletingAlbum(album)}
               >
                 <Trash2 className="size-3.5" />
               </button>
@@ -639,6 +679,15 @@ export function GalleryPage() {
           ))}
         </div>
       </section>
+      {albums.isError ? <ErrorState message="Unable to load albums." onRetry={() => albums.refetch()} /> : null}
+      <div className="mb-4">
+        <FormField label="Filter photos by album">
+          <select className={fieldClass} value={albumFilter} onChange={(e) => { setAlbumFilter(e.target.value); if (e.target.value !== "unassigned") setUploadAlbumId(e.target.value); }}>
+            <option value="">All albums</option><option value="unassigned">Unassigned photos</option>
+            {albums.data?.map((album) => <option key={album.id} value={album.id}>{album.title}</option>)}
+          </select>
+        </FormField>
+      </div>
       <Toolbar
         search={search}
         onSearch={setSearch}
@@ -665,14 +714,14 @@ export function GalleryPage() {
               className={`${secondaryButtonClass} ${!uploadAlbumId && albums.data?.length ? "opacity-60" : ""}`}
             >
               <UploadCloud className="size-4" />
-              Bulk Upload
+              {uploading ? "Uploading…" : "Bulk Upload"}
               <input
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
                 multiple
                 className="sr-only"
-                disabled={!uploadAlbumId && Boolean(albums.data?.length)}
-                onChange={(e) => uploadMany(e.target.files)}
+                disabled={!uploadAlbumId || uploading}
+                onChange={(e) => { void uploadMany(e.target.files); e.target.value = ""; }}
               />
             </label>
           </div>
@@ -682,10 +731,10 @@ export function GalleryPage() {
       {query.isError ? (
         <ErrorState message="Unable to load gallery." onRetry={() => query.refetch()} />
       ) : null}
-      {query.data?.length === 0 ? <EmptyState title="No gallery images yet." /> : null}
-      {query.data && query.data.length > 0 ? (
+      {visiblePhotos?.length === 0 ? <EmptyState title="No photos in this selection." /> : null}
+      {visiblePhotos && visiblePhotos.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {query.data.map((item) => (
+          {visiblePhotos.map((item) => (
             <article
               key={item.id}
               className="overflow-hidden rounded-lg border border-slate-200 bg-white"
@@ -714,12 +763,22 @@ export function GalleryPage() {
           ))}
         </div>
       ) : null}
-      <GalleryFormModal
+      {modal.open ? <GalleryFormModal
+        key={modal.record?.id ?? `new-${uploadAlbumId}`}
         open={modal.open}
-        record={modal.record}
+        record={modal.record ?? { album_id: uploadAlbumId || null, published: true, display_order: 0 }}
         onClose={() => setModal({ open: false, record: null })}
         albums={albums.data ?? []}
-      />
+      /> : null}
+      <AdminModal open={Boolean(editingAlbum)} title="Edit album" onClose={() => setEditingAlbum(null)}>
+        {editingAlbum ? <ManagedForm onSubmit={() => { if (!editingAlbum.title.trim()) { toast.error("Album title is required."); return; } updateAlbum.mutate(editingAlbum); }} submitting={updateAlbum.isPending}>
+          <FormField label="Album title" required><input className={fieldClass} value={editingAlbum.title} onChange={(e) => setEditingAlbum({ ...editingAlbum, title: e.target.value })} /></FormField>
+          <FormField label="Description"><textarea className={textAreaClass} value={editingAlbum.description ?? ""} onChange={(e) => setEditingAlbum({ ...editingAlbum, description: e.target.value })} /></FormField>
+          <FormField label="Display order (lowest first)"><input type="number" className={fieldClass} value={editingAlbum.display_order} onChange={(e) => setEditingAlbum({ ...editingAlbum, display_order: Number(e.target.value) })} /></FormField>
+          <label className="flex items-center gap-2"><input type="checkbox" checked={editingAlbum.published} onChange={(e) => setEditingAlbum({ ...editingAlbum, published: e.target.checked })} /> Published</label>
+        </ManagedForm> : null}
+      </AdminModal>
+      <ConfirmDialog open={Boolean(deletingAlbum)} title="Delete album?" description="Photos will be kept as unassigned photos." onCancel={() => setDeletingAlbum(null)} onConfirm={() => deletingAlbum && removeAlbum.mutate(deletingAlbum)} />
       <ConfirmDialog
         open={Boolean(deleteTarget)}
         title="Delete gallery image?"
@@ -758,6 +817,8 @@ function GalleryFormModal({
     },
     onSuccess: () => {
       toast.success("Gallery item saved.");
+      void queryClient.invalidateQueries({ queryKey: ["gallery-albums"] });
+      void queryClient.invalidateQueries({ queryKey: ["gallery-album"] });
       void queryClient.invalidateQueries({ queryKey: ["gallery"] });
       onClose();
     },
@@ -896,11 +957,12 @@ export function PartnersPage() {
           }))}
         />
       ) : null}
-      <PartnerFormModal
+      {modal.open ? <PartnerFormModal
+        key={modal.record?.id ?? "new-partner"}
         open={modal.open}
         record={modal.record}
         onClose={() => setModal({ open: false, record: null })}
-      />
+      /> : null}
       <ConfirmDialog
         open={Boolean(deleteTarget)}
         title="Delete partner?"
@@ -928,13 +990,15 @@ function PartnerFormModal({
   const [file, setFile] = useState<File | null>(null);
   const mutation = useMutation({
     mutationFn: async () => {
-      validateRequired(form.name, "Partner name");
+      const name = form.name?.trim() || file?.name.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ") || "Partner";
       validateUrl(form.website_url);
       const logo_url = file ? await uploadImage("partner-logos", file, "partners") : form.logo_url;
-      return savePartner({ ...form, logo_url });
+      validateRequired(logo_url, "Logo");
+      return savePartner({ ...form, name, logo_url });
     },
     onSuccess: () => {
       toast.success("Partner saved.");
+      void queryClient.invalidateQueries({ queryKey: ["site-content"] });
       void queryClient.invalidateQueries({ queryKey: ["partners"] });
       onClose();
     },
@@ -943,7 +1007,7 @@ function PartnerFormModal({
   return (
     <AdminModal open={open} title={record?.id ? "Edit Partner" : "Add Partner"} onClose={onClose}>
       <ManagedForm onSubmit={() => mutation.mutate()} submitting={mutation.isPending}>
-        <FormField label="Partner Name" required>
+        <FormField label="Partner Name (optional, defaults to filename)">
           <input
             className={fieldClass}
             value={form.name ?? ""}
@@ -965,7 +1029,7 @@ function PartnerFormModal({
             onChange={(e) => setForm({ ...form, display_order: Number(e.target.value) })}
           />
         </FormField>
-        <FormField label="Logo">
+        <FormField label="Logo" required>
           <ImageUploader value={form.logo_url} onFile={setFile} disabled={mutation.isPending} />
         </FormField>
         <BooleanField

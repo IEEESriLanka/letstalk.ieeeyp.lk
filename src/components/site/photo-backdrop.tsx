@@ -105,7 +105,7 @@ export function PhotoBackdrop({ images }: { images?: string[] | undefined }) {
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_75%_65%_at_0%_100%,#fbfcff_0%,rgba(251,252,255,0.9)_18%,rgba(251,252,255,0.5)_42%,transparent_75%)]"
       />
       {photos.length > 1 && (
-        <div className="absolute right-6 bottom-14 left-6 flex flex-wrap items-center justify-end gap-4 lg:left-[30%]">
+        <div className="absolute right-6 bottom-32 left-6 flex flex-wrap items-center justify-end gap-4 lg:left-[30%]">
           <div className="flex flex-wrap items-center gap-1" aria-label="Choose photo">
             {photos.map((src, index) => (
               <button

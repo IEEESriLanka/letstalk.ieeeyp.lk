@@ -72,7 +72,7 @@ const pillarIcons = {
 };
 
 const eventVisuals = [g1, g2, g3, g4];
-const journeyYears = ["2023", "2024", "2025", "2026"];
+const journeyYears = ["2024", "2025", "2026"];
 
 export function About({ content }: { content: SiteContent["about"] }) {
   return (
@@ -364,12 +364,12 @@ function JourneyEvent({ event, last }: { event: SiteContent["events"][number]; l
         initial={false}
         animate={{ opacity: active ? 1 : 0.18, x: active ? 0 : 24, scale: active ? 1 : 0.96 }}
         transition={{ duration: reducedMotion ? 0 : 0.62, ease: [0.22, 1, 0.36, 1] }}
-        className="min-w-0 overflow-hidden rounded-lg border border-border bg-white shadow-soft"
+        className="flex min-w-0 items-center justify-center py-4"
       >
         {event.imageUrl ? (
-          <img src={event.imageUrl} alt={event.title} loading="lazy" className="aspect-[4/3] w-full object-contain bg-ieee-tint" />
+          <img src={event.imageUrl} alt={event.title} loading="lazy" className="block h-auto max-h-[560px] w-auto max-w-full rounded-sm shadow-[0_12px_28px_-8px_rgba(0,38,76,0.28)]" />
         ) : (
-          <div className="grid aspect-[4/3] place-items-center bg-ieee-tint" aria-hidden="true">
+          <div className="grid aspect-[4/3] w-full place-items-center rounded-lg bg-ieee-tint" aria-hidden="true">
             <CalendarDays className="size-12 text-ieee" />
           </div>
         )}
@@ -379,12 +379,19 @@ function JourneyEvent({ event, last }: { event: SiteContent["events"][number]; l
 }
 
 export function PastSessions({ events }: { events: SiteContent["events"] }) {
-  const [year, setYear] = useState("2023");
+  const [year, setYear] = useState("2026");
+  const [visibleCount, setVisibleCount] = useState(3);
   const today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Colombo" });
+  const availableYears = [...new Set([...journeyYears, ...events
+    .filter((event) => /^\d{4}-\d{2}-\d{2}$/.test(event.dateLabel) && event.dateLabel < today)
+    .map((event) => event.dateLabel.slice(0, 4))])]
+    .filter((item) => item !== "2023")
+    .sort((a, b) => b.localeCompare(a));
   const pastEvents = events
     .filter((event) => /^\d{4}-\d{2}-\d{2}$/.test(event.dateLabel) &&
       event.dateLabel.startsWith(year + "-") && event.dateLabel < today)
     .sort((a, b) => b.dateLabel.localeCompare(a.dateLabel));
+  const visibleEvents = pastEvents.slice(0, visibleCount);
 
   return (
     <section id="journey" className="bg-orange-tint/40 py-24 lg:py-32">
@@ -399,13 +406,18 @@ export function PastSessions({ events }: { events: SiteContent["events"] }) {
           </p>
         </Reveal>
         <div role="group" aria-label="Event year" className="sticky top-20 z-20 mt-10 grid grid-cols-4 gap-2 rounded-lg border border-border bg-white/95 p-1.5 shadow-soft backdrop-blur-xl sm:flex">
-          {journeyYears.map((item) => (
+          {availableYears.map((item) => (
             <button
               key={item}
               type="button"
               aria-pressed={year === item}
               aria-controls="journey-events"
-              onClick={() => setYear(item)}
+              onClick={() => {
+                if (item !== year) {
+                  setYear(item);
+                  setVisibleCount(3);
+                }
+              }}
               className={`min-h-10 rounded-md px-2 py-2 text-sm font-bold transition-colors sm:px-6 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ieee ${year === item ? "bg-orange text-white" : "bg-ieee-tint text-ieee hover:bg-orange-tint"}`}
             >
               {item}
@@ -418,12 +430,25 @@ export function PastSessions({ events }: { events: SiteContent["events"] }) {
             <p className="py-10 text-center text-body">No past events published for {year} yet.</p>
           ) : (
             <div key={year} className="overflow-x-clip">
-              {pastEvents.map((event, index) => (
-                <JourneyEvent key={`${event.dateLabel}-${event.title}-${index}`} event={event} last={index === pastEvents.length - 1} />
+              {visibleEvents.map((event, index) => (
+                <JourneyEvent key={`${event.dateLabel}-${event.title}-${index}`} event={event} last={index === visibleEvents.length - 1} />
               ))}
             </div>
           )}
         </div>
+        {visibleEvents.length < pastEvents.length && (
+          <div className="mt-8 flex justify-center">
+            <button
+              type="button"
+              aria-controls="journey-events"
+              onClick={() => setVisibleCount((count) => count + 3)}
+              className="inline-flex min-h-11 items-center justify-center rounded-full bg-orange px-7 py-3 text-sm font-semibold text-white shadow-soft transition-colors hover:bg-[#e85f00] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ieee"
+            >
+              Read more
+              <span className="sr-only"> events from {year}</span>
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );
@@ -466,7 +491,7 @@ export function Gallery() {
                   <img src={cover} alt={album.title} loading="lazy" className="size-full object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-108" />
                   <div className="absolute inset-0 flex flex-col justify-end bg-[linear-gradient(to_top,color-mix(in_oklab,var(--ieee-deep)_88%,transparent),transparent_68%)] p-6 text-white">
                     <p className="text-xs font-bold tracking-[0.14em] text-orange-soft uppercase">{album.images.length} photos</p>
-                    <h3 className="mt-2 text-xl font-bold sm:text-2xl">{album.title}</h3>
+                    <h3 className="mt-2 text-xl font-bold text-white sm:text-2xl">{album.title}</h3>
                   </div>
                 </Link>
               </motion.div>
@@ -487,133 +512,9 @@ export function Gallery() {
   );
 }
 
-export function Awards({ content }: { content: SiteContent["awards"] }) {
-  return (
-    <section
-      id="awards"
-      className="relative overflow-hidden bg-background py-24 text-white lg:py-32"
-    >
-      <div
-        aria-hidden
-        className="absolute inset-x-0 top-0 h-1/2 bg-ieee-tint"
-      />
-      <div
-        aria-hidden
-        className="absolute inset-0 bg-grid opacity-45 [mask-image:radial-gradient(64%_50%_at_50%_32%,black,transparent)]"
-      />
+export { Awards } from "./awards";
 
-      <div className="relative mx-auto max-w-6xl px-5">
-        <Reveal className="max-w-2xl">
-          <span className="section-eyebrow">Awards &amp; Recognition</span>
-          <h2 className="mt-5 text-3xl leading-[1.14] font-bold tracking-tight text-heading sm:text-[2.6rem]">
-            Recognized for <span className="text-gradient-orange">industry impact</span>.
-          </h2>
-          <p className="mt-4 text-base leading-relaxed text-body">{content.description}</p>
-        </Reveal>
-
-        <Reveal delay={0.15} className="mt-14">
-          <div className="grid overflow-hidden shadow-[0_34px_90px_rgba(0,20,43,0.28)] lg:grid-cols-[1.55fr_0.85fr]">
-            <article className="relative min-h-[430px] overflow-hidden bg-ieee-deep">
-              <img
-                src={g4}
-                alt=""
-                loading="lazy"
-                className="absolute inset-0 size-full object-cover grayscale-[20%]"
-              />
-              <div
-                aria-hidden
-                className="absolute inset-0 bg-[linear-gradient(90deg,color-mix(in_oklab,var(--ieee-deep)_86%,transparent),color-mix(in_oklab,var(--ieee-deep)_50%,transparent)_62%,color-mix(in_oklab,var(--orange)_34%,transparent))]"
-              />
-              <div
-                aria-hidden
-                className="absolute inset-0 bg-[radial-gradient(circle_at_74%_18%,rgba(255,255,255,0.22),transparent_28%)]"
-              />
-
-              <div className="relative flex min-h-[430px] flex-col justify-between p-7 sm:p-10">
-                <div className="flex justify-end">
-                  <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/15 px-3.5 py-1.5 text-xs font-bold tracking-[0.14em] text-white uppercase backdrop-blur-md">
-                    <Trophy className="size-3.5 text-orange-soft" />
-                    {content.label}
-                  </span>
-                </div>
-
-                <div className="max-w-2xl">
-                  <span className="text-xs font-bold tracking-[0.18em] text-orange-soft uppercase">
-                    IEEE Sri Lanka Section Awards
-                  </span>
-                  <h3 className="mt-3 text-3xl leading-tight font-bold text-white sm:text-5xl">
-                    {content.awardName}
-                  </h3>
-                  <p className="mt-5 max-w-xl text-sm leading-relaxed text-white/82">
-                    {content.program}
-                  </p>
-                </div>
-              </div>
-            </article>
-
-            <aside className="relative overflow-hidden bg-ieee-deep p-7 sm:p-10">
-              <div
-                aria-hidden
-                className="absolute inset-0 bg-[linear-gradient(160deg,color-mix(in_oklab,var(--ieee-deep)_96%,transparent),color-mix(in_oklab,var(--ieee)_68%,transparent))]"
-              />
-              <div className="relative flex h-full min-h-[360px] flex-col justify-between">
-                <div className="grid size-14 place-items-center rounded-2xl bg-[image:var(--gradient-orange)] shadow-glow">
-                  <Award className="size-7 text-white" />
-                </div>
-
-                <div>
-                  <span className="text-xs font-bold tracking-[0.18em] text-orange-soft uppercase">
-                    Vision to Value
-                  </span>
-                  <h4 className="mt-3 text-2xl leading-tight font-bold text-white">
-                    The Business Analysis Experience Program
-                  </h4>
-                  <p className="mt-5 text-sm leading-relaxed text-white/74">
-                    Celebrated for practical learning, meaningful industry collaboration, and
-                    career-focused skill development.
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2 border-t border-white/15 pt-5 text-xs font-semibold text-orange-soft">
-                  <CheckCircle2 className="size-3.5" />
-                  Verified Section Recognition
-                </div>
-              </div>
-            </aside>
-          </div>
-        </Reveal>
-      </div>
-    </section>
-  );
-}
-
-export function Partners({ partners }: { partners: SiteContent["partners"] }) {
-  return (
-    <section className="bg-surface-gray py-20">
-      <div className="mx-auto max-w-6xl px-5">
-        <Reveal className="text-center">
-          <span className="section-eyebrow">Ecosystem</span>
-          <h2 className="mt-3 text-2xl font-bold text-heading sm:text-3xl">Our partners</h2>
-          <p className="mx-auto mt-2 max-w-xl text-sm text-body">
-            Collaborating with leading industry organizations, student branches, and IEEE affinity
-            groups.
-          </p>
-        </Reveal>
-        <RevealGroup className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {partners.map((p) => (
-            <motion.div
-              key={p}
-              variants={fadeUp}
-              className="flex h-20 items-center justify-center rounded-2xl border border-border bg-white px-3 text-center text-[0.8rem] font-semibold text-ieee shadow-soft transition-all duration-300 hover:border-orange/40 hover:shadow-md"
-            >
-              {p}
-            </motion.div>
-          ))}
-        </RevealGroup>
-      </div>
-    </section>
-  );
-}
+export { Partners } from "./partner-marquee";
 
 export function StayConnected({ content }: { content: SiteContent["connected"] }) {
   return (

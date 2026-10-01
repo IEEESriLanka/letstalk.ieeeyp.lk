@@ -70,21 +70,26 @@ export function Hero({ content }: { content: SiteContent["hero"] }) {
       </div>
       {hasPhotos && (
         <div className="relative h-[360px] sm:h-[460px] lg:absolute lg:top-[clamp(6rem,12svh,8rem)] lg:right-0 lg:bottom-0 lg:h-auto lg:w-[51%]">
-          <div className="absolute inset-0 lg:[clip-path:polygon(30%_0,100%_0,100%_100%,0_100%)] lg:[mask-image:radial-gradient(ellipse_80%_75%_at_0%_100%,transparent_0%,transparent_25%,black_80%)]">
-            <PhotoBackdrop images={content.backgroundImages} />
+          <div className="absolute inset-0 [mask-image:linear-gradient(to_bottom,black_0%,black_calc(100%_-_120px),transparent_100%)]">
+            <div className="absolute inset-0 lg:[clip-path:polygon(30%_0,100%_0,100%_100%,0_100%)] lg:[mask-image:radial-gradient(ellipse_80%_75%_at_0%_100%,transparent_0%,transparent_25%,black_80%)]">
+              <PhotoBackdrop images={content.backgroundImages} />
+            </div>
           </div>
           <div
             aria-hidden
             className="pointer-events-none absolute -top-2 left-[22%] hidden h-24 w-10 skew-x-[-26deg] rounded-xl bg-gradient-to-b from-[#ff9954] to-[#ff6815] lg:block"
           />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute right-[-30px] bottom-[-50px] h-24 w-64 skew-x-[-28deg] rounded-tl-3xl bg-[#092e58]/95"
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute right-8 bottom-[-35px] h-16 w-16 skew-x-[-28deg] rounded-tl-xl bg-[#ff6815]"
-          />
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 1000 120"
+            preserveAspectRatio="none"
+            fill="none"
+            className="pointer-events-none absolute right-0 bottom-0 h-24 w-full sm:h-28"
+          >
+            <path d="M180 102C430 102 610 28 970 28" stroke="#0879E8" strokeOpacity="0.12" strokeWidth="1" />
+            <path d="M390 108C610 108 730 51 1000 51" stroke="#003B6F" strokeOpacity="0.08" strokeWidth="1" />
+            <path d="M770 37C811 33 851 30 890 29" stroke="#FF6B00" strokeOpacity="0.65" strokeWidth="3" strokeLinecap="round" />
+          </svg>
         </div>
       )}
     </section>

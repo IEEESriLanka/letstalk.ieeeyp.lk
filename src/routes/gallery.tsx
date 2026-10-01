@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useMatchRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, Camera, Image } from "lucide-react";
 import { SiteFooter } from "@/components/site/site-footer";
@@ -19,8 +19,13 @@ export const Route = createFileRoute("/gallery")({
       },
     ],
   }),
-  component: GalleryPage,
+  component: GalleryRoute,
 });
+
+function GalleryRoute() {
+  const matchRoute = useMatchRoute();
+  return matchRoute({ to: "/gallery/$albumSlug" }) ? <Outlet /> : <GalleryPage />;
+}
 
 function GalleryPage() {
   const { data: content = defaultSiteContent } = useQuery({
@@ -110,7 +115,7 @@ function GalleryPage() {
                   <img src={cover} alt={album.title} loading="lazy" className="size-full object-cover transition-transform duration-700 group-hover:scale-105" />
                   <div className="absolute inset-0 flex flex-col justify-end bg-[linear-gradient(to_top,color-mix(in_oklab,var(--ieee-deep)_88%,transparent),transparent_68%)] p-6 text-white">
                     <p className="text-xs font-bold tracking-[0.14em] text-orange-soft uppercase">{album.images.length} photos</p>
-                    <h3 className="mt-2 text-2xl font-bold">{album.title}</h3>
+                    <h3 className="mt-2 text-2xl font-bold text-white">{album.title}</h3>
                     {album.description ? <p className="mt-2 line-clamp-2 text-sm text-white/75">{album.description}</p> : null}
                   </div>
                 </Link>

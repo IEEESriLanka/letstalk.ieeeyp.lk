@@ -85,6 +85,7 @@ export const siteContentSchema: z.ZodType<SiteContent> = z.object({
     label: z.string().min(1),
   }),
   partners: z.array(z.string().min(1)).min(1),
+  videoLinks: z.array(z.object({ url: z.string().url(), title: z.string() })).max(6).optional(),
   connected: z.object({
     title: z.string().min(1),
     copy: z.string().min(1),
@@ -263,6 +264,7 @@ export async function readSiteContent(): Promise<SiteContent> {
       imageUrl: item.image_url,
     })),
     partners: (partners.data ?? []).map((partner) => partner.name),
+    partnerLogos: (partners.data ?? []).filter((partner) => partner.logo_url).map((partner) => ({ name: partner.name, logoUrl: partner.logo_url! })),
   } as SiteContent;
 }
 

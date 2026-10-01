@@ -6,6 +6,8 @@ import { Preloader } from "@/components/site/preloader";
 import { SiteNav } from "@/components/site/site-nav";
 import { MouseGlow } from "@/components/site/mouse-glow";
 import { Hero } from "@/components/site/hero";
+import { LatestArticles } from "@/components/site/latest-articles";
+import { LatestVideos } from "@/components/site/latest-videos";
 import {
   Events,
   PastSessions,
@@ -75,9 +77,11 @@ function Index() {
         <Hero content={content.hero} />
         <Events events={content.events} />
         <PastSessions events={content.events} />
+        <LatestArticles />
+        <LatestVideos />
         <Gallery />
         <Awards content={content.awards} />
-        <Partners partners={content.partners} />
+        <Partners logos={content.partnerLogos ?? []} />
         <StayConnected content={content.connected} />
         <Contact content={content.contact} />
         <SiteFooter email={content.contact.email} />
