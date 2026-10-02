@@ -405,7 +405,7 @@ export function PastSessions({ events }: { events: SiteContent["events"] }) {
             Celebrating the events, conversations, and industry connections that bring our community together.
           </p>
         </Reveal>
-        <div role="group" aria-label="Event year" className="sticky top-20 z-20 mt-10 grid grid-cols-4 gap-2 rounded-lg border border-border bg-white/95 p-1.5 shadow-soft backdrop-blur-xl sm:flex">
+        <div role="group" aria-label="Event year" className="sticky top-20 z-20 mt-10 flex w-fit max-w-full flex-wrap gap-2 rounded-lg border border-border bg-white/95 p-1.5 shadow-soft backdrop-blur-xl">
           {availableYears.map((item) => (
             <button
               key={item}
