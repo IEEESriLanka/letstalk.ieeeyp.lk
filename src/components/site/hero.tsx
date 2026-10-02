@@ -1,5 +1,5 @@
 import { motion, useReducedMotion } from "motion/react";
-import { ArrowDown, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { PhotoBackdrop } from "./photo-backdrop";
 import type { SiteContent } from "@/lib/site-content";
 
@@ -10,7 +10,7 @@ export function Hero({ content }: { content: SiteContent["hero"] }) {
     <section
       id="top"
       aria-labelledby="hero-title"
-      className="relative isolate overflow-hidden bg-[#fbfcff] pt-28 lg:min-h-svh lg:pt-[clamp(6rem,12svh,8rem)]"
+      className="relative isolate overflow-hidden bg-[#fbfcff] pt-28 pb-24 lg:min-h-svh lg:pt-[clamp(6rem,12svh,8rem)] lg:pb-0"
     >
       <div
         aria-hidden
@@ -45,27 +45,18 @@ export function Hero({ content }: { content: SiteContent["hero"] }) {
           </p>
           <div className="mt-8 flex flex-wrap gap-3 sm:gap-4 lg:mt-[clamp(1.25rem,3.5svh,2.5rem)]">
             <a
-              href="/#journey"
+              href="/about-us"
               className="inline-flex min-h-14 items-center justify-center gap-4 rounded-2xl bg-[#ff6815] px-6 text-sm font-semibold text-white shadow-[0_8px_24px_-10px_#ff6815] transition-colors hover:bg-[#ed5705] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange sm:text-base"
+            >
+              About Us <ArrowRight className="size-5" />
+            </a>
+            <a
+              href="/#journey"
+              className="inline-flex min-h-14 items-center justify-center gap-4 rounded-2xl border border-[#254d80] bg-white/90 px-6 text-sm font-semibold text-[#102d58] transition-colors hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ieee sm:text-base"
             >
               Explore Our Journey <ArrowRight className="size-5" />
             </a>
-            <a
-              href="/team"
-              className="inline-flex min-h-14 items-center justify-center gap-4 rounded-2xl border border-[#254d80] bg-white/90 px-6 text-sm font-semibold text-[#102d58] transition-colors hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ieee sm:text-base"
-            >
-              Meet Our Team <ArrowRight className="size-5" />
-            </a>
           </div>
-          <a
-            href="/#journey"
-            className="mt-12 inline-flex items-center gap-3 text-[10px] font-semibold tracking-[0.2em] text-[#53658b] uppercase lg:mt-[clamp(1.5rem,5svh,4rem)]"
-          >
-            <span className="grid size-8 place-items-center rounded-full border border-[#d5dfed]">
-              <ArrowDown className="size-4" />
-            </span>
-            Discover our story
-          </a>
         </motion.div>
       </div>
       {hasPhotos && (
@@ -92,6 +83,26 @@ export function Hero({ content }: { content: SiteContent["hero"] }) {
           </svg>
         </div>
       )}
+      <a
+        href="#events"
+        aria-label="Scroll down to explore events"
+        onClick={(event) => {
+          const section = document.getElementById("events");
+          if (section) {
+            event.preventDefault();
+            section.scrollIntoView({ behavior: reduceMotion ? "instant" : "smooth", block: "start" });
+          }
+        }}
+        className="absolute bottom-6 left-1/2 z-20 flex h-16 w-12 -translate-x-1/2 items-center justify-center rounded-full text-[#222] transition-colors hover:text-orange focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ieee"
+      >
+        <span aria-hidden="true" className="relative block h-7 w-4 rounded-full border-[1.5px] border-current">
+          <motion.span
+            className="absolute top-1 left-1/2 size-[3px] -translate-x-1/2 rounded-full bg-current"
+            animate={reduceMotion ? { y: 9, opacity: 1 } : { y: [0, 0, 10, 10], opacity: [0, 1, 1, 0] }}
+            transition={reduceMotion ? { duration: 0 } : { duration: 1.8, times: [0, 0.15, 0.8, 1], repeat: Infinity, repeatDelay: 0.25, ease: "easeInOut" }}
+          />
+        </span>
+      </a>
     </section>
   );
 }

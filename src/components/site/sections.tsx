@@ -367,9 +367,9 @@ function JourneyEvent({ event, last }: { event: SiteContent["events"][number]; l
         className="flex min-w-0 items-center justify-center py-4"
       >
         {event.imageUrl ? (
-          <img src={event.imageUrl} alt={event.title} loading="lazy" className="block h-auto max-h-[560px] w-auto max-w-full rounded-sm shadow-[0_12px_28px_-8px_rgba(0,38,76,0.28)]" />
+          <img src={event.imageUrl} alt={event.title} loading="lazy" className="block h-auto max-h-[280px] w-auto max-w-full rounded-sm object-contain shadow-[0_12px_28px_-8px_rgba(0,38,76,0.28)] sm:max-h-[320px] sm:max-w-[360px]" />
         ) : (
-          <div className="grid aspect-[4/3] w-full place-items-center rounded-lg bg-ieee-tint" aria-hidden="true">
+          <div className="grid aspect-[4/3] w-full max-w-[360px] place-items-center rounded-lg bg-ieee-tint" aria-hidden="true">
             <CalendarDays className="size-12 text-ieee" />
           </div>
         )}
