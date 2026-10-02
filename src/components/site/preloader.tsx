@@ -93,11 +93,7 @@ export function Preloader({ contentReady, onComplete }: PreloaderProps) {
             {progress}%
           </span>
         </div>
-        <div className="preloader-segments" aria-hidden="true">
-          {[0, 1, 2].map((segment) => (
-            <span key={segment} data-active={segment === Math.min(completed, 2)} />
-          ))}
-        </div>
+
       </div>
     </section>
   );

@@ -125,20 +125,7 @@
   font-variant-numeric: tabular-nums;
   text-align: right;
 }
-.preloader-segments {
-  display: flex;
-  gap: 12px;
-  margin-top: 48px;
-}
-.preloader-segments span {
-  width: 34px;
-  height: 7px;
-  border-radius: 999px;
-  background: #eaf0f7;
-}
-.preloader-segments span[data-active="true"] {
-  background: #ff8a36;
-}
+
 .preloader-orbit {
   position: absolute;
   width: clamp(280px, 38vw, 620px);
@@ -232,9 +219,7 @@
   .preloader-progress-row {
     margin-top: 16px;
   }
-  .preloader-segments {
-    margin-top: 20px;
-  }
+
 }
 @media (prefers-reduced-motion: reduce) {
   .preloader-content,
