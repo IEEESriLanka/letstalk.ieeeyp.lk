@@ -68,24 +68,58 @@ function EventsPage() {
                   const dated = /^\d{4}-\d{2}-\d{2}$/.test(event.dateLabel) && !Number.isNaN(Date.parse(event.dateLabel));
                   const past = dated && event.dateLabel < today;
                   const registration = event.registrationUrl && /^https?:\/\//i.test(event.registrationUrl) ? event.registrationUrl : null;
-                  return <article key={event.title + event.dateLabel + index} className="flex min-w-0 flex-col overflow-hidden rounded-lg border border-border bg-white transition-shadow hover:shadow-lg">
-                    <div className="relative aspect-square bg-ieee-tint">
-                      <img src={event.imageUrl || logo} alt={event.title} loading="lazy"
-                        className={`size-full object-contain ${event.imageUrl ? "" : "p-12"}`} />
-                      <span className="absolute bottom-3 left-3 max-w-[calc(100%-1.5rem)] rounded-md bg-black/80 px-3 py-2 text-sm font-semibold text-white">
-                        {dated ? new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(event.dateLabel)) : event.dateLabel}
-                      </span>
-                    </div>
-                    <div className="flex flex-1 flex-col p-5">
-                      <span className={`text-xs font-bold ${past ? "text-body" : "text-ieee"}`}>{dated ? (past ? "Past event" : "Upcoming") : "Event"}</span>
-                      <h2 className="mt-3 break-words text-xl leading-snug font-bold text-heading">{event.title}</h2>
-                      <p className="mt-3 flex items-start gap-2 text-sm text-ieee"><MapPin className="mt-0.5 size-4 shrink-0" /><span className="min-w-0 break-words">{event.tag}</span></p>
-                      <p className="mt-4 whitespace-pre-line break-words text-sm leading-relaxed text-body">{event.description}</p>
-                      {!past && registration && <a href={registration} target="_blank" rel="noopener noreferrer" className="mt-5 inline-flex items-center gap-2 self-start font-semibold text-ieee">
-                        Register <ArrowUpRight className="size-4" />
-                      </a>}
-                    </div>
-                  </article>;
+                  return (
+                    <article
+                      key={event.title + event.dateLabel + index}
+                      className="flex h-[560px] min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-lift"
+                    >
+                      <div className="relative h-72 w-full shrink-0 overflow-hidden border-b border-border/50 bg-slate-950">
+                        <img
+                          src={event.imageUrl || logo}
+                          alt={event.title}
+                          loading="lazy"
+                          className={`size-full object-contain ${event.imageUrl ? "bg-slate-950" : "bg-ieee-tint p-12"}`}
+                        />
+                        <span className="absolute bottom-3 left-3 max-w-[calc(100%-1.5rem)] rounded-full bg-black/80 px-3.5 py-1.5 text-xs font-semibold text-white backdrop-blur-md">
+                          {dated
+                            ? new Intl.DateTimeFormat("en-GB", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                                timeZone: "UTC",
+                              }).format(new Date(event.dateLabel))
+                            : event.dateLabel}
+                        </span>
+                      </div>
+                      <div className="flex flex-1 flex-col p-5">
+                        <span className={`text-xs font-bold ${past ? "text-body" : "text-ieee"}`}>
+                          {dated ? (past ? "Past event" : "Upcoming") : "Event"}
+                        </span>
+                        <h2 className="mt-2.5 line-clamp-2 min-h-[3.25rem] break-words text-xl leading-snug font-bold text-heading">
+                          {event.title}
+                        </h2>
+                        <p className="mt-2.5 flex items-start gap-2 text-sm text-ieee line-clamp-1">
+                          <MapPin className="mt-0.5 size-4 shrink-0" />
+                          <span className="min-w-0 truncate">{event.tag}</span>
+                        </p>
+                        <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-body">
+                          {event.description}
+                        </p>
+                        <div className="mt-auto flex min-h-[2.5rem] items-center pt-3">
+                          {!past && registration ? (
+                            <a
+                              href={registration}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-2 font-semibold text-ieee transition-colors hover:text-orange"
+                            >
+                              Register <ArrowUpRight className="size-4" />
+                            </a>
+                          ) : null}
+                        </div>
+                      </div>
+                    </article>
+                  );
                 })}
               </div>}
             </>}
