@@ -1,32 +1,42 @@
+import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Camera } from "lucide-react";
+import { ArrowLeft, Camera, ZoomIn } from "lucide-react";
 import { motion } from "motion/react";
 import { SiteNav } from "@/components/site/site-nav";
 import { SiteFooter } from "@/components/site/site-footer";
 import { RevealGroup, fadeUp } from "@/components/site/motion-primitives";
 import { getPublishedGalleryAlbum } from "@/lib/gallery-albums";
 import { defaultSiteContent } from "@/lib/site-content";
+import { ImageLightbox } from "@/components/site/image-lightbox";
 
 export const Route = createFileRoute("/gallery/$albumSlug")({ component: AlbumPage });
 
 function AlbumPage() {
   const { albumSlug } = Route.useParams();
-  const { data: album, isLoading, isError } = useQuery({
+  const { data: album, isError } = useQuery({
     queryKey: ["gallery-album", albumSlug],
     queryFn: () => getPublishedGalleryAlbum(albumSlug),
   });
+
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   return (
     <main className="min-h-screen bg-background text-body">
       <SiteNav />
       <section className="bg-ieee-deep pt-32 pb-16 text-white">
         <div className="mx-auto max-w-6xl px-5">
-          <Link to="/gallery" className="inline-flex items-center gap-2 text-sm font-semibold text-white/75 hover:text-white">
-            <ArrowLeft className="size-4" /> All albums
-          </Link>
+          <div className="flex flex-wrap items-center gap-4">
+            <Link to="/gallery/events" className="inline-flex items-center gap-2 text-sm font-semibold text-white/75 hover:text-white">
+              <ArrowLeft className="size-4" /> All event albums
+            </Link>
+            <span className="text-white/40">•</span>
+            <Link to="/gallery" className="text-sm font-semibold text-white/75 hover:text-white">
+              Community moments
+            </Link>
+          </div>
           <div className="mt-8 flex items-center gap-3 text-orange-soft"><Camera className="size-5" /> Photo album</div>
-          <h1 className="mt-4 text-4xl font-bold sm:text-6xl">{album?.title ?? (isLoading ? "Loading album…" : "Album not found")}</h1>
+          <h1 className="mt-4 text-4xl font-bold sm:text-6xl text-white">{album?.title ?? "Album not found"}</h1>
           {album?.description ? <p className="mt-5 max-w-2xl text-lg text-white/75">{album.description}</p> : null}
         </div>
       </section>
@@ -35,15 +45,50 @@ function AlbumPage() {
         {album && album.images.length === 0 ? <p className="text-center text-body/70">No published photos in this album yet.</p> : null}
         {album ? (
           <RevealGroup className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {album.images.map((image) => (
-              <motion.figure key={image.id} variants={fadeUp} className="group overflow-hidden rounded-3xl border border-border bg-white shadow-soft">
-                <img src={image.image_url} alt={image.title} loading="lazy" className="aspect-[4/3] w-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                <figcaption className="p-5"><h2 className="font-bold text-heading">{image.title}</h2>{image.caption ? <p className="mt-2 text-sm">{image.caption}</p> : null}</figcaption>
+            {album.images.map((image, index) => (
+              <motion.figure
+                key={image.id}
+                variants={fadeUp}
+                onClick={() => setLightboxIndex(index)}
+                className="group cursor-pointer overflow-hidden rounded-3xl border border-border bg-white shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-lift"
+              >
+                <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-900">
+                  <img
+                    src={image.image_url}
+                    alt={image.title}
+                    loading="lazy"
+                    className="size-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/25 opacity-0 backdrop-blur-[2px] transition-opacity duration-300 group-hover:opacity-100">
+                    <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/60 px-4 py-2 text-xs font-semibold text-white shadow-lg backdrop-blur-md">
+                      <ZoomIn className="size-3.5 text-orange-soft" />
+                      View photo
+                    </span>
+                  </div>
+                </div>
+                <figcaption className="p-5">
+                  <h2 className="font-bold text-heading transition-colors group-hover:text-orange">
+                    {image.title}
+                  </h2>
+                  {image.caption ? <p className="mt-2 text-sm text-body">{image.caption}</p> : null}
+                </figcaption>
               </motion.figure>
             ))}
           </RevealGroup>
         ) : null}
       </section>
+
+      {album && lightboxIndex !== null && (
+        <ImageLightbox
+          images={album.images}
+          currentIndex={lightboxIndex}
+          albumTitle={album.title}
+          isOpen={lightboxIndex !== null}
+          onClose={() => setLightboxIndex(null)}
+          onNavigate={(nextIdx) => setLightboxIndex(nextIdx)}
+        />
+      )}
+
       <SiteFooter email={defaultSiteContent.contact.email} />
     </main>
   );
