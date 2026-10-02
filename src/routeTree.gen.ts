@@ -30,6 +30,8 @@ import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminTeamRouteImport } from './routes/admin.team'
 import { Route as AdminVideosRouteImport } from './routes/admin.videos'
 import { Route as GalleryAlbumSlugRouteImport } from './routes/gallery.$albumSlug'
+import { Route as GalleryAlbumsRouteImport } from './routes/gallery.albums'
+import { Route as GalleryEventsRouteImport } from './routes/gallery.events'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -136,6 +138,16 @@ const GalleryAlbumSlugRoute = GalleryAlbumSlugRouteImport.update({
   path: '/$albumSlug',
   getParentRoute: () => GalleryRoute,
 } as any)
+const GalleryAlbumsRoute = GalleryAlbumsRouteImport.update({
+  id: '/albums',
+  path: '/albums',
+  getParentRoute: () => GalleryRoute,
+} as any)
+const GalleryEventsRoute = GalleryEventsRouteImport.update({
+  id: '/events',
+  path: '/events',
+  getParentRoute: () => GalleryRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -158,6 +170,8 @@ export interface FileRoutesByFullPath {
   '/admin/team': typeof AdminTeamRoute
   '/admin/videos': typeof AdminVideosRoute
   '/gallery/$albumSlug': typeof GalleryAlbumSlugRoute
+  '/gallery/albums': typeof GalleryAlbumsRoute
+  '/gallery/events': typeof GalleryEventsRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
@@ -180,6 +194,8 @@ export interface FileRoutesByTo {
   '/admin/team': typeof AdminTeamRoute
   '/admin/videos': typeof AdminVideosRoute
   '/gallery/$albumSlug': typeof GalleryAlbumSlugRoute
+  '/gallery/albums': typeof GalleryAlbumsRoute
+  '/gallery/events': typeof GalleryEventsRoute
   '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
@@ -204,6 +220,8 @@ export interface FileRoutesById {
   '/admin/team': typeof AdminTeamRoute
   '/admin/videos': typeof AdminVideosRoute
   '/gallery/$albumSlug': typeof GalleryAlbumSlugRoute
+  '/gallery/albums': typeof GalleryAlbumsRoute
+  '/gallery/events': typeof GalleryEventsRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
@@ -229,6 +247,8 @@ export interface FileRouteTypes {
     | '/admin/team'
     | '/admin/videos'
     | '/gallery/$albumSlug'
+    | '/gallery/albums'
+    | '/gallery/events'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -251,6 +271,8 @@ export interface FileRouteTypes {
     | '/admin/team'
     | '/admin/videos'
     | '/gallery/$albumSlug'
+    | '/gallery/albums'
+    | '/gallery/events'
     | '/admin'
   id:
     | '__root__'
@@ -274,6 +296,8 @@ export interface FileRouteTypes {
     | '/admin/team'
     | '/admin/videos'
     | '/gallery/$albumSlug'
+    | '/gallery/albums'
+    | '/gallery/events'
     | '/admin/'
   fileRoutesById: FileRoutesById
 }
@@ -435,6 +459,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GalleryAlbumSlugRouteImport
       parentRoute: typeof GalleryRoute
     }
+    '/gallery/albums': {
+      id: '/gallery/albums'
+      path: '/albums'
+      fullPath: '/gallery/albums'
+      preLoaderRoute: typeof GalleryAlbumsRouteImport
+      parentRoute: typeof GalleryRoute
+    }
+    '/gallery/events': {
+      id: '/gallery/events'
+      path: '/events'
+      fullPath: '/gallery/events'
+      preLoaderRoute: typeof GalleryEventsRouteImport
+      parentRoute: typeof GalleryRoute
+    }
   }
 }
 
@@ -476,10 +514,14 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface GalleryRouteChildren {
   GalleryAlbumSlugRoute: typeof GalleryAlbumSlugRoute
+  GalleryAlbumsRoute: typeof GalleryAlbumsRoute
+  GalleryEventsRoute: typeof GalleryEventsRoute
 }
 
 const GalleryRouteChildren: GalleryRouteChildren = {
   GalleryAlbumSlugRoute: GalleryAlbumSlugRoute,
+  GalleryAlbumsRoute: GalleryAlbumsRoute,
+  GalleryEventsRoute: GalleryEventsRoute,
 }
 
 const GalleryRouteWithChildren =
