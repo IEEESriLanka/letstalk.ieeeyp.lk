@@ -867,6 +867,12 @@ function GalleryFormModal({
             ))}
           </select>
         </FormField>
+        <BooleanField
+          label="Show in community moments (homepage)"
+          checked={Boolean(form.show_in_moments)}
+          onChange={(show_in_moments) => setForm({ ...form, show_in_moments })}
+        />
+        <p className="text-sm text-slate-500">Selected photos appear on the homepage when both the photo and its album are published. Display order controls their position.</p>
         <FormField label="Image" required>
           <ImageUploader
             value={form.image_url ?? null}

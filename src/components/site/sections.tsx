@@ -459,7 +459,10 @@ export function Gallery() {
     queryKey: ["gallery-albums"],
     queryFn: getPublishedGalleryAlbums,
   });
-  const visibleAlbums = albums.filter((album) => album.images.length > 0);
+  const reducedMotion = useReducedMotion();
+  const selectedPhotos = albums.flatMap((album) =>
+    album.images.filter((image) => image.show_in_moments).map((image) => ({ image, album })),
+  ).sort((a, b) => a.image.display_order - b.image.display_order);
 
   return (
     <section id="gallery" className="bg-background py-24 lg:py-32">
@@ -476,22 +479,28 @@ export function Gallery() {
         />
         {isLoading ? <p className="mt-14 text-center text-body/70">Loading albums…</p> : null}
         {isError ? <p className="mt-14 rounded-2xl border border-red-200 bg-red-50 p-5 text-center text-red-700">Unable to load gallery albums.</p> : null}
-        {!isLoading && !isError && visibleAlbums.length === 0 ? <p className="mt-14 text-center text-body/70">No uploaded album photos yet.</p> : null}
+        {!isLoading && !isError && selectedPhotos.length === 0 ? <p className="mt-14 text-center text-body/70">Community moments are coming soon.</p> : null}
         <RevealGroup className="mt-14 grid auto-rows-[220px] grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {visibleAlbums.map((album, index) => {
-            const cover = album.cover_image_url || album.images[0]!.image_url;
+          {selectedPhotos.map(({ image, album }, index) => {
             const size = index % 5 === 0 ? "sm:row-span-2 lg:col-span-2" : index % 5 === 3 ? "lg:col-span-2" : "";
             return (
-              <motion.div key={album.id} variants={fadeUp} className={size}>
+              <motion.div
+                key={image.id}
+                initial={{ opacity: 0, y: reducedMotion ? 0 : 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.15 }}
+                transition={{ duration: reducedMotion ? 0 : 0.65, delay: reducedMotion ? 0 : (index % 5) * 0.08 }}
+                className={size}
+              >
                 <Link
                   to="/gallery/$albumSlug"
                   params={{ albumSlug: album.slug }}
-                  className="group relative block size-full overflow-hidden rounded-3xl border border-border bg-ieee-deep shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-lift"
+                  className="group relative block size-full overflow-hidden rounded-3xl border border-border bg-ieee-deep shadow-soft transition-all duration-300 motion-safe:hover:-translate-y-1 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange hover:shadow-lift"
                 >
-                  <img src={cover} alt={album.title} loading="lazy" className="size-full object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-108" />
+                  <img src={image.image_url} alt={image.caption || image.title} loading="lazy" className="size-full object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:group-hover:scale-108 motion-safe:group-focus-visible:scale-108" />
                   <div className="absolute inset-0 flex flex-col justify-end bg-[linear-gradient(to_top,color-mix(in_oklab,var(--ieee-deep)_88%,transparent),transparent_68%)] p-6 text-white">
-                    <p className="text-xs font-bold tracking-[0.14em] text-orange-soft uppercase">{album.images.length} photos</p>
-                    <h3 className="mt-2 text-xl font-bold text-white sm:text-2xl">{album.title}</h3>
+                    <p className="text-xs font-bold tracking-[0.14em] text-orange-soft uppercase">{album.title}</p>
+                    <h3 className="mt-2 text-xl font-bold text-white sm:text-2xl">{image.title}</h3>
                   </div>
                 </Link>
               </motion.div>

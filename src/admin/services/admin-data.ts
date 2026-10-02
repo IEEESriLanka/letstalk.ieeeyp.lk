@@ -341,6 +341,7 @@ export async function saveGalleryItem(input: Partial<GalleryItem>) {
     caption: input.caption || null,
     image_url: input.image_url,
     album_id: input.album_id || null,
+    show_in_moments: Boolean(input.show_in_moments),
     display_order: Number(input.display_order ?? 0),
     published: Boolean(input.published),
   };

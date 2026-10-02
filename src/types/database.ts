@@ -39,6 +39,7 @@ export type GalleryItem = {
   caption: string | null;
   image_url: string;
   album_id: string | null;
+  show_in_moments: boolean;
   display_order: number;
   published: boolean;
   created_at: string;
