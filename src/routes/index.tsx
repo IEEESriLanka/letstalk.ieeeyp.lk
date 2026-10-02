@@ -52,7 +52,7 @@ export const Route = createFileRoute("/")({
 function Index() {
   const [initializing, setInitializing] = useState(true);
   const finishInitialization = useCallback(() => setInitializing(false), []);
-  const { data: content = defaultSiteContent, isPending, fetchStatus } = useQuery({
+  const { data: content = defaultSiteContent, isPending, fetchStatus, isError, refetch } = useQuery({
     queryKey: ["site-content"],
     queryFn: () => getSiteContent(),
   });
@@ -74,6 +74,14 @@ function Index() {
       >
         <MouseGlow />
         <SiteNav />
+        {isError && (
+          <div role="alert" className="relative z-10 mx-5 mt-28 rounded-2xl border border-red-200 bg-red-50 p-5 text-center text-red-700">
+            <p>Unable to load website content. Please try again.</p>
+            <button type="button" onClick={() => void refetch()} className="mt-2 font-semibold underline">
+              Retry loading content
+            </button>
+          </div>
+        )}
         <Hero content={content.hero} />
         <Events events={content.events} />
         <PastSessions events={content.events} />
