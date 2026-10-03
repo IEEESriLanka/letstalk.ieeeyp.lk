@@ -1,15 +1,18 @@
-import { createFileRoute, Navigate, Outlet, useMatchRoute } from "@tanstack/react-router";
+import { createFileRoute, Navigate, Outlet, useLocation } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/gallery")({
   component: GalleryRoute,
 });
 
 function GalleryRoute() {
-  const matchRoute = useMatchRoute();
-  const isChild =
-    Boolean(matchRoute({ to: "/gallery/$albumSlug" })) ||
-    Boolean(matchRoute({ to: "/gallery/events" })) ||
-    Boolean(matchRoute({ to: "/gallery/albums" }));
+  const pathname = useLocation({ select: (location) => location.pathname });
 
-  return isChild ? <Outlet /> : <Navigate to="/" hash="gallery" replace />;
+  // Only redirect if specifically landing on the bare /gallery or /gallery/ URL
+  const cleanPath = pathname.replace(/\/+$/, "");
+  if (cleanPath === "/gallery") {
+    return <Navigate to="/" hash="gallery" replace />;
+  }
+
+  return <Outlet />;
 }
+

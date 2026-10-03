@@ -525,9 +525,11 @@ export function Gallery() {
                   ? "md:col-span-2 lg:col-span-2"
                   : "md:col-span-1 lg:col-span-1";
               return (
-                <div
+                <Link
                   key={`${album.id}-${image.id}-${index}`}
-                  className={`group relative overflow-hidden rounded-[2rem] border border-border bg-ieee-deep shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-lift ${size}`}
+                  to="/gallery/$albumSlug"
+                  params={{ albumSlug: album.slug }}
+                  className={`group relative block overflow-hidden rounded-[2rem] border border-border bg-ieee-deep shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-lift ${size}`}
                 >
                   <img
                     src={image.image_url}
@@ -539,8 +541,9 @@ export function Gallery() {
                     <p className="text-xs font-bold tracking-[0.14em] text-orange-soft uppercase">
                       {album.title}
                     </p>
+                    <h3 className="mt-1 text-lg font-bold text-white line-clamp-1">{image.title}</h3>
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>
