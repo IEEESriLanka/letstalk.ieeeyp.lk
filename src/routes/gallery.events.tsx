@@ -63,7 +63,8 @@ function GalleryEventsPage() {
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
-                to="/gallery"
+                to="/"
+                hash="gallery"
                 className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-md transition-colors hover:bg-white/20"
               >
                 <ArrowLeft className="size-4" />

@@ -33,23 +33,19 @@ function NavLink({
 }) {
   const hash = getHrefHash(href);
   const pathname = useLocation({ select: (location) => location.pathname });
-  const selected = hash ? pathname === "/" && active === hash : pathname === href;
-  const children = (
-    <>
-      {label}
-      {selected && (
-        <motion.span
-          layoutId="nav-active"
-          className="absolute -bottom-2 left-1/2 size-1.5 -translate-x-1/2 rounded-full bg-orange"
-          transition={{ type: "spring", stiffness: 400, damping: 32 }}
-        />
-      )}
-    </>
-  );
+  const selected = hash
+    ? (pathname === "/" && active === hash) || (hash === "#gallery" && pathname.startsWith("/gallery"))
+    : pathname === href || (href !== "/" && pathname.startsWith(href));
 
   return (
-    <a href={href} onClick={onClick} className={className} aria-current={selected ? "page" : undefined}>
-      {children}
+    <a
+      href={href}
+      onClick={onClick}
+      className={className}
+      aria-current={selected ? "page" : undefined}
+      data-active={selected ? "true" : undefined}
+    >
+      {label}
     </a>
   );
 }

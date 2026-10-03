@@ -102,7 +102,7 @@ function AlbumPage() {
                 <ArrowLeft className="size-4" /> All event albums
               </Link>
               <span className="text-white/40">•</span>
-              <Link to="/gallery" className="text-sm font-semibold text-white/75 hover:text-white">
+              <Link to="/" hash="gallery" className="text-sm font-semibold text-white/75 hover:text-white">
                 Community moments
               </Link>
             </div>

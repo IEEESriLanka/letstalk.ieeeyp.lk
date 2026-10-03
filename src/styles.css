@@ -227,11 +227,13 @@
     width: 100%;
     transform: scaleX(0);
     transform-origin: right;
-    background: var(--color-ieee);
+    background: var(--color-orange);
     transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  &:hover::after {
+  &:hover::after,
+  &[aria-current="page"]::after,
+  &[data-active="true"]::after {
     transform: scaleX(1);
     transform-origin: left;
   }
