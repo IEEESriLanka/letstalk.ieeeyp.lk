@@ -43,28 +43,32 @@ function TeamPage() {
     <main id="top" className="min-h-screen overflow-hidden bg-background text-body">
       <SiteNav />
 
-      <section className="relative overflow-hidden bg-ieee-deep pt-32 pb-20 text-white lg:pt-40 lg:pb-28">
+      <section className="relative overflow-hidden bg-[linear-gradient(135deg,#f0f7ff_0%,#ffffff_50%,#fff7f2_100%)] pt-32 pb-20 text-heading border-b border-border/60 lg:pt-40 lg:pb-28">
         <img
           src={galleryThree}
           alt=""
-          className="absolute inset-0 size-full object-cover opacity-24"
+          className="absolute inset-0 size-full object-cover opacity-10 mix-blend-multiply"
+        />
+        <div aria-hidden className="absolute inset-0 bg-grid opacity-30" />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-32 right-1/4 size-[400px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(0,114,178,0.08),transparent_65%)]"
         />
         <div
           aria-hidden
-          className="absolute inset-0 bg-[linear-gradient(115deg,color-mix(in_oklab,var(--ieee-deep)_96%,transparent),color-mix(in_oklab,var(--ieee-deep)_78%,transparent)_54%,color-mix(in_oklab,var(--orange)_44%,transparent))]"
+          className="pointer-events-none absolute bottom-0 left-1/4 size-[320px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(255,104,21,0.07),transparent_65%)]"
         />
-        <div aria-hidden className="absolute inset-0 bg-grid opacity-20" />
 
         <div className="relative mx-auto grid max-w-6xl gap-12 px-5 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">
           <Reveal>
-            <span className="inline-flex items-center gap-2 rounded-full border border-orange/40 bg-orange/15 px-4 py-1.5 text-xs font-semibold text-orange">
+            <span className="inline-flex items-center gap-2 rounded-full border border-orange/30 bg-orange-tint px-4 py-1.5 text-xs font-semibold text-orange">
               <UsersRound className="size-3.5" />
               {teamPage.eyebrow}
             </span>
-            <h1 className="mt-6 max-w-3xl text-4xl leading-[1.05] font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
-              {teamPage.title} <span className="text-orange-soft">{teamPage.highlightedTitle}</span>.
+            <h1 className="mt-6 max-w-3xl text-4xl leading-[1.05] font-bold tracking-tight text-heading sm:text-5xl lg:text-6xl">
+              {teamPage.title} <span className="text-gradient-orange">{teamPage.highlightedTitle}</span>.
             </h1>
-            <p className="mt-6 max-w-2xl text-base leading-relaxed text-white/80 sm:text-lg">
+            <p className="mt-6 max-w-2xl text-base leading-relaxed text-body sm:text-lg">
               {teamPage.description}
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
@@ -77,7 +81,7 @@ function TeamPage() {
               </a>
               <a
                 href="#past-members"
-                className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-md transition-colors hover:bg-white/20"
+                className="inline-flex items-center gap-2 rounded-full border border-border bg-white/90 px-6 py-3 text-sm font-semibold text-heading shadow-soft transition-colors hover:border-ieee hover:text-ieee"
               >
                 Past teams
                 <CalendarDays className="size-4" />
@@ -251,14 +255,14 @@ function TeamPage() {
 
 function TeamMetric({ value, label }: { value: string; label: string }) {
   return (
-    <div className="rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur-md">
+    <div className="rounded-3xl border border-border bg-white/90 p-5 shadow-soft backdrop-blur-md">
       <div className="flex items-center gap-3">
-        <span className="grid size-11 place-items-center rounded-2xl bg-white/95 text-orange">
+        <span className="grid size-11 place-items-center rounded-2xl bg-orange-tint text-orange shadow-sm">
           <Star className="size-5" />
         </span>
         <div>
-          <p className="text-3xl font-bold text-white">{value}</p>
-          <p className="text-xs font-semibold text-white/70">{label}</p>
+          <p className="text-3xl font-bold text-heading">{value}</p>
+          <p className="text-xs font-semibold text-body">{label}</p>
         </div>
       </div>
     </div>

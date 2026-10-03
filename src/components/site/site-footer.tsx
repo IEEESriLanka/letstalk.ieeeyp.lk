@@ -1,32 +1,37 @@
 import { Linkedin, Twitter, Instagram, Youtube, Mail, MessageCircle } from "lucide-react";
 import letsTalkLogo from "@/assets/lets-talk-logo.png";
 
-const groups = [
+const groups: Array<{
+  title: string;
+  links: Array<{ label: string; href: string; external?: boolean }>;
+}> = [
   {
-    title: "Initiatives",
+    title: "Useful Links",
     links: [
-      { label: "Road to Ignite", href: "/#journey" },
-      { label: "Upskill Series", href: "/#journey" },
-      { label: "Creative Sri Lanka", href: "/#journey" },
-      { label: "Workshop Series", href: "/#journey" },
+      { label: "Home", href: "/" },
+      { label: "About Us", href: "/about-us" },
+      { label: "Team", href: "/team" },
+      { label: "Event Timeline", href: "/#journey" },
+      { label: "Partners", href: "/#partners" },
     ],
   },
   {
-    title: "Community",
+    title: "National Projects",
     links: [
-      { label: "Upcoming Events", href: "/#events" },
-      { label: "Awards & Recognition", href: "/#awards" },
-      { label: "WhatsApp Channel", href: "/#whatsapp" },
-      { label: "YPSL Summit", href: "/#journey" },
+      { label: "StudPro", href: "https://studpro.ieeeyp.lk/", external: true },
+      { label: "SL Inspire", href: "https://slinspire.lk/", external: true },
+      { label: "AIDSL", href: "https://aidriven.ieeeyp.lk/", external: true },
+      { label: "Y2NPro", href: "https://y2npro.ieeeyp.lk/", external: true },
+      { label: "INSL", href: "https://insl.ieeeyp.lk/", external: true },
     ],
   },
   {
-    title: "Connect",
+    title: "IEEE Links",
     links: [
-      { label: "About LETs Talk", href: "/about-us" },
-      { label: "Meet the Team", href: "/team" },
-      { label: "Photo Gallery", href: "/#gallery" },
-      { label: "Get in Touch", href: "/#contact" },
+      { label: "IEEE", href: "https://www.ieee.org/", external: true },
+      { label: "IEEE Sri Lanka", href: "https://www.ieee.lk/", external: true },
+      { label: "IEEE YP", href: "https://yp.ieee.org/", external: true },
+      { label: "IEEE R10", href: "https://r10.ieee.org/", external: true },
     ],
   },
 ];
@@ -52,7 +57,7 @@ export function SiteFooter({ email = "contact@ieeeyp.lk" }: { email?: string }) 
               <div className="flex flex-col">
                 <span className="font-display text-base font-bold text-white">IEEE LETs talk</span>
                 <span className="text-[0.65rem] text-white/60">
-                  National project — IEEE Young Professionals Sri Lanka
+                  National project - IEEE Young Professionals Sri Lanka
                 </span>
               </div>
             </div>
@@ -83,11 +88,16 @@ export function SiteFooter({ email = "contact@ieeeyp.lk" }: { email?: string }) 
 
           {groups.map((g) => (
             <div key={g.title}>
-              <h4 className="font-display text-sm font-semibold text-white">{g.title}</h4>
+              <h4 className="font-display text-sm font-semibold tracking-wider text-white uppercase">{g.title}</h4>
               <ul className="mt-4 space-y-3 text-sm">
                 {g.links.map((l) => (
                   <li key={l.label}>
-                    <a href={l.href} className="transition-colors hover:text-orange">
+                    <a
+                      href={l.href}
+                      target={l.external ? "_blank" : undefined}
+                      rel={l.external ? "noopener noreferrer" : undefined}
+                      className="transition-colors hover:text-orange"
+                    >
                       {l.label}
                     </a>
                   </li>
