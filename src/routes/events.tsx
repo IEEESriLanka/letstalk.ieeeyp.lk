@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowUpRight, CalendarDays, MapPin, Search, X } from "lucide-react";
+import { ArrowUpRight, CalendarDays, MapPin } from "lucide-react";
 import { SiteNav } from "@/components/site/site-nav";
 import { SiteFooter } from "@/components/site/site-footer";
 import { getSiteContent } from "@/lib/content-actions";
@@ -14,57 +14,198 @@ export const Route = createFileRoute("/events")({
 });
 
 function EventsPage() {
-  const [year, setYear] = useState("all");
-  const [search, setSearch] = useState("");
+  const [tab, setTab] = useState<"upcoming" | "past">("upcoming");
+  const [selectedYear, setSelectedYear] = useState<string>("all");
   const query = useQuery({ queryKey: ["site-content"], queryFn: () => getSiteContent() });
   const today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Colombo" });
-  const needle = search.trim().toLowerCase();
-  const events = (query.data?.events ?? [])
-    .filter((event) => (year === "all" || event.dateLabel.startsWith(year + "-")) &&
-      [event.title, event.description, event.tag].some((value) => value.toLowerCase().includes(needle)))
-    .sort((a, b) => b.dateLabel.localeCompare(a.dateLabel));
+
+  const allEvents = query.data?.events ?? [];
+
+  const isPastEvent = (dateStr: string) => {
+    const isFormattedDate = /^\d{4}-\d{2}-\d{2}$/.test(dateStr) && !Number.isNaN(Date.parse(dateStr));
+    return isFormattedDate && dateStr < today;
+  };
+
+  const upcomingEvents = useMemo(() => {
+    return allEvents
+      .filter((event) => !isPastEvent(event.dateLabel))
+      .sort((a, b) => {
+        const aDated = /^\d{4}-\d{2}-\d{2}$/.test(a.dateLabel);
+        const bDated = /^\d{4}-\d{2}-\d{2}$/.test(b.dateLabel);
+        if (aDated && bDated) return a.dateLabel.localeCompare(b.dateLabel);
+        if (aDated) return -1;
+        if (bDated) return 1;
+        return a.title.localeCompare(b.title);
+      });
+  }, [allEvents, today]);
+
+  const pastEvents = useMemo(() => {
+    return allEvents
+      .filter((event) => isPastEvent(event.dateLabel))
+      .sort((a, b) => b.dateLabel.localeCompare(a.dateLabel));
+  }, [allEvents, today]);
+
+  const pastYears = useMemo(() => {
+    const years = Array.from(
+      new Set(
+        pastEvents
+          .map((e) => e.dateLabel.slice(0, 4))
+          .filter((y) => /^\d{4}$/.test(y)),
+      ),
+    ).sort((a, b) => b.localeCompare(a));
+
+    return years.length > 0 ? years : ["2026", "2025", "2024", "2023"];
+  }, [pastEvents]);
+
+  const displayedEvents = useMemo(() => {
+    if (tab === "upcoming") {
+      return upcomingEvents;
+    }
+    return pastEvents.filter(
+      (event) => selectedYear === "all" || event.dateLabel.startsWith(selectedYear + "-"),
+    );
+  }, [tab, upcomingEvents, pastEvents, selectedYear]);
 
   return (
     <>
       <SiteNav />
       <main className="min-h-screen bg-background pt-32 pb-20">
         <div className="mx-auto max-w-7xl px-5">
-          <span className="section-eyebrow">IEEE LETs Talk</span>
-          <h1 className="mt-3 text-4xl font-bold text-heading">Events</h1>
-          <div className="mt-8 flex flex-col gap-4 border-y border-border py-5 sm:flex-row sm:items-end">
-            <div className="min-w-0 flex-1">
-              <label htmlFor="event-search" className="mb-2 block text-sm font-semibold text-heading">Search events</label>
-              <div className="relative">
-                <Search aria-hidden="true" className="absolute top-3 left-3 size-5 text-body" />
-                <input id="event-search" type="search" value={search} onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Search by title, location, or description"
-                  className="h-11 w-full rounded-md border border-border bg-white pr-10 pl-10 text-sm text-heading focus-visible:outline-2 focus-visible:outline-ieee" />
-                {search && <button type="button" aria-label="Clear search" title="Clear search" onClick={() => setSearch("")}
-                  className="absolute top-1 right-1 grid size-9 place-items-center rounded-md bg-white text-body"><X className="size-4" /></button>}
-              </div>
-            </div>
-            <div>
-              <label htmlFor="event-year" className="mb-2 block text-sm font-semibold text-heading">Year</label>
-              <select id="event-year" value={year} onChange={(event) => setYear(event.target.value)}
-                className="h-11 w-full rounded-md border border-border bg-white px-3 text-sm text-heading sm:w-40">
-                <option value="all">All years</option>
-                {["2026", "2025", "2024", "2023"].map((value) => <option key={value} value={value}>{value}</option>)}
-              </select>
-            </div>
+          <div className="mx-auto max-w-3xl text-center">
+            <span className="section-eyebrow">IEEE LETs Talk</span>
+            <h1 className="mt-3 text-4xl font-bold text-heading sm:text-5xl">Events</h1>
+            <p className="mt-4 text-base leading-relaxed text-body">
+              Stay updated with our latest workshops, seminars, and networking sessions designed to empower young professionals in Sri Lanka.
+            </p>
           </div>
-          {query.isPending ? <p role="status" className="py-16 text-body">Loading events...</p> :
-            query.isError ? <div role="alert" className="py-16 text-body">
+
+          {/* Filter Section matching reference design */}
+          <div className="mt-10 flex flex-col items-center">
+            {/* Top Toggle: Upcoming Events | Past Events */}
+            <div
+              role="tablist"
+              aria-label="Event timing"
+              className="inline-flex items-center rounded-full bg-slate-100 p-1.5 border border-slate-200/70 shadow-inner"
+            >
+              <button
+                type="button"
+                role="tab"
+                aria-selected={tab === "upcoming"}
+                onClick={() => setTab("upcoming")}
+                className={`rounded-full px-6 py-2.5 text-sm font-semibold transition-all duration-200 ${
+                  tab === "upcoming"
+                    ? "bg-white text-heading shadow-sm"
+                    : "text-body hover:text-heading"
+                }`}
+              >
+                Upcoming Events
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={tab === "past"}
+                onClick={() => setTab("past")}
+                className={`rounded-full px-6 py-2.5 text-sm font-semibold transition-all duration-200 ${
+                  tab === "past"
+                    ? "bg-white text-heading shadow-sm"
+                    : "text-body hover:text-heading"
+                }`}
+              >
+                Past Events
+              </button>
+            </div>
+
+            {/* Past Years Pills: Displayed under Upcoming/Past selection when Past Events is active */}
+            {tab === "past" && (
+              <div
+                role="group"
+                aria-label="Filter past events by year"
+                className="mt-6 flex flex-wrap items-center justify-center gap-2.5"
+              >
+                <button
+                  type="button"
+                  aria-pressed={selectedYear === "all"}
+                  onClick={() => setSelectedYear("all")}
+                  className={`rounded-full px-5 py-2 text-sm font-semibold transition-all duration-200 ${
+                    selectedYear === "all"
+                      ? "bg-orange text-white shadow-soft"
+                      : "border border-border bg-white text-heading/80 shadow-sm hover:border-ieee hover:text-heading"
+                  }`}
+                >
+                  All Years
+                </button>
+                {pastYears.map((yr) => (
+                  <button
+                    key={yr}
+                    type="button"
+                    aria-pressed={selectedYear === yr}
+                    onClick={() => setSelectedYear(yr)}
+                    className={`rounded-full px-5 py-2 text-sm font-semibold transition-all duration-200 ${
+                      selectedYear === yr
+                        ? "bg-orange text-white shadow-soft"
+                        : "border border-border bg-white text-heading/80 shadow-sm hover:border-ieee hover:text-heading"
+                    }`}
+                  >
+                    {yr}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {query.isPending ? (
+            <p role="status" className="py-16 text-center text-body">Loading events...</p>
+          ) : query.isError ? (
+            <div role="alert" className="py-16 text-center text-body">
               <p>Unable to load events.</p>
-              <button type="button" onClick={() => void query.refetch()} className="mt-3 font-semibold text-ieee underline">Try again</button>
-            </div> : <>
-              <p role="status" className="my-6 text-sm text-body">{events.length} {events.length === 1 ? "event" : "events"}</p>
-              {events.length === 0 ? <div className="py-16 text-center">
-                <CalendarDays className="mx-auto size-10 text-ieee" />
-                <h2 className="mt-4 text-xl font-bold text-heading">No events found</h2>
-                {(search || year !== "all") && <button type="button" onClick={() => { setSearch(""); setYear("all"); }}
-                  className="mt-4 font-semibold text-ieee underline">Clear filters</button>}
-              </div> : <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {events.map((event, index) => {
+              <button
+                type="button"
+                onClick={() => void query.refetch()}
+                className="mt-3 font-semibold text-ieee underline"
+              >
+                Try again
+              </button>
+            </div>
+          ) : (
+            <>
+              <p role="status" className="mt-10 mb-6 text-sm text-body">
+                {displayedEvents.length} {displayedEvents.length === 1 ? "event" : "events"}
+              </p>
+
+              {displayedEvents.length === 0 ? (
+                <div className="py-16 text-center">
+                  <CalendarDays className="mx-auto size-10 text-ieee" />
+                  <h2 className="mt-4 text-xl font-bold text-heading">
+                    {tab === "upcoming" ? "No upcoming events scheduled" : "No past events found"}
+                  </h2>
+                  <p className="mt-2 text-sm text-body">
+                    {tab === "upcoming"
+                      ? "Check back soon for new announcements, or explore our past events."
+                      : selectedYear !== "all"
+                        ? `No events recorded for ${selectedYear}.`
+                        : "No past events recorded yet."}
+                  </p>
+                  {tab === "upcoming" ? (
+                    <button
+                      type="button"
+                      onClick={() => setTab("past")}
+                      className="mt-4 font-semibold text-ieee underline"
+                    >
+                      Browse past events
+                    </button>
+                  ) : selectedYear !== "all" ? (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedYear("all")}
+                      className="mt-4 font-semibold text-ieee underline"
+                    >
+                      View all past years
+                    </button>
+                  ) : null}
+                </div>
+              ) : (
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {displayedEvents.map((event, index) => {
                   const dated = /^\d{4}-\d{2}-\d{2}$/.test(event.dateLabel) && !Number.isNaN(Date.parse(event.dateLabel));
                   const past = dated && event.dateLabel < today;
                   const registration = event.registrationUrl && /^https?:\/\//i.test(event.registrationUrl) ? event.registrationUrl : null;
@@ -121,8 +262,10 @@ function EventsPage() {
                     </article>
                   );
                 })}
-              </div>}
-            </>}
+              </div>
+            )}
+          </>
+        )}
         </div>
       </main>
       <SiteFooter email={query.data?.contact.email ?? defaultSiteContent.contact.email} />

@@ -97,7 +97,7 @@ export function SiteNav() {
           </div>
           <div className="flex flex-col">
             <span className="font-display text-[0.95rem] leading-tight font-bold tracking-tight text-heading">
-              IEEE <span className="text-[#006fa6]">LETs</span> <span className="text-orange">talk</span>
+              IEEE <span className="text-[#005d84]">LETs</span> <span className="text-orange">talk</span>
             </span>
           </div>
         </a>
