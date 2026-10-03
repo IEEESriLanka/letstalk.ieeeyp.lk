@@ -18,7 +18,7 @@ export function Partners({ logos }: { logos: NonNullable<SiteContent["partnerLog
   const midpoint = Math.ceil(uniqueLogos.length / 2);
   const rows = [uniqueLogos.slice(0, midpoint), uniqueLogos.slice(midpoint)];
   return (
-    <section aria-labelledby="partners-heading" className="py-20">
+    <section id="partners" aria-labelledby="partners-heading" className="py-20">
       <div className="px-5 text-center">
         <span className="section-eyebrow">Ecosystem</span>
         <h2 id="partners-heading" className="mt-4 text-3xl font-bold sm:text-4xl">Our partners</h2>

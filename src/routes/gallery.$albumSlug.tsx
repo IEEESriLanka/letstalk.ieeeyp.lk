@@ -95,20 +95,21 @@ function AlbumPage() {
         className="min-h-screen bg-background text-body"
       >
         <SiteNav />
-        <section className="bg-ieee-deep pt-32 pb-16 text-white">
-          <div className="mx-auto max-w-6xl px-5">
+        <section className="relative overflow-hidden bg-[linear-gradient(135deg,#f0f7ff_0%,#ffffff_50%,#fff7f2_100%)] pt-32 pb-16 text-heading border-b border-border/60">
+          <div aria-hidden className="absolute inset-0 bg-grid opacity-30" />
+          <div className="relative mx-auto max-w-6xl px-5">
             <div className="flex flex-wrap items-center gap-4">
-              <Link to="/gallery/events" className="inline-flex items-center gap-2 text-sm font-semibold text-white/75 hover:text-white">
+              <Link to="/gallery/events" className="inline-flex items-center gap-2 text-sm font-semibold text-body hover:text-ieee">
                 <ArrowLeft className="size-4" /> All event albums
               </Link>
-              <span className="text-white/40">•</span>
-              <Link to="/" hash="gallery" className="text-sm font-semibold text-white/75 hover:text-white">
+              <span className="text-border">•</span>
+              <Link to="/" hash="gallery" className="text-sm font-semibold text-body hover:text-ieee">
                 Community moments
               </Link>
             </div>
-            <div className="mt-8 flex items-center gap-3 text-orange-soft"><Camera className="size-5" /> Photo album</div>
-            <h1 className="mt-4 text-4xl font-bold sm:text-6xl text-white">{album?.title ?? "Album not found"}</h1>
-            {album?.description ? <p className="mt-5 max-w-2xl text-lg text-white/75">{album.description}</p> : null}
+            <div className="mt-8 flex items-center gap-3 text-orange font-semibold"><Camera className="size-5" /> Photo album</div>
+            <h1 className="mt-4 text-4xl font-bold sm:text-6xl text-heading">{album?.title ?? "Album not found"}</h1>
+            {album?.description ? <p className="mt-5 max-w-2xl text-lg text-body">{album.description}</p> : null}
           </div>
         </section>
         <section className="mx-auto max-w-6xl px-5 py-16 lg:py-24">
