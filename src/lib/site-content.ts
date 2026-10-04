@@ -42,6 +42,12 @@ export type SiteContent = {
     storyCards?: Array<{ title: string; copy: string }>;
     values?: Array<{ title: string; copy: string }>;
     milestones?: string[];
+    yearsOfImpact?: string;
+    stats?: Array<{
+      value: string;
+      label: string;
+      description?: string;
+    }>;
     pillars: Array<{
       icon: "lightbulb" | "mic" | "brain" | "network";
       title: string;
@@ -189,6 +195,29 @@ export const defaultSiteContent: SiteContent = {
       "Expanded into leadership talks, workshops, and career-focused tracks",
       "Connected students and young professionals with industry experts",
       "Recognized for collaborative impact through IEEE Sri Lanka Section awards",
+    ],
+    yearsOfImpact: "10 Years of Impact",
+    stats: [
+      {
+        value: "100+",
+        label: "Industry Speakers",
+        description: "Founders, tech executives & domain leaders",
+      },
+      {
+        value: "30+",
+        label: "Partners & Collaborators",
+        description: "Corporate leaders & IEEE affinity units",
+      },
+      {
+        value: "10,000+",
+        label: "Total Registrations",
+        description: "Undergraduates & young professionals engaged",
+      },
+      {
+        value: "20+",
+        label: "Universities Reached",
+        description: "Higher education institutes nationwide",
+      },
     ],
     pillars: [
       {
