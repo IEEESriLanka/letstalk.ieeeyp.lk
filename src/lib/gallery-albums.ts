@@ -1,9 +1,11 @@
-import { supabase } from "./supabase";
+import { supabase, isSupabaseConfigured } from "./supabase";
 import type { GalleryAlbum, GalleryItem } from "@/types/database";
 
 export type PublicGalleryAlbum = GalleryAlbum & { images: GalleryItem[] };
 
 export async function getPublishedGalleryAlbums(): Promise<PublicGalleryAlbum[]> {
+  if (!isSupabaseConfigured) return [];
+
   const { data: albums, error } = await supabase
     .from("gallery_albums")
     .select("*")
@@ -25,6 +27,8 @@ export async function getPublishedGalleryAlbums(): Promise<PublicGalleryAlbum[]>
 }
 
 export async function getPublishedGalleryAlbum(slug: string): Promise<PublicGalleryAlbum | null> {
+  if (!isSupabaseConfigured) return null;
+
   const { data: album, error } = await supabase
     .from("gallery_albums")
     .select("*")
