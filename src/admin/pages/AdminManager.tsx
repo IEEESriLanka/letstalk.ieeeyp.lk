@@ -1,9 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FormEvent, useState } from "react";
-import { ShieldCheck, Trash2, UserPlus } from "lucide-react";
+import { Check, ShieldCheck, Trash2, UserPlus, X } from "lucide-react";
 import { toast } from "sonner";
 import { AdminLayout } from "@/admin/components/AdminLayout";
+import { useAuth } from "@/hooks/useAuth";
 import {
+  AdminModal,
   ConfirmDialog,
   EmptyState,
   ErrorState,
@@ -16,16 +18,42 @@ import {
   createAdminAccount,
   deleteAdminAccount,
   listAdminAccounts,
+  listAccessRequests,
+  approveAccessRequest,
+  rejectAccessRequest,
   type AdminAccount,
+  type AccessRequest,
 } from "@/admin/services/admin-data";
 
 export function AdminManagerPage() {
+  const { data: access } = useAuth();
   const queryClient = useQueryClient();
   const [userId, setUserId] = useState("");
   const [role, setRole] = useState<"admin" | "editor">("admin");
   const [deleteTarget, setDeleteTarget] = useState<AdminAccount | null>(null);
+  const [approveTarget, setApproveTarget] = useState<AccessRequest | null>(null);
+  const [approvalUserId, setApprovalUserId] = useState("");
+  const [approvalRole, setApprovalRole] = useState<"admin" | "editor">("editor");
 
-  const admins = useQuery({ queryKey: ["admin-accounts"], queryFn: listAdminAccounts });
+  const canManage = access?.ok === true && access.admin.role === "admin";
+  const admins = useQuery({
+    queryKey: ["admin-accounts"],
+    queryFn: listAdminAccounts,
+    enabled: canManage,
+  });
+  const requests = useQuery({
+    queryKey: ["admin-access-requests"],
+    queryFn: listAccessRequests,
+    enabled: canManage,
+  });
+
+  if (access?.ok && access.admin.role !== "admin") {
+    return (
+      <AdminLayout title="Admin Manager" subtitle="Manage CMS access.">
+        <ErrorState message="Only administrators can manage CMS access." />
+      </AdminLayout>
+    );
+  }
 
   const create = useMutation({
     mutationFn: () => createAdminAccount({ user_id: userId, role }),
@@ -34,6 +62,28 @@ export function AdminManagerPage() {
       setUserId("");
       setRole("admin");
       void queryClient.invalidateQueries({ queryKey: ["admin-accounts"] });
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
+  const approve = useMutation({
+    mutationFn: () =>
+      approveAccessRequest({ requestId: approveTarget!.id, userId: approvalUserId, role: approvalRole }),
+    onSuccess: () => {
+      toast.success("Access request approved.");
+      setApproveTarget(null);
+      setApprovalUserId("");
+      void queryClient.invalidateQueries({ queryKey: ["admin-accounts"] });
+      void queryClient.invalidateQueries({ queryKey: ["admin-access-requests"] });
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
+  const reject = useMutation({
+    mutationFn: rejectAccessRequest,
+    onSuccess: () => {
+      toast.success("Access request rejected.");
+      void queryClient.invalidateQueries({ queryKey: ["admin-access-requests"] });
     },
     onError: (error) => toast.error(error.message),
   });
@@ -142,6 +192,44 @@ export function AdminManagerPage() {
             </div>
           ) : null}
         </section>
+
+        <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm lg:col-span-2">
+          <h2 className="text-lg font-bold text-slate-950">Access Requests</h2>
+          <p className="mt-1 text-sm text-slate-500">
+            Review requests submitted from the admin login page. The applicant must provide their
+            Supabase Auth user ID before approval.
+          </p>
+          {requests.isLoading ? <LoadingSkeleton /> : null}
+          {requests.data?.filter((request) => request.status === "pending").length === 0 ? (
+            <EmptyState title="No pending access requests." />
+          ) : null}
+          <div className="mt-4 divide-y divide-slate-100 rounded-lg border border-slate-200">
+            {requests.data?.filter((request) => request.status === "pending").map((request) => (
+              <article key={request.id} className="flex flex-col gap-4 p-4 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <p className="font-semibold text-slate-950">{request.full_name}</p>
+                  <p className="text-sm text-[#00629b]">{request.email}</p>
+                  <p className="mt-2 text-sm text-slate-600">{request.reason}</p>
+                </div>
+                <div className="flex shrink-0 gap-2">
+                  <button
+                    type="button"
+                    className={primaryButtonClass}
+                    onClick={() => {
+                      setApproveTarget(request);
+                      setApprovalUserId(request.user_id ?? "");
+                    }}
+                  >
+                    <Check className="size-4" /> Approve
+                  </button>
+                  <button type="button" className={secondaryButtonClass} onClick={() => reject.mutate(request.id)}>
+                    <X className="size-4" /> Reject
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
       </div>
 
       <ConfirmDialog
@@ -151,6 +239,47 @@ export function AdminManagerPage() {
         onCancel={() => setDeleteTarget(null)}
         onConfirm={() => deleteTarget && remove.mutate(deleteTarget.id)}
       />
+      <AdminModal
+        open={Boolean(approveTarget)}
+        title="Approve access request"
+        onClose={() => setApproveTarget(null)}
+      >
+        <form
+          className="space-y-4"
+          onSubmit={(event) => {
+            event.preventDefault();
+            approve.mutate();
+          }}
+        >
+          <p className="text-sm text-slate-600">
+            Add the Supabase Auth user ID for {approveTarget?.email} to grant CMS access.
+          </p>
+          <label className="block">
+            <span className="text-sm font-semibold text-slate-700">Supabase Auth user ID</span>
+            <input
+              value={approvalUserId}
+              onChange={(event) => setApprovalUserId(event.target.value)}
+              className={`${fieldClass} mt-1.5`}
+              placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+              required
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-semibold text-slate-700">Role</span>
+            <select
+              value={approvalRole}
+              onChange={(event) => setApprovalRole(event.target.value as "admin" | "editor")}
+              className={`${fieldClass} mt-1.5`}
+            >
+              <option value="editor">Editor</option>
+              <option value="admin">Admin</option>
+            </select>
+          </label>
+          <button type="submit" disabled={approve.isPending} className={primaryButtonClass}>
+            {approve.isPending ? "Approving..." : "Approve access"}
+          </button>
+        </form>
+      </AdminModal>
     </AdminLayout>
   );
 }

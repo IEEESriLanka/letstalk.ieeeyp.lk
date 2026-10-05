@@ -2,14 +2,12 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "motion/react";
-import { ArrowRight, CalendarDays, Linkedin, Mail, Sparkles, Star, UsersRound } from "lucide-react";
+import { ArrowRight, Linkedin, Mail } from "lucide-react";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteNav } from "@/components/site/site-nav";
 import { Reveal, RevealGroup, fadeUp } from "@/components/site/motion-primitives";
 import { getSiteContent } from "@/lib/content-actions";
 import { defaultSiteContent, getYearTeams } from "@/lib/site-content";
-import galleryOne from "@/assets/gallery-1.jpg";
-import galleryThree from "@/assets/gallery-3.jpg";
 
 export const Route = createFileRoute("/team")({
   head: () => ({
@@ -36,7 +34,21 @@ function TeamPage() {
   const years = [...new Set(teams.map((team) => team.year))].sort().reverse();
   const latestYear = years[0] ?? String(new Date().getFullYear());
   const year = selectedYear ?? latestYear;
-  const currentMembers = teams.find((team) => team.year === year)?.members ?? [];
+  const currentMembers = [...(teams.find((team) => team.year === year)?.members ?? [])].sort((a, b) => {
+    const roleRank = (role: string) => {
+      const normalized = role.toLowerCase();
+      if (normalized.includes("vice chair")) return 2;
+      if (normalized.includes("chair")) return 0;
+      if (normalized.includes("secretary")) return 1;
+      if (normalized.includes("coordinator")) return 3;
+      return 4;
+    };
+    return roleRank(a.role) - roleRank(b.role);
+  });
+  const leadership = currentMembers.filter((member) => /chair|secretary/i.test(member.role) && !/vice chair/i.test(member.role));
+  const coLeaders = currentMembers.filter((member) => /vice chair/i.test(member.role));
+  const otherMembers = currentMembers.filter((member) => !leadership.includes(member) && !coLeaders.includes(member));
+  const memberRows = [leadership, coLeaders, otherMembers].filter((row) => row.length > 0);
   const pastTeams = teams
     .filter((team) => team.year < latestYear)
     .sort((a, b) => b.year.localeCompare(a.year));
@@ -44,63 +56,6 @@ function TeamPage() {
   return (
     <main id="top" className="min-h-screen overflow-hidden bg-background text-body">
       <SiteNav />
-
-      <section className="relative overflow-hidden bg-[linear-gradient(135deg,#f0f7ff_0%,#ffffff_50%,#fff7f2_100%)] pt-32 pb-20 text-heading border-b border-border/60 lg:pt-40 lg:pb-28">
-        <img
-          src={galleryThree}
-          alt=""
-          className="absolute inset-0 size-full object-cover opacity-10 mix-blend-multiply"
-        />
-        <div aria-hidden className="absolute inset-0 bg-grid opacity-30" />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -top-32 right-1/4 size-[400px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(0,114,178,0.08),transparent_65%)]"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute bottom-0 left-1/4 size-[320px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(255,104,21,0.07),transparent_65%)]"
-        />
-
-        <div className="relative mx-auto grid max-w-6xl gap-12 px-5 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">
-          <Reveal>
-            <span className="inline-flex items-center gap-2 rounded-full border border-orange/30 bg-orange-tint px-4 py-1.5 text-xs font-semibold text-orange">
-              <UsersRound className="size-3.5" />
-              {teamPage.eyebrow}
-            </span>
-            <h1 className="mt-6 max-w-3xl text-4xl leading-[1.05] font-bold tracking-tight text-heading sm:text-5xl lg:text-6xl">
-              {teamPage.title}{" "}
-              <span className="text-gradient-orange">{teamPage.highlightedTitle}</span>.
-            </h1>
-            <p className="mt-6 max-w-2xl text-base leading-relaxed text-body sm:text-lg">
-              {teamPage.description}
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <a
-                href="#current-team"
-                className="inline-flex items-center gap-2 rounded-full bg-[image:var(--gradient-orange)] px-6 py-3 text-sm font-semibold text-white shadow-glow transition-transform duration-300 hover:-translate-y-0.5"
-              >
-                View members
-                <ArrowRight className="size-4" />
-              </a>
-              <a
-                href="#past-members"
-                className="inline-flex items-center gap-2 rounded-full border border-border bg-white/90 px-6 py-3 text-sm font-semibold text-heading shadow-soft transition-colors hover:border-ieee hover:text-ieee"
-              >
-                Past teams
-                <CalendarDays className="size-4" />
-              </a>
-            </div>
-          </Reveal>
-
-          <Reveal delay={0.1}>
-            <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
-              <TeamMetric value={String(currentMembers.length)} label={year + " members"} />
-              <TeamMetric value={String(pastTeams.length)} label="Past years" />
-              <TeamMetric value="1" label="National project" />
-            </div>
-          </Reveal>
-        </div>
-      </section>
 
       <section
         id="current-team"
@@ -167,12 +122,13 @@ function TeamPage() {
               No team members published for {year} yet.
             </p>
           )}
-          <RevealGroup key={year} className="mt-14 flex flex-wrap justify-center gap-5">
-            {currentMembers.map((member, index) => (
+          <div className="mt-14 space-y-8">
+          {memberRows.map((row, rowIndex) => <RevealGroup key={`${year}-${rowIndex}`} className={`mx-auto grid w-full gap-5 ${rowIndex === 0 ? "max-w-2xl grid-cols-2" : rowIndex === 1 ? "max-w-5xl grid-cols-1 sm:grid-cols-3" : "max-w-6xl grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"}`}>
+            {row.map((member) => (
               <motion.article
                 key={member.name}
                 variants={fadeUp}
-                className="group relative w-full sm:w-[calc(50%-10px)] lg:w-[calc(25%-15px)] shrink-0 overflow-hidden rounded-3xl border border-white/80 border-b-[5px] border-b-slate-300/80 bg-white/70 shadow-[0_12px_30px_-6px_rgba(15,23,42,0.08),0_4px_8px_-2px_rgba(15,23,42,0.04),inset_0_1px_1px_0_rgba(255,255,255,0.95)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-2 hover:border-b-[5px] hover:border-b-orange hover:bg-white/85 hover:shadow-[0_24px_42px_-6px_rgba(255,115,0,0.24),0_10px_16px_-4px_rgba(15,23,42,0.06),inset_0_1px_1px_0_rgba(255,255,255,1)]"
+                className="group relative min-w-0 overflow-hidden rounded-3xl border border-white/80 border-b-[5px] border-b-slate-300/80 bg-white/70 shadow-[0_12px_30px_-6px_rgba(15,23,42,0.08),0_4px_8px_-2px_rgba(15,23,42,0.04),inset_0_1px_1px_0_rgba(255,255,255,0.95)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-2 hover:border-b-[5px] hover:border-b-orange hover:bg-white/85 hover:shadow-[0_24px_42px_-6px_rgba(255,115,0,0.24),0_10px_16px_-4px_rgba(15,23,42,0.06),inset_0_1px_1px_0_rgba(255,255,255,1)]"
               >
                 {/* Border Beam: Bold, radiant light line along the edge on hover */}
                 <div
@@ -215,9 +171,6 @@ function TeamPage() {
                       </span>
                     </>
                   )}
-                  <span className="absolute top-3.5 right-3.5 rounded-full border border-white/80 bg-white/85 px-2.5 py-0.5 font-mono text-[11px] font-bold text-orange shadow-[0_2px_10px_rgba(0,0,0,0.08)] backdrop-blur-md">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
                 </div>
                 <div className="border-t border-white/60 bg-gradient-to-b from-white/80 via-white/60 to-white/70 p-5 backdrop-blur-lg shadow-[inset_0_1px_0_0_rgba(255,255,255,0.9)]">
                   <h3 className="text-lg font-bold text-heading tracking-tight">{member.name}</h3>
@@ -250,37 +203,8 @@ function TeamPage() {
                 </div>
               </motion.article>
             ))}
-          </RevealGroup>
-        </div>
-      </section>
-
-      <section className="relative overflow-hidden bg-ieee-tint py-20 lg:py-28">
-        <div aria-hidden className="absolute inset-0 bg-grid opacity-50" />
-        <div className="relative mx-auto grid max-w-6xl gap-10 px-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-          <Reveal>
-            <img
-              src={galleryOne}
-              alt="IEEE LETs Talk team event"
-              className="aspect-[5/4] w-full rounded-3xl object-cover shadow-lift"
-            />
-          </Reveal>
-          <Reveal delay={0.1}>
-            <span className="section-eyebrow">How We Work</span>
-            <h2 className="mt-5 text-3xl leading-tight font-bold text-heading sm:text-4xl">
-              A team structure built around clear responsibilities.
-            </h2>
-            <div className="mt-8 grid gap-4 sm:grid-cols-2">
-              {teamPage.workAreas.map((item) => (
-                <div
-                  key={item}
-                  className="rounded-2xl border border-border bg-white p-5 shadow-soft"
-                >
-                  <Sparkles className="size-5 text-orange" />
-                  <p className="mt-3 text-sm font-bold text-heading">{item}</p>
-                </div>
-              ))}
-            </div>
-          </Reveal>
+          </RevealGroup>)}
+          </div>
         </div>
       </section>
 
@@ -339,21 +263,5 @@ function TeamPage() {
 
       <SiteFooter email={content.contact.email} />
     </main>
-  );
-}
-
-function TeamMetric({ value, label }: { value: string; label: string }) {
-  return (
-    <div className="rounded-3xl border border-border bg-white/90 p-5 shadow-soft backdrop-blur-md">
-      <div className="flex items-center gap-3">
-        <span className="grid size-11 place-items-center rounded-2xl bg-orange-tint text-orange shadow-sm">
-          <Star className="size-5" />
-        </span>
-        <div>
-          <p className="text-3xl font-bold text-heading">{value}</p>
-          <p className="text-xs font-semibold text-body">{label}</p>
-        </div>
-      </div>
-    </div>
   );
 }

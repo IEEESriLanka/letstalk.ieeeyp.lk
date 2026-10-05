@@ -9,6 +9,29 @@ export type AdminUser = {
   created_at: string;
 };
 
+export type AccessRequestStatus = "pending" | "approved" | "rejected";
+
+export type AdminAccessRequest = {
+  id: string;
+  user_id: string | null;
+  email: string;
+  full_name: string;
+  reason: string;
+  status: AccessRequestStatus;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  created_at: string;
+};
+
+export type TeamPrivateContact = {
+  id: string;
+  year: string;
+  member_name: string;
+  phone: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type EventRecord = {
   id: string;
   title: string;

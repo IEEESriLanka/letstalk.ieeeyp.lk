@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { Eye, EyeOff, LockKeyhole, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, LockKeyhole, ShieldCheck, UserRoundPlus } from "lucide-react";
 import { FormEvent, useState } from "react";
-import { getAdminAccess, signInAdmin } from "@/lib/auth";
+import { getAdminAccess, requestAdminAccess, signInAdmin } from "@/lib/auth";
 
 export function AdminLogin() {
   const [email, setEmail] = useState("");
@@ -9,6 +9,11 @@ export function AdminLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [requestOpen, setRequestOpen] = useState(false);
+  const [requestName, setRequestName] = useState("");
+  const [requestPassword, setRequestPassword] = useState("");
+  const [requestReason, setRequestReason] = useState("");
+  const [requestSent, setRequestSent] = useState(false);
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -37,6 +42,25 @@ export function AdminLogin() {
     }
   }
 
+  async function submitRequest(event: FormEvent) {
+    event.preventDefault();
+    setError("");
+    try {
+      setLoading(true);
+      await requestAdminAccess({
+        email,
+        password: requestPassword,
+        fullName: requestName,
+        reason: requestReason,
+      });
+      setRequestSent(true);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Unable to submit your access request.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#07111f] px-4 py-10 text-white">
       <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,.055)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,.055)_1px,transparent_1px)] bg-[size:48px_48px]" />
@@ -60,6 +84,18 @@ export function AdminLogin() {
               onChange={(event) => setEmail(event.target.value)}
               autoComplete="email"
               className="mt-1.5 h-11 w-full rounded-md border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-[#00629b] focus:ring-2 focus:ring-[#00629b]/15"
+              required
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-semibold text-slate-700">Create a password</span>
+            <input
+              type="password"
+              value={requestPassword}
+              onChange={(event) => setRequestPassword(event.target.value)}
+              minLength={6}
+              autoComplete="new-password"
+              className="mt-1.5 h-11 w-full rounded-md border border-slate-200 px-3 text-sm"
               required
             />
           </label>
@@ -102,6 +138,19 @@ export function AdminLogin() {
           </button>
         </form>
 
+        <button
+          type="button"
+          onClick={() => {
+            setRequestOpen(true);
+            setError("");
+            setRequestSent(false);
+          }}
+          className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-md border border-[#00629b] text-sm font-bold text-[#00629b] transition hover:bg-[#00629b]/5"
+        >
+          <UserRoundPlus className="size-4" />
+          Request access
+        </button>
+
         <div className="mt-5 flex items-center justify-between text-sm">
           <Link to="/" className="font-semibold text-[#00629b]">
             View public site
@@ -115,6 +164,77 @@ export function AdminLogin() {
           Authorized administrators only
         </p>
       </section>
+
+      {requestOpen ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 py-8">
+          <section className="w-full max-w-md rounded-lg bg-white p-6 text-slate-950 shadow-2xl">
+            <h2 className="text-xl font-bold">Request admin access</h2>
+            {requestSent ? (
+              <>
+                <p className="mt-3 text-sm leading-relaxed text-slate-600">
+                  Your request was sent to the administrators. You will be able to sign in after
+                  an administrator approves your account.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setRequestOpen(false)}
+                  className="mt-6 h-11 w-full rounded-md bg-[#00629b] text-sm font-bold text-white"
+                >
+                  Close
+                </button>
+              </>
+            ) : (
+              <form onSubmit={submitRequest} className="mt-5 space-y-4">
+                <label className="block">
+                  <span className="text-sm font-semibold text-slate-700">Full name</span>
+                  <input
+                    value={requestName}
+                    onChange={(event) => setRequestName(event.target.value)}
+                    className="mt-1.5 h-11 w-full rounded-md border border-slate-200 px-3 text-sm"
+                    required
+                  />
+                </label>
+                <label className="block">
+                  <span className="text-sm font-semibold text-slate-700">Email</span>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    className="mt-1.5 h-11 w-full rounded-md border border-slate-200 px-3 text-sm"
+                    required
+                  />
+                </label>
+                <label className="block">
+                  <span className="text-sm font-semibold text-slate-700">Why do you need access?</span>
+                  <textarea
+                    value={requestReason}
+                    onChange={(event) => setRequestReason(event.target.value)}
+                    className="mt-1.5 min-h-24 w-full rounded-md border border-slate-200 p-3 text-sm"
+                    required
+                  />
+                </label>
+                {error ? <p className="text-sm font-medium text-red-700">{error}</p> : null}
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setRequestOpen(false)}
+                    className="h-11 flex-1 rounded-md border border-slate-200 text-sm font-bold text-slate-700"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="h-11 flex-1 rounded-md bg-[#00629b] text-sm font-bold text-white disabled:opacity-60"
+                  >
+                    {loading ? "Sending..." : "Send request"}
+                  </button>
+                </div>
+              </form>
+            )}
+          </section>
+        </div>
+      ) : null}
     </main>
   );
 }

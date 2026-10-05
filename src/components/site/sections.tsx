@@ -400,7 +400,7 @@ export function PastSessions({ events }: { events: SiteContent["events"] }) {
         <Reveal className="max-w-2xl">
           <span className="section-eyebrow">Milestones</span>
           <h2 className="mt-5 text-3xl leading-[1.14] font-bold text-heading sm:text-[2.6rem]">
-            Our journey <span className="text-gradient-orange">so far</span>
+            Our Journey <span className="text-gradient-orange">so far</span>
           </h2>
           <p className="mt-4 text-base leading-relaxed text-body">
             Celebrating the events, conversations, and industry connections that bring our community together.

@@ -21,6 +21,28 @@ create table if not exists public.admin_users (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.admin_access_requests (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete set null,
+  email text not null,
+  full_name text not null,
+  reason text not null,
+  status text not null default 'pending' check (status in ('pending', 'approved', 'rejected')),
+  reviewed_by uuid references auth.users(id) on delete set null,
+  reviewed_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.team_private_contacts (
+  id uuid primary key default gen_random_uuid(),
+  year text not null check (year ~ '^[1-9][0-9]{3}$'),
+  member_name text not null,
+  phone text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (year, member_name)
+);
+
 create table if not exists public.events (
   id uuid primary key default gen_random_uuid(),
   title text not null,
@@ -102,6 +124,8 @@ create index if not exists awards_published_year_idx on public.awards (published
 create index if not exists partners_active_order_idx on public.partners (active, display_order);
 create index if not exists contact_messages_read_idx on public.contact_messages (read, created_at desc);
 create index if not exists admin_users_user_id_idx on public.admin_users (user_id);
+create index if not exists admin_access_requests_status_idx on public.admin_access_requests (status, created_at desc);
+create index if not exists team_private_contacts_year_idx on public.team_private_contacts (year);
 
 create or replace function public.set_updated_at()
 returns trigger
@@ -140,6 +164,8 @@ for each row execute function public.set_updated_at();
 alter table public.site_content enable row level security;
 alter table public.contact_messages enable row level security;
 alter table public.admin_users enable row level security;
+alter table public.admin_access_requests enable row level security;
+alter table public.team_private_contacts enable row level security;
 alter table public.events enable row level security;
 alter table public.programs enable row level security;
 alter table public.gallery_items enable row level security;
@@ -159,6 +185,21 @@ as $$
     from public.admin_users
     where user_id = auth.uid()
       and role in ('admin', 'editor')
+  );
+$$;
+
+create or replace function public.is_super_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.admin_users
+    where user_id = auth.uid()
+      and role = 'admin'
   );
 $$;
 
@@ -192,6 +233,23 @@ using (user_id = auth.uid() or public.is_admin());
 drop policy if exists "Admins manage admin users" on public.admin_users;
 create policy "Admins manage admin users"
 on public.admin_users for all
+using (public.is_super_admin())
+with check (public.is_super_admin());
+
+drop policy if exists "Public can request admin access" on public.admin_access_requests;
+create policy "Public can request admin access"
+on public.admin_access_requests for insert
+with check (status = 'pending' and reviewed_by is null and reviewed_at is null);
+
+drop policy if exists "Admins manage access requests" on public.admin_access_requests;
+create policy "Admins manage access requests"
+on public.admin_access_requests for all
+using (public.is_super_admin())
+with check (public.is_super_admin());
+
+drop policy if exists "Admins manage private team contacts" on public.team_private_contacts;
+create policy "Admins manage private team contacts"
+on public.team_private_contacts for all
 using (public.is_admin())
 with check (public.is_admin());
 

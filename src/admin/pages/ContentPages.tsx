@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Edit, Eye, EyeOff, Plus, Trash2, UploadCloud } from "lucide-react";
-import { FormEvent, useEffect, useState, type ReactNode } from "react";
+import { FormEvent, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { AdminLayout } from "@/admin/components/AdminLayout";
 import {
@@ -41,7 +41,6 @@ import {
   saveGalleryAlbum,
   savePartner,
   saveProgram,
-  saveSiteSettings,
   updateMessageStatus,
 } from "@/admin/services/admin-data";
 import { deleteImage, listPublicImages, uploadImage } from "@/lib/storage";
@@ -1165,23 +1164,8 @@ export function SettingsPage() {
     queryKey: ["hero-background-uploads"],
     queryFn: () => listPublicImages("gallery-images", "hero-backgrounds"),
   });
-  const [draft, setDraft] = useState("");
   const [backgroundSaving, setBackgroundSaving] = useState(false);
   const [backgroundToRemove, setBackgroundToRemove] = useState<string | null>(null);
-
-  const mutation = useMutation({
-    mutationFn: () => saveSiteSettings(JSON.parse(draft)),
-    onSuccess: () => {
-      toast.success("Website settings saved.");
-      void queryClient.invalidateQueries({ queryKey: ["site-settings"] });
-      void queryClient.invalidateQueries({ queryKey: ["site-content"] });
-    },
-    onError: (error) => toast.error(error.message),
-  });
-
-  useEffect(() => {
-    if (settings.data) setDraft(JSON.stringify(settings.data, null, 2));
-  }, [settings.data]);
 
   async function uploadBackgroundImage(file: File) {
     setBackgroundSaving(true);
@@ -1239,13 +1223,7 @@ export function SettingsPage() {
             />
           ) : null}
           {settings.data ? (
-            <form
-              className="mt-4"
-              onSubmit={(event) => {
-                event.preventDefault();
-                mutation.mutate();
-              }}
-            >
+            <div className="mt-4">
               <div className="mb-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
@@ -1299,7 +1277,7 @@ export function SettingsPage() {
                             <button
                               type="button"
                               className={secondaryButtonClass}
-                              disabled={backgroundSaving || mutation.isPending}
+                              disabled={backgroundSaving}
                               onClick={() => setBackgroundToRemove(url)}
                             >
                               <Trash2 className="size-4" /> Remove
@@ -1316,20 +1294,7 @@ export function SettingsPage() {
                   ) : null}
                 </div>
               </div>
-              <textarea
-                value={draft}
-                onChange={(event) => setDraft(event.target.value)}
-                className={`${textAreaClass} min-h-96 font-mono text-xs`}
-                spellCheck={false}
-              />
-              <button
-                type="submit"
-                disabled={mutation.isPending}
-                className={`${primaryButtonClass} mt-4`}
-              >
-                {mutation.isPending ? "Saving..." : "Save Settings"}
-              </button>
-            </form>
+            </div>
           ) : null}
         </section>
       </div>

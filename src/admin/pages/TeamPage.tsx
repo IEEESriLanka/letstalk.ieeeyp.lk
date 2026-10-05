@@ -4,7 +4,12 @@ import { Edit, Plus, Save, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { AdminLayout } from "@/admin/components/AdminLayout";
 import { AdminModal, ConfirmDialog, ErrorState, FormField, ImageUploader, LoadingSkeleton, fieldClass, primaryButtonClass } from "@/admin/components/AdminPrimitives";
-import { getSiteSettings, saveSiteSettings } from "@/admin/services/admin-data";
+import {
+  getSiteSettings,
+  listTeamPrivateContacts,
+  saveSiteSettings,
+  saveTeamPrivateContact,
+} from "@/admin/services/admin-data";
 import { defaultSiteContent, getYearTeams, type TeamMember } from "@/lib/site-content";
 import { uploadImage } from "@/lib/storage";
 
@@ -15,7 +20,9 @@ export function TeamAdminPage() {
   const [newYear, setNewYear] = useState("");
   const [editing, setEditing] = useState<{ index: number | null; member: TeamMember } | null>(null);
   const [removing, setRemoving] = useState<number | null>(null);
+  const [removingYear, setRemovingYear] = useState(false);
   const query = useQuery({ queryKey: ["site-settings"], queryFn: getSiteSettings });
+  const privateContacts = useQuery({ queryKey: ["team-private-contacts"], queryFn: listTeamPrivateContacts });
   const teams = getYearTeams(query.data?.teamPage ?? defaultSiteContent.teamPage!);
   const years = [...new Set(teams.map((team) => team.year))].sort().reverse();
   const year = selectedYear ?? years[0] ?? String(new Date().getFullYear());
@@ -41,8 +48,24 @@ export function TeamAdminPage() {
       toast.success("Team year added.");
     },
   });
+  const deleteYear = useMutation({
+    mutationFn: async () => {
+      const latest = await getSiteSettings();
+      const teamPage = latest.teamPage ?? defaultSiteContent.teamPage!;
+      const yearlyTeams = (teamPage.yearlyTeams ?? []).filter((team) => team.year !== year);
+      const pastTeams = teamPage.pastTeams.filter((team) => team.year !== year);
+      return saveSiteSettings({ ...latest, teamPage: { ...teamPage, yearlyTeams, pastTeams } });
+    },
+    onSuccess: (content) => {
+      client.setQueryData(["site-settings"], content);
+      void client.invalidateQueries({ queryKey: ["site-content"] });
+      setYear(null); setRemovingYear(false);
+      toast.success(`Team year ${year} removed.`);
+    },
+    onError: (error) => toast.error(error.message),
+  });
   const mutation = useMutation({
-    mutationFn: async (change: { index: number | null; member?: TeamMember }) => {
+    mutationFn: async (change: { index: number | null; member?: TeamMember; phone?: string | null }) => {
       const latest = await getSiteSettings();
       const teamPage = latest.teamPage ?? defaultSiteContent.teamPage!;
       const yearlyTeams = getYearTeams(teamPage).map((team) => ({ ...team, members: [...team.members] }));
@@ -57,11 +80,20 @@ export function TeamAdminPage() {
         if (change.member) target.members[change.index] = change.member;
         else target.members.splice(change.index, 1);
       }
-      return saveSiteSettings({ ...latest, teamPage: { ...teamPage, yearlyTeams } });
+      const content = await saveSiteSettings({ ...latest, teamPage: { ...teamPage, yearlyTeams } });
+      if (change.member) {
+        await saveTeamPrivateContact({
+          year,
+          memberName: change.member.name,
+          phone: change.phone ?? null,
+        });
+      }
+      return content;
     },
     onSuccess: (content) => {
       client.setQueryData(["site-settings"], content);
       void client.invalidateQueries({ queryKey: ["site-content"] });
+      void client.invalidateQueries({ queryKey: ["team-private-contacts"] });
       setEditing(null); setRemoving(null);
       toast.success("Team updated.");
     },
@@ -69,12 +101,15 @@ export function TeamAdminPage() {
   });
 
   return <AdminLayout title="Team">
-    {query.isPending ? <LoadingSkeleton /> : query.isError ? <ErrorState message="Unable to load team members." onRetry={() => void query.refetch()} /> : <>
+    {query.isPending || privateContacts.isPending ? <LoadingSkeleton /> : query.isError || privateContacts.isError ? <ErrorState message="Unable to load team members." onRetry={() => { void query.refetch(); void privateContacts.refetch(); }} /> : <>
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <FormField label="Team year"><select className={fieldClass} value={year} onChange={(event) => setYear(event.target.value)}>
           {years.length === 0 && <option value={year}>{year}</option>}
           {years.map((value) => <option key={value}>{value}</option>)}
         </select></FormField>
+        <button type="button" className="flex min-h-10 items-center gap-2 rounded-md border border-red-200 px-3 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50" disabled={deleteYear.isPending || years.length <= 1} onClick={() => setRemovingYear(true)}>
+          <Trash2 className="size-4" />Remove year
+        </button>
         <button type="button" className={primaryButtonClass} onClick={() => {
           setNewYear(String(Math.min(9999, Number(years[0] ?? new Date().getFullYear()) + 1)));
           addYear.reset(); setAddingYear(true);
@@ -106,18 +141,27 @@ export function TeamAdminPage() {
         </button>
       </form>
     </AdminModal>
-    {editing && <MemberEditor member={editing.member} year={year} onClose={() => setEditing(null)}
-      onSave={(member) => mutation.mutateAsync({ index: editing.index, member })} />}
+    {editing && <MemberEditor
+      member={editing.member}
+      year={year}
+      phone={privateContacts.data?.find((contact) => contact.year === year && contact.member_name === editing.member.name)?.phone ?? ""}
+      onClose={() => setEditing(null)}
+      onSave={(member, phone) => mutation.mutateAsync({ index: editing.index, member, phone })}
+    />}
     <ConfirmDialog open={removing !== null} title="Delete team member?" description={`Remove this member from the ${year} team?`}
       onCancel={() => { if (!mutation.isPending) setRemoving(null); }}
       onConfirm={() => { if (!mutation.isPending && removing !== null) mutation.mutate({ index: removing }); }} />
+    <ConfirmDialog open={removingYear} title={`Remove ${year} team year?`} description={`This will permanently remove the ${year} team and its members from the site.`}
+      onCancel={() => { if (!deleteYear.isPending) setRemovingYear(false); }}
+      onConfirm={() => { if (!deleteYear.isPending) deleteYear.mutate(); }} />
   </AdminLayout>;
 }
 
-function MemberEditor({ member, year, onClose, onSave }: {
-  member: TeamMember; year: string; onClose: () => void; onSave: (member: TeamMember) => Promise<unknown>;
+function MemberEditor({ member, year, phone, onClose, onSave }: {
+  member: TeamMember; year: string; phone: string; onClose: () => void; onSave: (member: TeamMember, phone: string | null) => Promise<unknown>;
 }) {
   const [form, setForm] = useState(member);
+  const [privatePhone, setPrivatePhone] = useState(phone);
   const [file, setFile] = useState<File | null>(null);
   const [photoVersion, setPhotoVersion] = useState(0);
   const [saving, setSaving] = useState(false);
@@ -136,7 +180,10 @@ function MemberEditor({ member, year, onClose, onSave }: {
       }
       const imageUrl = file ? await uploadImage("gallery-images", file, "team/" + year) : form.imageUrl ?? null;
       setForm((current) => ({ ...current, imageUrl })); setFile(null);
-      await onSave({ ...form, name, role, linkedinUrl, imageUrl, initials: name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase() });
+      await onSave(
+        { ...form, name, role, linkedinUrl, imageUrl, initials: name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase() },
+        privatePhone,
+      );
     } catch (reason) { setError(reason instanceof Error ? reason.message : "Unable to save member."); }
     finally { setSaving(false); }
   }
@@ -146,6 +193,7 @@ function MemberEditor({ member, year, onClose, onSave }: {
         <FormField label="Name" required><input required className={fieldClass} value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} /></FormField>
         <FormField label="Position" required><input required className={fieldClass} value={form.role} onChange={(event) => setForm({ ...form, role: event.target.value })} /></FormField>
         <FormField label="LinkedIn profile"><input type="url" placeholder="https://www.linkedin.com/in/..." className={fieldClass} value={form.linkedinUrl ?? ""} onChange={(event) => setForm({ ...form, linkedinUrl: event.target.value })} /></FormField>
+        <FormField label="Phone number (admin only)"><input type="tel" autoComplete="tel" className={fieldClass} value={privatePhone} onChange={(event) => setPrivatePhone(event.target.value)} /></FormField>
         <FormField label="Photo"><ImageUploader key={photoVersion} value={form.imageUrl ?? null} onFile={setFile} disabled={saving} /></FormField>
         {(form.imageUrl || file) && <button type="button" className="flex items-center gap-2 text-sm text-red-700" onClick={() => { setFile(null); setForm({ ...form, imageUrl: null }); setPhotoVersion((value) => value + 1); }}><Trash2 className="size-4" />Remove photo</button>}
         {error && <p role="alert" className="text-sm text-red-700">{error}</p>}

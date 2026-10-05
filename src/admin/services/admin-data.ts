@@ -3,6 +3,8 @@ import { deleteImage } from "@/lib/storage";
 import { defaultSiteContent, type SiteContent } from "@/lib/site-content";
 import type {
   AdminUser,
+  AdminAccessRequest,
+  TeamPrivateContact,
   AwardRecord,
   ContactMessageRecord,
   EventRecord,
@@ -30,6 +32,34 @@ export type RecentActivity = {
 };
 
 export type AdminAccount = Pick<AdminUser, "id" | "user_id" | "role" | "created_at">;
+export type AccessRequest = AdminAccessRequest;
+
+export async function listTeamPrivateContacts(): Promise<TeamPrivateContact[]> {
+  const { data, error } = await supabase
+    .from("team_private_contacts")
+    .select("id,year,member_name,phone,created_at,updated_at")
+    .order("year", { ascending: false })
+    .order("member_name", { ascending: true });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as TeamPrivateContact[];
+}
+
+export async function saveTeamPrivateContact(input: {
+  year: string;
+  memberName: string;
+  phone: string | null;
+}) {
+  const { error } = await supabase.from("team_private_contacts").upsert(
+    {
+      year: input.year,
+      member_name: input.memberName,
+      phone: input.phone?.trim() || null,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "year,member_name" },
+  );
+  if (error) throw new Error(error.message);
+}
 
 export type DatabaseCheck = {
   name: string;
@@ -146,6 +176,8 @@ export async function getDatabaseStatus(): Promise<DatabaseStatus> {
     "partners",
     "contact_messages",
     "admin_users",
+    "admin_access_requests",
+    "team_private_contacts",
   ];
   const requiredBuckets = [
     "event-images",
@@ -224,6 +256,51 @@ export async function createAdminAccount(input: {
 
 export async function deleteAdminAccount(id: string) {
   const { error } = await supabase.from("admin_users").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
+export async function listAccessRequests(): Promise<AccessRequest[]> {
+  const { data, error } = await supabase
+    .from("admin_access_requests")
+    .select("id,user_id,email,full_name,reason,status,reviewed_by,reviewed_at,created_at")
+    .order("created_at", { ascending: false });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as AccessRequest[];
+}
+
+export async function approveAccessRequest(input: {
+  requestId: string;
+  userId: string;
+  role: "admin" | "editor";
+}) {
+  const { error: accountError } = await supabase
+    .from("admin_users")
+    .insert({ user_id: input.userId.trim(), role: input.role });
+  if (accountError) throw new Error(accountError.message);
+
+  const { error } = await supabase
+    .from("admin_access_requests")
+    .update({
+      status: "approved",
+      reviewed_by: (await supabase.auth.getUser()).data.user?.id ?? null,
+      reviewed_at: new Date().toISOString(),
+    })
+    .eq("id", input.requestId)
+    .eq("status", "pending");
+  if (error) throw new Error(error.message);
+}
+
+export async function rejectAccessRequest(id: string) {
+  const { data: user } = await supabase.auth.getUser();
+  const { error } = await supabase
+    .from("admin_access_requests")
+    .update({
+      status: "rejected",
+      reviewed_by: user.user?.id ?? null,
+      reviewed_at: new Date().toISOString(),
+    })
+    .eq("id", id)
+    .eq("status", "pending");
   if (error) throw new Error(error.message);
 }
 
