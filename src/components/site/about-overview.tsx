@@ -1,12 +1,38 @@
-import { ArrowRight, CalendarDays, ChartNoAxesColumnIncreasing, Users } from "lucide-react";
+import { ArrowRight, GraduationCap, Handshake, Mic, Sparkles, Users } from "lucide-react";
 import type { SiteContent } from "@/lib/site-content";
+import { defaultSiteContent } from "@/lib/site-content";
 
-export function AboutOverview({ content, stats }: { content: SiteContent["about"]; stats: SiteContent["hero"]["stats"] }) {
-  const icons = [CalendarDays, Users, ChartNoAxesColumnIncreasing];
+export function AboutOverview({
+  content,
+  stats,
+}: {
+  content: SiteContent["about"];
+  stats?: SiteContent["hero"]["stats"];
+}) {
+  const displayStats =
+    content.stats && content.stats.length > 0
+      ? content.stats
+      : defaultSiteContent.about.stats!;
+
+  const statIcons = [Mic, Handshake, Users, GraduationCap];
 
   return (
     <section id="about" aria-labelledby="about-heading" className="relative pt-32 pb-20 lg:pt-40 lg:pb-28">
-      <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 sm:px-8 lg:grid-cols-2 lg:gap-16">
+      {/* Subtle brand ambient accents */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-grid opacity-30 [mask-image:radial-gradient(ellipse_60%_50%_at_50%_40%,black,transparent)]"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-24 right-1/4 size-[420px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(0,114,178,0.07),transparent_65%)]"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-10 left-10 size-[360px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(255,104,21,0.06),transparent_65%)]"
+      />
+
+      <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-5 sm:px-8 lg:grid-cols-2 lg:gap-16">
         <div>
           <p className="flex items-center gap-4 text-xs font-bold tracking-[0.14em] text-body uppercase">
             <span aria-hidden="true" className="h-0.5 w-9 bg-orange" />
@@ -26,19 +52,45 @@ export function AboutOverview({ content, stats }: { content: SiteContent["about"
             </a>
           </div>
         </div>
-        <div className="rounded-[2rem] border border-white bg-white/85 p-5 shadow-[0_8px_40px_-12px_#00629b20] sm:p-8">
-          <div className="inline-flex items-center gap-3 rounded-2xl bg-[#f3f9fd] px-4 py-3 text-sm font-semibold text-[#002855] shadow-sm sm:text-base">
-            <span className="grid size-10 shrink-0 place-items-center rounded-full bg-orange-tint text-orange"><Users aria-hidden="true" className="size-6" /></span>
-            IEEE Young Professionals Sri Lanka
+
+        {/* Right side: 10 Years Impact Showcase - NOT IN BOXES */}
+        <div className="flex flex-col justify-center lg:pl-4">
+          <div className="inline-flex items-center gap-2 self-start rounded-full border border-orange/30 bg-orange-tint px-3.5 py-1.5 text-xs font-bold tracking-wider text-orange uppercase">
+            <Sparkles className="size-3.5" />
+            <span>{content.yearsOfImpact ?? "10 Years of Impact"}</span>
           </div>
-          <dl className="mt-8 grid grid-cols-3 gap-2 sm:gap-5">
-            {stats.slice(0, 3).map((stat, index) => {
-              const Icon = icons[index];
+
+          <h2 className="mt-4 text-2xl font-bold tracking-tight text-[#06172d] sm:text-3xl lg:text-[2.15rem] lg:leading-[1.18]">
+            A decade of connecting future professionals with industry leaders.
+          </h2>
+
+          <p className="mt-3 text-sm leading-relaxed text-body sm:text-base">
+            Over ten years of continuous growth, IEEE LETs Talk has brought together undergraduates, seasoned practitioners, and corporate partners to ignite careers and inspire technical leadership across Sri Lanka.
+          </p>
+
+          <dl className="mt-8 grid grid-cols-2 gap-x-8 gap-y-7 border-t border-border/70 pt-7 sm:gap-x-12 sm:gap-y-8">
+            {displayStats.map((stat, index) => {
+              const Icon = statIcons[index % statIcons.length];
+              const isWarm = index % 2 === 0;
+              const match = stat.value.match(/^([^+-]+)(.*)$/);
+              const numPart = match ? match[1] : stat.value;
+              const suffixPart = match ? match[2] : "";
+
               return (
-                <div key={stat.label} className={`flex flex-col items-center rounded-2xl px-2 py-6 text-center sm:px-4 sm:py-7 ${index === 1 ? "bg-[#fff8f2]" : "bg-[#f3f9fd]"}`}>
-                  <span className={`mb-4 grid size-12 place-items-center rounded-full ${index === 1 ? "bg-orange-tint text-orange" : "bg-[#e4f3ff] text-ieee"}`}><Icon aria-hidden="true" className="size-6" /></span>
-                  <dd className={`order-1 text-2xl font-bold tracking-tight sm:text-4xl ${index === 1 ? "text-[#002855]" : "text-ieee"}`}>{stat.value}</dd>
-                  <dt className="order-2 mt-2 text-sm leading-snug text-body sm:text-lg">{stat.label}</dt>
+                <div key={stat.label} className="group">
+                  <dd className="flex items-baseline text-3xl font-extrabold tracking-tight text-[#06172d] sm:text-4xl lg:text-[2.65rem]">
+                    <span>{numPart}</span>
+                    {suffixPart ? <span className="text-orange">{suffixPart}</span> : null}
+                  </dd>
+                  <dt className="mt-1.5 flex items-center gap-2 text-sm font-bold text-[#06172d] sm:text-base">
+                    <Icon className={`size-4 shrink-0 ${isWarm ? "text-orange" : "text-ieee"}`} aria-hidden="true" />
+                    <span>{stat.label}</span>
+                  </dt>
+                  {stat.description ? (
+                    <p className="mt-0.5 text-xs text-body leading-relaxed">
+                      {stat.description}
+                    </p>
+                  ) : null}
                 </div>
               );
             })}
