@@ -85,7 +85,10 @@ export const siteContentSchema: z.ZodType<SiteContent> = z.object({
     label: z.string().min(1),
   }),
   partners: z.array(z.string().min(1)).min(1),
-  videoLinks: z.array(z.object({ url: z.string().url(), title: z.string() })).max(6).optional(),
+  videoLinks: z
+    .array(z.object({ url: z.string().url(), title: z.string() }))
+    .max(6)
+    .optional(),
   connected: z.object({
     title: z.string().min(1),
     copy: z.string().min(1),
@@ -111,6 +114,7 @@ export const siteContentSchema: z.ZodType<SiteContent> = z.object({
                 track: z.string(),
                 initials: z.string(),
                 imageUrl: z.string().nullable().optional(),
+                imagePosition: z.string().nullable().optional(),
                 linkedinUrl: z.string().nullable().optional(),
                 email: z.string().nullable().optional(),
               }),
@@ -130,6 +134,7 @@ export const siteContentSchema: z.ZodType<SiteContent> = z.object({
             track: z.string().min(1),
             initials: z.string().min(1),
             imageUrl: z.string().nullable().optional(),
+            imagePosition: z.string().nullable().optional(),
             linkedinUrl: z.string().nullable().optional(),
             email: z.string().nullable().optional(),
           }),
@@ -158,9 +163,7 @@ export const contactMessageSchema = z.object({
 
 function getSupabase() {
   const url =
-    process.env.SUPABASE_URL ||
-    process.env.VITE_SUPABASE_URL ||
-    import.meta.env.VITE_SUPABASE_URL;
+    process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL;
   const key =
     process.env.SUPABASE_SERVICE_ROLE_KEY ||
     process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
@@ -264,7 +267,9 @@ export async function readSiteContent(): Promise<SiteContent> {
       imageUrl: item.image_url,
     })),
     partners: (partners.data ?? []).map((partner) => partner.name),
-    partnerLogos: (partners.data ?? []).filter((partner) => partner.logo_url).map((partner) => ({ name: partner.name, logoUrl: partner.logo_url! })),
+    partnerLogos: (partners.data ?? [])
+      .filter((partner) => partner.logo_url)
+      .map((partner) => ({ name: partner.name, logoUrl: partner.logo_url! })),
   } as SiteContent;
 }
 
