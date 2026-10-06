@@ -55,6 +55,8 @@ export type SiteContent = {
     copy: string;
     quote: string;
     quoteBy: string;
+    vision?: string;
+    mission?: string;
     storyCards?: Array<{ title: string; copy: string }>;
     values?: Array<{ title: string; copy: string }>;
     milestones?: string[];
@@ -171,6 +173,10 @@ export const defaultSiteContent: SiteContent = {
     quote:
       "Bridging the gap between academia and industry by turning passion and curiosity into career-defining professional opportunities.",
     quoteBy: "IEEE Young Professionals Sri Lanka",
+    vision:
+      "To be the best platform to sharpen the skill set of young professionals by sharing timely and valuable knowledge to the industry of Sri Lanka.",
+    mission:
+      "Improve leadership skills, entrepreneurial skills, technology awareness and adaptation of sustainability of the young professionals and educated workforce in Sri Lanka.",
     storyCards: [
       {
         title: "Our Purpose",
