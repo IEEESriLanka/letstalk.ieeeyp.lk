@@ -68,29 +68,43 @@ export function AboutOverview({
             Over ten years of continuous growth, IEEE LETs Talk has brought together undergraduates, seasoned practitioners, and corporate partners to ignite careers and inspire technical leadership across Sri Lanka.
           </p>
 
-          <dl className="mt-8 grid grid-cols-2 gap-x-8 gap-y-7 border-t border-border/70 pt-7 sm:gap-x-12 sm:gap-y-8">
+          <dl className="mt-8 grid gap-4 border-t border-border/70 pt-7 sm:grid-cols-2">
             {displayStats.map((stat, index) => {
               const Icon = statIcons[index % statIcons.length];
-              const isWarm = index % 2 === 0;
               const match = stat.value.match(/^([^+-]+)(.*)$/);
               const numPart = match ? match[1] : stat.value;
               const suffixPart = match ? match[2] : "";
+              const filled = index % 2 === 1;
 
               return (
-                <div key={stat.label} className="group">
-                  <dd className="flex items-baseline text-3xl font-extrabold tracking-tight text-[#06172d] sm:text-4xl lg:text-[2.65rem]">
-                    <span>{numPart}</span>
-                    {suffixPart ? <span className="text-orange">{suffixPart}</span> : null}
-                  </dd>
-                  <dt className="mt-1.5 flex items-center gap-2 text-sm font-bold text-[#06172d] sm:text-base">
-                    <Icon className={`size-4 shrink-0 ${isWarm ? "text-orange" : "text-ieee"}`} aria-hidden="true" />
-                    <span>{stat.label}</span>
-                  </dt>
-                  {stat.description ? (
-                    <p className="mt-0.5 text-xs text-body leading-relaxed">
-                      {stat.description}
-                    </p>
-                  ) : null}
+                <div
+                  key={stat.label}
+                  className={`group flex min-h-[104px] items-center gap-3 rounded-3xl px-5 py-4 shadow-[0_12px_25px_-18px_rgba(7,22,56,0.55)] transition-transform duration-300 hover:-translate-y-1 ${
+                    filled
+                      ? "bg-[#ff6815] text-white"
+                      : "border border-[#ff6815]/70 bg-white/80 text-[#102d58]"
+                  }`}
+                >
+                  <span
+                    className={`grid size-11 shrink-0 place-items-center rounded-xl ${
+                      filled ? "bg-white/15 text-white" : "bg-orange-tint text-orange"
+                    }`}
+                  >
+                    <Icon className="size-5" aria-hidden="true" />
+                  </span>
+                  <span className="min-w-0">
+                    <dd className="text-2xl leading-none font-extrabold tracking-tight">
+                      {numPart}
+                      {suffixPart ? <span className={filled ? "text-white/80" : "text-orange"}>{suffixPart}</span> : null}
+                    </dd>
+                    <dt
+                      className={`mt-1 block text-[0.65rem] font-bold tracking-[0.08em] uppercase ${
+                        filled ? "text-white/80" : "text-[#53658b]"
+                      }`}
+                    >
+                      {stat.label}
+                    </dt>
+                  </span>
                 </div>
               );
             })}

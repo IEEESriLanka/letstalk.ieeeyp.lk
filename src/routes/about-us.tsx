@@ -2,11 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowRight,
-  Eye,
   Globe2,
   Quote,
   Sparkles,
-  Target,
 } from "lucide-react";
 import { SiteNav } from "@/components/site/site-nav";
 import { AboutOverview } from "@/components/site/about-overview";
@@ -48,7 +46,6 @@ function AboutUsPage() {
       <section aria-labelledby="vision-mission-heading" className="relative border-y border-border/60 bg-gradient-to-b from-[#f8fbff] to-white py-20 lg:py-28">
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
           <Reveal className="mx-auto max-w-2xl text-center">
-            <span className="section-eyebrow">Direction & Purpose</span>
             <h2 id="vision-mission-heading" className="mt-4 text-3xl font-bold tracking-tight text-[#061025] sm:text-4xl lg:text-5xl">
               Our Vision & Mission
             </h2>
@@ -65,25 +62,12 @@ function AboutUsPage() {
                   className="pointer-events-none absolute -top-16 -right-16 size-48 rounded-full bg-ieee-tint/70 blur-3xl"
                 />
                 <div>
-                  <div className="flex items-center justify-between gap-4">
-                    <span className="grid size-14 place-items-center rounded-2xl bg-ieee-tint text-ieee shadow-sm">
-                      <Eye className="size-7" />
-                    </span>
-                    <span className="rounded-full border border-ieee/30 bg-[#eaf6ff] px-3.5 py-1 text-xs font-bold tracking-wider text-ieee uppercase">
-                      Vision
-                    </span>
-                  </div>
-                  <h3 className="mt-6 text-2xl font-bold tracking-tight text-[#061025] sm:text-3xl">
+                  <h3 className="text-2xl font-bold tracking-tight text-[#061025] sm:text-3xl">
                     Our Vision
                   </h3>
                   <p className="mt-4 text-base leading-relaxed text-body sm:text-lg">
                     {content.about.vision ?? defaultSiteContent.about.vision}
                   </p>
-                </div>
-                <div className="mt-8 border-t border-[#eaf2fb] pt-5">
-                  <span className="text-xs font-semibold tracking-wider text-ieee uppercase">
-                    Core Focus • Timely Knowledge & Sri Lankan Industry
-                  </span>
                 </div>
               </div>
             </Reveal>
@@ -95,34 +79,12 @@ function AboutUsPage() {
                   className="pointer-events-none absolute -top-16 -right-16 size-48 rounded-full bg-orange-tint/70 blur-3xl"
                 />
                 <div>
-                  <div className="flex items-center justify-between gap-4">
-                    <span className="grid size-14 place-items-center rounded-2xl bg-orange-tint text-orange shadow-sm">
-                      <Target className="size-7" />
-                    </span>
-                    <span className="rounded-full border border-orange/30 bg-[#fff4eb] px-3.5 py-1 text-xs font-bold tracking-wider text-orange uppercase">
-                      Mission
-                    </span>
-                  </div>
-                  <h3 className="mt-6 text-2xl font-bold tracking-tight text-[#061025] sm:text-3xl">
+                  <h3 className="text-2xl font-bold tracking-tight text-[#061025] sm:text-3xl">
                     Our Mission
                   </h3>
                   <p className="mt-4 text-base leading-relaxed text-body sm:text-lg">
                     {content.about.mission ?? defaultSiteContent.about.mission}
                   </p>
-                </div>
-                <div className="mt-8 flex flex-wrap gap-2 border-t border-[#fdefdf] pt-5">
-                  <span className="rounded-full bg-orange-tint px-3 py-1 text-xs font-semibold text-orange">
-                    Leadership Skills
-                  </span>
-                  <span className="rounded-full bg-orange-tint px-3 py-1 text-xs font-semibold text-orange">
-                    Entrepreneurial Skills
-                  </span>
-                  <span className="rounded-full bg-ieee-tint px-3 py-1 text-xs font-semibold text-ieee">
-                    Technology Awareness
-                  </span>
-                  <span className="rounded-full bg-ieee-tint px-3 py-1 text-xs font-semibold text-ieee">
-                    Sustainability
-                  </span>
                 </div>
               </div>
             </Reveal>

@@ -9,6 +9,7 @@ import {
   BrainCircuit,
   CalendarDays,
   CheckCircle2,
+  ChevronDown,
   Eye,
   Lightbulb,
   Mail,
@@ -17,9 +18,12 @@ import {
   Mic,
   Network,
   Quote,
+  Send,
   Sparkles,
   Target,
   Trophy,
+  UserRound,
+  Tag,
   Users,
 } from "lucide-react";
 import { Reveal, RevealGroup, fadeUp } from "./motion-primitives";
@@ -147,9 +151,9 @@ export function About({ content }: { content: SiteContent["about"] }) {
                 {content.mission ?? defaultSiteContent.about.mission}
               </p>
               <div className="mt-4 flex flex-wrap gap-2 border-t border-border/50 pt-3">
-                <span className="rounded-full bg-orange-tint px-2.5 py-0.5 text-[0.7rem] font-semibold text-orange">Leadership Skills</span>
-                <span className="rounded-full bg-orange-tint px-2.5 py-0.5 text-[0.7rem] font-semibold text-orange">Entrepreneurial Skills</span>
-                <span className="rounded-full bg-ieee-tint px-2.5 py-0.5 text-[0.7rem] font-semibold text-ieee">Technology Awareness</span>
+                <span className="rounded-full bg-orange-tint px-2.5 py-0.5 text-[0.7rem] font-semibold text-orange">Leadership</span>
+                <span className="rounded-full bg-orange-tint px-2.5 py-0.5 text-[0.7rem] font-semibold text-orange">Entrepreneurship</span>
+                <span className="rounded-full bg-ieee-tint px-2.5 py-0.5 text-[0.7rem] font-semibold text-ieee">Technology</span>
                 <span className="rounded-full bg-ieee-tint px-2.5 py-0.5 text-[0.7rem] font-semibold text-ieee">Sustainability</span>
               </div>
             </div>
@@ -681,11 +685,10 @@ export function Contact({ content }: { content: SiteContent["contact"] }) {
       <div className="relative mx-auto grid max-w-6xl gap-12 px-5 lg:grid-cols-[0.9fr_1.1fr]">
         <div>
           <SectionHead
-            eyebrow="Get in Touch"
+            eyebrow="LETs Talk"
             title={
               <>
-                Connect, collaborate or <span className="text-gradient-orange">partner</span> with
-                us
+                Have an idea? <span className="text-gradient-orange">Let’s talk</span>
               </>
             }
             copy={content.copy}
@@ -694,43 +697,41 @@ export function Contact({ content }: { content: SiteContent["contact"] }) {
             {[
               {
                 icon: Mail,
-                label: content.email,
+                label: "Email Us",
                 desc: "Official inquiries & proposals",
+                href: `mailto:${content.email}`,
               },
               {
                 icon: MessageCircle,
                 label: content.whatsappLabel,
                 desc: "Instant event alerts & community updates",
+                href: whatsappChannelUrl,
               },
               {
                 icon: MessagesSquare,
                 label: content.organization,
                 desc: "National professional development platform",
+                href: "https://yp.ieee.org/",
               },
             ].map((c) => (
-              <div
+              <a
                 key={c.label}
-                className="flex items-center gap-3.5 rounded-2xl border border-border bg-white px-5 py-4 shadow-soft"
+                href={c.href}
+                target={c.href.startsWith("http") ? "_blank" : undefined}
+                rel={c.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                className="group flex items-center gap-3.5 rounded-2xl border border-border bg-white px-5 py-4 shadow-soft transition-transform hover:-translate-y-0.5"
               >
                 <div className="grid size-10 place-items-center rounded-xl bg-orange-tint text-orange">
                   <c.icon className="size-4.5" />
                 </div>
-                <div>
-                  {c.icon === MessageCircle ? (
-                    <a
-                      href={whatsappChannelUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block text-sm font-bold text-heading transition-colors hover:text-ieee"
-                    >
-                      {c.label}
-                    </a>
-                  ) : (
-                    <span className="block text-sm font-bold text-heading">{c.label}</span>
-                  )}
+                <div className="min-w-0 flex-1">
+                  <span className="block text-sm font-bold text-heading transition-colors group-hover:text-ieee">
+                    {c.label}
+                  </span>
                   <span className="text-xs text-body">{c.desc}</span>
                 </div>
-              </div>
+                <ArrowRight className="size-5 shrink-0 text-orange transition-transform group-hover:translate-x-1" />
+              </a>
             ))}
           </Reveal>
         </div>
@@ -761,57 +762,89 @@ export function Contact({ content }: { content: SiteContent["contact"] }) {
                 });
             }}
           >
+            <div className="mb-7">
+              <span className="section-eyebrow">LETs Talk</span>
+              <h3 className="mt-4 text-3xl font-bold tracking-tight text-heading">
+                Start a <span className="text-gradient-orange">Conversation</span>
+              </h3>
+              <p className="mt-2 text-sm text-body">Send us a message and we’ll get back to you soon.</p>
+            </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="block">
                 <span className="text-xs font-semibold tracking-wide text-body uppercase">
                   Full name
                 </span>
-                <input
-                  required
-                  name="name"
-                  className="mt-2 w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm text-heading outline-none transition-colors focus:border-ieee"
-                  placeholder="Your Name"
-                />
+                <div className="relative mt-2">
+                  <UserRound className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-body" />
+                  <input
+                    required
+                    name="name"
+                    className="w-full rounded-xl border border-border bg-surface py-3 pr-4 pl-11 text-sm text-heading outline-none transition-colors focus:border-ieee"
+                    placeholder="Enter your name"
+                  />
+                </div>
               </label>
               <label className="block">
                 <span className="text-xs font-semibold tracking-wide text-body uppercase">
                   Email
                 </span>
-                <input
-                  required
-                  name="email"
-                  type="email"
-                  className="mt-2 w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm text-heading outline-none transition-colors focus:border-ieee"
-                  placeholder="name@organization.com"
-                />
+                <div className="relative mt-2">
+                  <Mail className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-body" />
+                  <input
+                    required
+                    name="email"
+                    type="email"
+                    className="w-full rounded-xl border border-border bg-surface py-3 pr-4 pl-11 text-sm text-heading outline-none transition-colors focus:border-ieee"
+                    placeholder="Enter your email address"
+                  />
+                </div>
               </label>
             </div>
             <label className="mt-4 block">
               <span className="text-xs font-semibold tracking-wide text-body uppercase">
                 Topic / Inquiry
               </span>
-              <input
-                name="topic"
-                className="mt-2 w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm text-heading outline-none transition-colors focus:border-ieee"
-                placeholder="Upcoming sessions, Partnership, Speaking, General inquiry..."
-              />
+              <div className="relative mt-2">
+                <Tag className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-body" />
+                <select
+                  required
+                  name="topic"
+                  defaultValue=""
+                  className="w-full appearance-none rounded-xl border border-border bg-surface py-3 pr-11 pl-11 text-sm text-heading outline-none transition-colors focus:border-ieee"
+                >
+                  <option value="" disabled>
+                    Select a topic
+                  </option>
+                  <option value="Session idea">Session idea</option>
+                  <option value="Partnership">Partnership</option>
+                  <option value="Speaking opportunity">Speaking opportunity</option>
+                  <option value="General inquiry">General inquiry</option>
+                </select>
+                <ChevronDown className="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 text-body" />
+              </div>
             </label>
             <label className="mt-4 block">
               <span className="text-xs font-semibold tracking-wide text-body uppercase">
                 Message
               </span>
-              <textarea
-                rows={4}
-                name="message"
-                className="mt-2 w-full resize-none rounded-xl border border-border bg-surface px-4 py-3 text-sm text-heading outline-none transition-colors focus:border-ieee"
-                placeholder="How would you like to connect with IEEE LETs Talk?"
-              />
+              <div className="relative mt-2">
+                <MessagesSquare className="pointer-events-none absolute top-4 left-4 size-4 text-body" />
+                <textarea
+                  rows={4}
+                  required
+                  name="message"
+                  className="w-full resize-none rounded-xl border border-border bg-surface py-3 pr-4 pl-11 text-sm text-heading outline-none transition-colors focus:border-ieee"
+                  placeholder="Tell us a little more about your idea or inquiry."
+                />
+              </div>
             </label>
             <button
               type="submit"
-              className="mt-6 w-full rounded-full bg-[image:var(--gradient-orange)] px-6 py-3.5 text-sm font-semibold text-white shadow-glow transition-transform duration-300 hover:-translate-y-0.5"
+              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[image:var(--gradient-orange)] px-6 py-3.5 text-sm font-semibold text-white shadow-glow transition-transform duration-300 hover:-translate-y-0.5"
             >
+              <Send className="size-4" />
               Send Message
+              <ArrowRight className="size-4" />
             </button>
           </form>
         </Reveal>
