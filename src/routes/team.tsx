@@ -81,7 +81,7 @@ function TeamPage() {
             <div
               role="group"
               aria-label="Team year"
-              className="inline-flex flex-wrap items-center justify-center gap-3 p-2 rounded-3xl bg-slate-100/80 border border-white/80 shadow-[inset_0_2px_4px_rgba(15,23,42,0.06),0_8px_24px_-6px_rgba(15,23,42,0.06)] backdrop-blur-lg"
+              className="inline-flex max-w-full flex-wrap items-center justify-center gap-1 rounded-full border border-slate-200 bg-slate-100/90 p-1.5 shadow-[inset_0_2px_4px_rgba(15,23,42,0.06),0_8px_24px_-6px_rgba(15,23,42,0.06)] backdrop-blur-lg"
             >
               {years.map((value) => {
                 const isActive = year === value;
@@ -91,23 +91,17 @@ function TeamPage() {
                     type="button"
                     aria-pressed={isActive}
                     onClick={() => setYear(value)}
-                    className={`group relative inline-flex items-center gap-2.5 rounded-2xl px-6 sm:px-7 py-3 text-sm font-bold transition-all duration-200 active:translate-y-0.5 active:border-b-[2px] ${
+                    className={`group relative inline-flex items-center gap-2.5 rounded-full px-5 py-2.5 text-sm font-bold transition-all duration-200 sm:px-7 ${
                       isActive
-                        ? "border border-white/40 border-t-2 border-t-white/60 border-b-[4px] border-b-[#b83d00] bg-gradient-to-b from-[#ff7e14] via-[#ff6815] to-[#e65300] text-white shadow-[0_10px_22px_-4px_rgba(255,115,0,0.5),0_4px_8px_-2px_rgba(255,115,0,0.3),inset_0_1.5px_0_0_rgba(255,255,255,0.5)]"
-                        : "border border-white/90 border-t-2 border-t-white border-b-[4px] border-b-slate-300 bg-white/90 text-slate-700 shadow-[0_4px_12px_rgba(15,23,42,0.06),inset_0_1px_0_rgba(255,255,255,1)] hover:-translate-y-1 hover:border-b-[5px] hover:border-b-ieee hover:text-ieee hover:shadow-[0_10px_20px_-4px_rgba(0,98,155,0.25)]"
+                        ? "bg-white text-heading shadow-[0_3px_8px_rgba(15,23,42,0.12),inset_0_1px_0_rgba(255,255,255,1)]"
+                        : "text-slate-600 hover:bg-white/70 hover:text-ieee"
                     }`}
                   >
-                    {isActive && (
-                      <span className="relative flex size-2">
-                        <span className="absolute inline-flex size-full animate-ping rounded-full bg-white opacity-75" />
-                        <span className="relative inline-flex size-2 rounded-full bg-white shadow-[0_0_6px_#ffffff]" />
-                      </span>
-                    )}
                     <span
-                      className={`font-display text-base sm:text-lg font-extrabold tracking-tight ${
+                      className={`font-display text-base font-extrabold tracking-tight sm:text-lg ${
                         isActive
-                          ? "drop-shadow-[0_1px_1px_rgba(0,0,0,0.25)] text-white"
-                          : "text-heading group-hover:text-ieee transition-colors"
+                          ? "text-heading"
+                          : "text-slate-600 transition-colors group-hover:text-ieee"
                       }`}
                     >
                       {value}

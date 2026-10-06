@@ -28,6 +28,7 @@ export const siteContentSchema: z.ZodType<SiteContent> = z.object({
     quoteBy: z.string().min(1),
     storyCards: z.array(z.object({ title: z.string().min(1), copy: z.string().min(1) })).optional(),
     values: z.array(z.object({ title: z.string().min(1), copy: z.string().min(1) })).optional(),
+    organizations: z.array(z.object({ title: z.string().min(1), copy: z.string().min(1) })).optional(),
     milestones: z.array(z.string().min(1)).optional(),
     pillars: z
       .array(

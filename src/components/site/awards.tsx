@@ -1,4 +1,4 @@
-import { Award, CheckCircle2, Trophy } from "lucide-react";
+import { Trophy } from "lucide-react";
 import { Reveal } from "./motion-primitives";
 import type { SiteContent } from "@/lib/site-content";
 import "./awards.css";
@@ -48,21 +48,13 @@ export function Awards({ content }: { content: SiteContent["awards"] }) {
             </div>
           </article>
 
-          <aside className="recognition-detail" aria-label="Award-winning program">
-            <div aria-hidden="true" className="recognition-detail-arc" />
-            <div className="recognition-detail-content">
-              <div className="recognition-icon">
-                <Award aria-hidden="true" />
-              </div>
-              <p className="recognition-program-label">Vision to Value</p>
-              <h4>The Business Analysis Experience Program</h4>
-              <p className="recognition-description">{content.description}</p>
-              <div className="recognition-verification">
-                <CheckCircle2 aria-hidden="true" />
-                <span>Verified Section Recognition</span>
-              </div>
-            </div>
-          </aside>
+          <figure className="recognition-photo">
+            <img
+              src="/awards/ieee-sri-lanka-section-awards-2025.png"
+              alt="IEEE LETs Talk representatives receiving the IEEE Sri Lanka Section Awards 2025 Best Industry Collaborative Project Award"
+            />
+            <figcaption>{content.description}</figcaption>
+          </figure>
         </Reveal>
       </div>
     </section>

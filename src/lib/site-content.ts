@@ -59,6 +59,7 @@ export type SiteContent = {
     mission?: string;
     storyCards?: Array<{ title: string; copy: string }>;
     values?: Array<{ title: string; copy: string }>;
+    organizations?: Array<{ title: string; copy: string }>;
     milestones?: string[];
     yearsOfImpact?: string;
     stats?: Array<{
@@ -211,6 +212,20 @@ export const defaultSiteContent: SiteContent = {
       {
         title: "Community Impact",
         copy: "We work with IEEE communities and industry partners to make career development more accessible across Sri Lanka.",
+      },
+    ],
+    organizations: [
+      {
+        title: "IEEE",
+        copy: "IEEE is a global professional organization dedicated to advancing technology for the benefit of humanity. It connects professionals, researchers, and students worldwide through innovation, collaboration, standards, publications, and technical communities.",
+      },
+      {
+        title: "IEEE Sri Lanka Section",
+        copy: "IEEE Sri Lanka Section connects students, academics, professionals, and industry experts across the country. With a strong network of chapters and student branches, it promotes technological advancement, professional development, and collaboration within Sri Lanka.",
+      },
+      {
+        title: "IEEE Young Professionals Sri Lanka",
+        copy: "IEEE Young Professionals Sri Lanka supports young technology professionals through initiatives focused on career development, innovation, leadership, networking, and professional growth. It forms part of the global IEEE Young Professionals network.",
       },
     ],
     milestones: [
