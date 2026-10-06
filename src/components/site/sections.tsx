@@ -9,6 +9,7 @@ import {
   BrainCircuit,
   CalendarDays,
   CheckCircle2,
+  Eye,
   Lightbulb,
   Mail,
   MessageCircle,
@@ -17,13 +18,14 @@ import {
   Network,
   Quote,
   Sparkles,
+  Target,
   Trophy,
   Users,
 } from "lucide-react";
 import { Reveal, RevealGroup, fadeUp } from "./motion-primitives";
 import { submitContactMessage } from "@/lib/content-actions";
 import { getPublishedGalleryAlbums } from "@/lib/gallery-albums";
-import type { SiteContent } from "@/lib/site-content";
+import { defaultSiteContent, type SiteContent } from "@/lib/site-content";
 import g1 from "@/assets/gallery-1.jpg";
 import g2 from "@/assets/gallery-2.jpg";
 import g3 from "@/assets/gallery-3.jpg";
@@ -105,6 +107,54 @@ export function About({ content }: { content: SiteContent["about"] }) {
             </div>
           </Reveal>
         </div>
+
+        <Reveal delay={0.15} className="mt-12">
+          <div className="grid gap-6 md:grid-cols-2">
+            <div className="card-surface relative isolate overflow-hidden p-7 shadow-soft sm:p-8">
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -top-12 -right-12 size-36 rounded-full bg-ieee-tint/70 blur-2xl"
+              />
+              <div className="flex items-center gap-3">
+                <span className="grid size-11 place-items-center rounded-2xl bg-ieee-tint text-ieee">
+                  <Eye className="size-5.5" />
+                </span>
+                <div>
+                  <span className="text-xs font-bold tracking-wider text-ieee uppercase">Vision</span>
+                  <h3 className="text-lg font-bold text-heading">Our Vision</h3>
+                </div>
+              </div>
+              <p className="mt-4 text-sm leading-relaxed text-body sm:text-base">
+                {content.vision ?? defaultSiteContent.about.vision}
+              </p>
+            </div>
+
+            <div className="card-surface relative isolate overflow-hidden p-7 shadow-soft sm:p-8">
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -top-12 -right-12 size-36 rounded-full bg-orange-tint/70 blur-2xl"
+              />
+              <div className="flex items-center gap-3">
+                <span className="grid size-11 place-items-center rounded-2xl bg-orange-tint text-orange">
+                  <Target className="size-5.5" />
+                </span>
+                <div>
+                  <span className="text-xs font-bold tracking-wider text-orange uppercase">Mission</span>
+                  <h3 className="text-lg font-bold text-heading">Our Mission</h3>
+                </div>
+              </div>
+              <p className="mt-4 text-sm leading-relaxed text-body sm:text-base">
+                {content.mission ?? defaultSiteContent.about.mission}
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2 border-t border-border/50 pt-3">
+                <span className="rounded-full bg-orange-tint px-2.5 py-0.5 text-[0.7rem] font-semibold text-orange">Leadership Skills</span>
+                <span className="rounded-full bg-orange-tint px-2.5 py-0.5 text-[0.7rem] font-semibold text-orange">Entrepreneurial Skills</span>
+                <span className="rounded-full bg-ieee-tint px-2.5 py-0.5 text-[0.7rem] font-semibold text-ieee">Technology Awareness</span>
+                <span className="rounded-full bg-ieee-tint px-2.5 py-0.5 text-[0.7rem] font-semibold text-ieee">Sustainability</span>
+              </div>
+            </div>
+          </div>
+        </Reveal>
 
         <RevealGroup className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {content.pillars.map((p) => {

@@ -6,6 +6,8 @@ import {
   ArrowRight,
   Award,
   BrainCircuit,
+  Compass,
+  Eye,
   Rocket,
   Link2,
   Trophy,
@@ -60,6 +62,90 @@ function AboutUsPage() {
       <SiteNav />
       <AboutOverview content={content.about} stats={content.hero.stats} />
 
+      <section aria-labelledby="vision-mission-heading" className="relative border-y border-border/60 bg-gradient-to-b from-[#f8fbff] to-white py-20 lg:py-28">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8">
+          <Reveal className="mx-auto max-w-2xl text-center">
+            <span className="section-eyebrow">Direction & Purpose</span>
+            <h2 id="vision-mission-heading" className="mt-4 text-3xl font-bold tracking-tight text-[#061025] sm:text-4xl lg:text-5xl">
+              Our Vision & Mission
+            </h2>
+            <p className="mt-4 text-base leading-relaxed text-body sm:text-lg">
+              The strategic vision and foundational mission driving professional excellence across Sri Lanka.
+            </p>
+          </Reveal>
+
+          <div className="mt-14 grid gap-8 md:grid-cols-2">
+            <Reveal delay={0.1}>
+              <div className="relative isolate flex h-full flex-col justify-between overflow-hidden rounded-3xl border border-[#dceafa] bg-white p-8 shadow-[0_4px_24px_-10px_rgba(0,98,155,0.12)] transition-all duration-300 hover:border-ieee/40 hover:shadow-[0_12px_36px_-12px_rgba(0,98,155,0.18)] sm:p-10">
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -top-16 -right-16 size-48 rounded-full bg-ieee-tint/70 blur-3xl"
+                />
+                <div>
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="grid size-14 place-items-center rounded-2xl bg-ieee-tint text-ieee shadow-sm">
+                      <Eye className="size-7" />
+                    </span>
+                    <span className="rounded-full border border-ieee/30 bg-[#eaf6ff] px-3.5 py-1 text-xs font-bold tracking-wider text-ieee uppercase">
+                      Vision
+                    </span>
+                  </div>
+                  <h3 className="mt-6 text-2xl font-bold tracking-tight text-[#061025] sm:text-3xl">
+                    Our Vision
+                  </h3>
+                  <p className="mt-4 text-base leading-relaxed text-body sm:text-lg">
+                    {content.about.vision ?? defaultSiteContent.about.vision}
+                  </p>
+                </div>
+                <div className="mt-8 border-t border-[#eaf2fb] pt-5">
+                  <span className="text-xs font-semibold tracking-wider text-ieee uppercase">
+                    Core Focus • Timely Knowledge & Sri Lankan Industry
+                  </span>
+                </div>
+              </div>
+            </Reveal>
+
+            <Reveal delay={0.2}>
+              <div className="relative isolate flex h-full flex-col justify-between overflow-hidden rounded-3xl border border-[#ffeedf] bg-white p-8 shadow-[0_4px_24px_-10px_rgba(255,104,21,0.12)] transition-all duration-300 hover:border-orange/40 hover:shadow-[0_12px_36px_-12px_rgba(255,104,21,0.18)] sm:p-10">
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -top-16 -right-16 size-48 rounded-full bg-orange-tint/70 blur-3xl"
+                />
+                <div>
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="grid size-14 place-items-center rounded-2xl bg-orange-tint text-orange shadow-sm">
+                      <Target className="size-7" />
+                    </span>
+                    <span className="rounded-full border border-orange/30 bg-[#fff4eb] px-3.5 py-1 text-xs font-bold tracking-wider text-orange uppercase">
+                      Mission
+                    </span>
+                  </div>
+                  <h3 className="mt-6 text-2xl font-bold tracking-tight text-[#061025] sm:text-3xl">
+                    Our Mission
+                  </h3>
+                  <p className="mt-4 text-base leading-relaxed text-body sm:text-lg">
+                    {content.about.mission ?? defaultSiteContent.about.mission}
+                  </p>
+                </div>
+                <div className="mt-8 flex flex-wrap gap-2 border-t border-[#fdefdf] pt-5">
+                  <span className="rounded-full bg-orange-tint px-3 py-1 text-xs font-semibold text-orange">
+                    Leadership Skills
+                  </span>
+                  <span className="rounded-full bg-orange-tint px-3 py-1 text-xs font-semibold text-orange">
+                    Entrepreneurial Skills
+                  </span>
+                  <span className="rounded-full bg-ieee-tint px-3 py-1 text-xs font-semibold text-ieee">
+                    Technology Awareness
+                  </span>
+                  <span className="rounded-full bg-ieee-tint px-3 py-1 text-xs font-semibold text-ieee">
+                    Sustainability
+                  </span>
+                </div>
+              </div>
+            </Reveal>
+          </div>
+        </div>
+      </section>
 
       <section aria-labelledby="who-we-are-heading" className="relative py-20 lg:py-28">
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
@@ -103,7 +189,7 @@ function AboutUsPage() {
           </Reveal>
           <RevealGroup className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {(content.about.values ?? defaultSiteContent.about.values ?? []).map((value, index) => {
-              const Icon = valueIcons[index % valueIcons.length];
+              const Icon = valueIcons[index % valueIcons.length]!;
               return (
                 <motion.article key={value.title} variants={fadeUp} className="card-surface p-7">
                   <span className="grid size-12 place-items-center rounded-2xl bg-orange-tint text-orange">
@@ -129,7 +215,7 @@ function AboutUsPage() {
           </div>
           <ol className="relative space-y-4 border-l-2 border-[#dceafa] pl-6 sm:pl-8">
             {(content.about.milestones?.length ? content.about.milestones : defaultSiteContent.about.milestones ?? []).map((item, index) => {
-              const Icon = journeyIcons[index % journeyIcons.length];
+              const Icon = journeyIcons[index % journeyIcons.length]!;
               const warm = index % 2 === 1;
               return (
                 <li key={item} className="relative">
