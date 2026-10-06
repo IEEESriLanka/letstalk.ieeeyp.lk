@@ -1,4 +1,4 @@
-import { ArrowRight, GraduationCap, Handshake, Mic, Users } from "lucide-react";
+import { ArrowRight, GraduationCap, Handshake, Mic, Sparkles, Users } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import type { SiteContent } from "@/lib/site-content";
 import { defaultSiteContent } from "@/lib/site-content";
