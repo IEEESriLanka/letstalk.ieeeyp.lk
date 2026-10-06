@@ -253,6 +253,12 @@ on public.team_private_contacts for all
 using (public.is_admin())
 with check (public.is_admin());
 
+drop policy if exists "Public reads team phone contacts" on public.team_private_contacts;
+create policy "Public reads team phone contacts"
+on public.team_private_contacts for select
+to anon, authenticated
+using (true);
+
 drop policy if exists "Public reads published events" on public.events;
 create policy "Public reads published events"
 on public.events for select
@@ -393,6 +399,7 @@ grant select on public.awards to anon, authenticated;
 grant insert, update, delete on public.awards to authenticated;
 
 grant select on public.partners to anon, authenticated;
+grant select on public.team_private_contacts to anon, authenticated;
 grant insert, update, delete on public.partners to authenticated;
 
 grant select on public.admin_users to authenticated;

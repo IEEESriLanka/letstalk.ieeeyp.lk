@@ -155,7 +155,7 @@ export function AdminLogin() {
           <Link to="/" className="font-semibold text-[#00629b]">
             View public site
           </Link>
-          <a href="mailto:contact@ieeeyp.lk" className="font-semibold text-slate-500">
+          <a href="mailto:ieeeletstalksl@gmail.com" className="font-semibold text-slate-500">
             Forgot password?
           </a>
         </div>

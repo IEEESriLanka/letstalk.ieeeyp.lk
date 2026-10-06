@@ -50,7 +50,7 @@ export function Awards({ content }: { content: SiteContent["awards"] }) {
 
           <figure className="recognition-photo">
             <img
-              src="/awards/ieee-sri-lanka-section-awards-2025.png"
+              src={content.imageUrl ?? "/awards/ieee-sri-lanka-section-awards-2025.png"}
               alt="IEEE LETs Talk representatives receiving the IEEE Sri Lanka Section Awards 2025 Best Industry Collaborative Project Award"
             />
             <figcaption>{content.description}</figcaption>

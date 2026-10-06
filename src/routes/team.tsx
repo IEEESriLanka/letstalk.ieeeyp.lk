@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "motion/react";
-import { ArrowRight, Linkedin, Mail } from "lucide-react";
+import { ArrowRight, Linkedin, Mail, Phone } from "lucide-react";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteNav } from "@/components/site/site-nav";
 import { Reveal, RevealGroup, fadeUp } from "@/components/site/motion-primitives";
@@ -34,25 +34,21 @@ function TeamPage() {
   const years = [...new Set(teams.map((team) => team.year))].sort().reverse();
   const latestYear = years[0] ?? String(new Date().getFullYear());
   const year = selectedYear ?? latestYear;
+  const isViceChair = (role: string) => /\b(?:vc|vice[\s-]*chair)\b/i.test(role);
   const currentMembers = [...(teams.find((team) => team.year === year)?.members ?? [])].sort((a, b) => {
     const roleRank = (role: string) => {
       const normalized = role.toLowerCase();
-      if (normalized.includes("vice chair")) return 2;
-      if (normalized.includes("chair")) return 0;
+      if (normalized.includes("chair") && !isViceChair(role)) return 0;
       if (normalized.includes("secretary")) return 1;
-      if (normalized.includes("coordinator")) return 3;
-      return 4;
+      if (isViceChair(role)) return 2;
+      return 3;
     };
     return roleRank(a.role) - roleRank(b.role);
   });
-  const leadership = currentMembers.filter((member) => /chair|secretary/i.test(member.role) && !/vice chair/i.test(member.role));
-  const coLeaders = currentMembers.filter((member) => /vice chair/i.test(member.role));
+  const leadership = currentMembers.filter((member) => /chair|secretary/i.test(member.role) && !isViceChair(member.role));
+  const coLeaders = currentMembers.filter((member) => isViceChair(member.role));
   const otherMembers = currentMembers.filter((member) => !leadership.includes(member) && !coLeaders.includes(member));
   const memberRows = [leadership, coLeaders, otherMembers].filter((row) => row.length > 0);
-  const pastTeams = teams
-    .filter((team) => team.year < latestYear)
-    .sort((a, b) => b.year.localeCompare(a.year));
-
   return (
     <main id="top" className="min-h-screen overflow-hidden bg-background text-body">
       <SiteNav />
@@ -193,44 +189,20 @@ function TeamPage() {
                         <Mail className="size-4" />
                       </a>
                     )}
+                    {member.phone && (
+                      <a
+                        href={`tel:${member.phone}`}
+                        aria-label={`Call ${member.name}`}
+                        className="grid size-9 place-items-center rounded-full border border-white/80 border-b-2 border-b-slate-300/80 bg-white/80 text-body shadow-xs backdrop-blur-md transition-all hover:-translate-y-0.5 hover:border-ieee hover:border-b-ieee hover:text-ieee hover:shadow-sm active:translate-y-0 active:border-b"
+                      >
+                        <Phone className="size-4" />
+                      </a>
+                    )}
                   </div>
                 </div>
               </motion.article>
             ))}
           </RevealGroup>)}
-          </div>
-        </div>
-      </section>
-
-      <section id="past-members" className="bg-background py-20 lg:py-28">
-        <div className="mx-auto max-w-6xl px-5">
-          <Reveal className="max-w-2xl">
-            <span className="section-eyebrow">Past Members</span>
-            <h2 className="mt-5 text-3xl leading-tight font-bold text-heading sm:text-4xl">
-              Honoring our past teams.
-            </h2>
-            <p className="mt-4 text-base leading-relaxed text-body">
-              Each year added a new layer to the LETs Talk journey through planning, delivery, and
-              volunteer leadership.
-            </p>
-          </Reveal>
-
-          <div className="mt-10 flex flex-wrap gap-3">
-            {pastTeams.map((team) => (
-              <a
-                key={team.year}
-                href="#current-team"
-                onClick={() => setYear(team.year)}
-                className="group inline-flex items-center gap-2.5 rounded-2xl border border-white/90 border-t-2 border-t-white border-b-[4px] border-b-slate-300 bg-white/90 px-5 py-3 font-semibold text-slate-700 shadow-[0_4px_12px_rgba(15,23,42,0.06),inset_0_1px_0_rgba(255,255,255,1)] backdrop-blur-md transition-all duration-200 hover:-translate-y-1 hover:border-b-[5px] hover:border-b-ieee hover:text-ieee hover:shadow-[0_10px_20px_-4px_rgba(0,98,155,0.25)] active:translate-y-0.5 active:border-b-[2px]"
-              >
-                <span className="font-display text-base font-extrabold text-heading transition-colors group-hover:text-ieee">
-                  {team.year}
-                </span>
-                <span className="rounded-full bg-slate-100 border border-slate-200/80 px-2 py-0.5 font-mono text-xs font-bold text-slate-500 transition-colors group-hover:border-ieee/30 group-hover:bg-ieee-tint group-hover:text-ieee">
-                  {team.members.length} members
-                </span>
-              </a>
-            ))}
           </div>
         </div>
       </section>

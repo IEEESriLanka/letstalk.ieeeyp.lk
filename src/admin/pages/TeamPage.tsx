@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Edit, Plus, Save, Trash2 } from "lucide-react";
+import { Edit, Phone, Plus, Save, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { AdminLayout } from "@/admin/components/AdminLayout";
 import { AdminModal, ConfirmDialog, ErrorState, FormField, ImageUploader, LoadingSkeleton, fieldClass, primaryButtonClass } from "@/admin/components/AdminPrimitives";
@@ -193,7 +193,19 @@ function MemberEditor({ member, year, phone, onClose, onSave }: {
         <FormField label="Name" required><input required className={fieldClass} value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} /></FormField>
         <FormField label="Position" required><input required className={fieldClass} value={form.role} onChange={(event) => setForm({ ...form, role: event.target.value })} /></FormField>
         <FormField label="LinkedIn profile"><input type="url" placeholder="https://www.linkedin.com/in/..." className={fieldClass} value={form.linkedinUrl ?? ""} onChange={(event) => setForm({ ...form, linkedinUrl: event.target.value })} /></FormField>
-        <FormField label="Phone number (admin only)"><input type="tel" autoComplete="tel" className={fieldClass} value={privatePhone} onChange={(event) => setPrivatePhone(event.target.value)} /></FormField>
+        <FormField label="Phone number (admin only)">
+          <div className="relative">
+            <Phone aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-slate-400" />
+            <input
+              type="tel"
+              autoComplete="tel"
+              placeholder="+94 7X XXX XXXX"
+              className={`${fieldClass} pl-10`}
+              value={privatePhone}
+              onChange={(event) => setPrivatePhone(event.target.value)}
+            />
+          </div>
+        </FormField>
         <FormField label="Photo"><ImageUploader key={photoVersion} value={form.imageUrl ?? null} onFile={setFile} disabled={saving} /></FormField>
         {(form.imageUrl || file) && <button type="button" className="flex items-center gap-2 text-sm text-red-700" onClick={() => { setFile(null); setForm({ ...form, imageUrl: null }); setPhotoVersion((value) => value + 1); }}><Trash2 className="size-4" />Remove photo</button>}
         {error && <p role="alert" className="text-sm text-red-700">{error}</p>}

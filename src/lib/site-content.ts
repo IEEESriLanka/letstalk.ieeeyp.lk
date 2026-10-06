@@ -7,6 +7,7 @@ export type TeamMember = {
   imagePosition?: string | null;
   linkedinUrl?: string | null;
   email?: string | null;
+  phone?: string | null;
 };
 
 export type YearTeam = { year: string; members: TeamMember[] };
@@ -105,6 +106,7 @@ export type SiteContent = {
     program: string;
     description: string;
     label: string;
+    imageUrl?: string | null;
   };
   partners: string[];
   videoLinks?: Array<{ url: string; title: string }>;
@@ -153,7 +155,7 @@ export type ContactMessage = {
 
 export const defaultSiteContent: SiteContent = {
   hero: {
-    eyebrow: "IEEE Young Professionals Sri Lanka",
+    eyebrow: "Professional Development Initiative",
     title: "Where Future Professionals Meet",
     highlightedTitle: "Industry Leaders",
     description:
@@ -385,6 +387,7 @@ export const defaultSiteContent: SiteContent = {
     description:
       "The recognition celebrates our success in bridging the gap between academia and industry through practical, experience-driven learning, meaningful industry collaboration, and career-focused skill development.",
     label: "Award Winner",
+    imageUrl: "/awards/ieee-sri-lanka-section-awards-2025.png",
   },
   partners: [
     "IEEE Sri Lanka Section",
@@ -401,7 +404,7 @@ export const defaultSiteContent: SiteContent = {
     secondaryCta: "Explore Events",
   },
   contact: {
-    email: "contact@ieeeyp.lk",
+    email: "ieeeletstalksl@gmail.com",
     whatsappLabel: "Official WhatsApp Channel",
     organization: "IEEE Young Professionals Sri Lanka",
     copy: "Reach out to propose a session topic, collaborate as an industry partner, or connect with the IEEE Young Professionals Sri Lanka team.",

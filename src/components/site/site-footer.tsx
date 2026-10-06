@@ -1,4 +1,4 @@
-import { Linkedin, Twitter, Instagram, Youtube, Mail, MessageCircle } from "lucide-react";
+import { Linkedin, Twitter, Instagram, Youtube, Mail } from "lucide-react";
 import letsTalkLogo from "@/assets/lets-talk-logo.png";
 
 const groups: Array<{
@@ -36,7 +36,7 @@ const groups: Array<{
   },
 ];
 
-export function SiteFooter({ email = "contact@ieeeyp.lk" }: { email?: string }) {
+export function SiteFooter({ email = "ieeeletstalksl@gmail.com" }: { email?: string }) {
   return (
     <footer className="relative overflow-hidden bg-ieee-deep text-white/70">
       <div
@@ -67,7 +67,11 @@ export function SiteFooter({ email = "contact@ieeeyp.lk" }: { email?: string }) 
             </p>
             <div className="mt-6 flex gap-2">
               {[
-                { icon: MessageCircle, href: "#whatsapp", label: "WhatsApp" },
+                {
+                  icon: WhatsAppIcon,
+                  href: "https://whatsapp.com/channel/0029VbDKy6v3WHTaI7YQye33",
+                  label: "WhatsApp",
+                },
                 { icon: Linkedin, href: "#contact", label: "LinkedIn" },
                 { icon: Twitter, href: "#contact", label: "Twitter" },
                 { icon: Instagram, href: "#contact", label: "Instagram" },
@@ -113,5 +117,23 @@ export function SiteFooter({ email = "contact@ieeeyp.lk" }: { email?: string }) 
         </div>
       </div>
     </footer>
+  );
+}
+
+function WhatsAppIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M20.2 11.4a8.1 8.1 0 0 1-11.9 7.1L4 20l1.5-4.1A8.1 8.1 0 1 1 20.2 11.4Z" />
+      <path d="M8.2 8.4c.2-.4.4-.4.7-.4h.5c.2 0 .4.1.5.4l.7 1.7c.1.2.1.4-.1.6l-.6.7c.6 1.1 1.5 2 2.6 2.6l.7-.6c.2-.2.4-.2.6-.1l1.7.7c.3.1.4.3.4.5v.5c0 .3 0 .5-.4.7-.4.2-1 .3-1.4.2-2.3-.5-5.7-3.9-6.2-6.2-.1-.5 0-1 .3-1.5Z" />
+    </svg>
   );
 }

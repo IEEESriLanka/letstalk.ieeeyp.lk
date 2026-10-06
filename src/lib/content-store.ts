@@ -84,6 +84,7 @@ export const siteContentSchema: z.ZodType<SiteContent> = z.object({
     program: z.string().min(1),
     description: z.string().min(1),
     label: z.string().min(1),
+    imageUrl: z.string().nullable().optional(),
   }),
   partners: z.array(z.string().min(1)).min(1),
   videoLinks: z
@@ -162,6 +163,66 @@ export const contactMessageSchema = z.object({
   message: z.string().max(3000).optional().default(""),
 });
 
+const contactNotificationRecipient = "ieeeletstalksl@gmail.com";
+
+function escapeHtml(value: string) {
+  return value.replace(
+    /[&<>"']/g,
+    (character) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      })[character] ?? character,
+  );
+}
+
+async function sendContactNotification(input: z.infer<typeof contactMessageSchema>) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.RESEND_FROM_EMAIL;
+  if (!apiKey || !from) {
+    throw new Error("Contact email delivery is not configured on the server.");
+  }
+
+  const topic = input.topic || "General inquiry";
+  const message = input.message || "(No message provided)";
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from,
+      to: [contactNotificationRecipient],
+      reply_to: input.email,
+      subject: `New LETs Talk contact: ${topic}`,
+      text: [
+        `Name: ${input.name}`,
+        `Email: ${input.email}`,
+        `Topic: ${topic}`,
+        "",
+        message,
+      ].join("\n"),
+      html: `
+        <h2>New IEEE LETs Talk contact message</h2>
+        <p><strong>Name:</strong> ${escapeHtml(input.name)}</p>
+        <p><strong>Email:</strong> ${escapeHtml(input.email)}</p>
+        <p><strong>Topic:</strong> ${escapeHtml(topic)}</p>
+        <p><strong>Message:</strong></p>
+        <p>${escapeHtml(message).replace(/\n/g, "<br />")}</p>
+      `,
+    }),
+  });
+
+  if (!response.ok) {
+    const details = await response.text();
+    throw new Error(`Contact email delivery failed: ${details}`);
+  }
+}
+
 function getSupabase() {
   const url =
     process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL;
@@ -190,7 +251,7 @@ export async function readSiteContent(): Promise<SiteContent> {
   const supabase = getSupabase();
   if (!supabase) return defaultSiteContent;
 
-  const [site, events, gallery, awards, partners, heroBackgrounds] = await Promise.all([
+  const [site, events, gallery, awards, partners, heroBackgrounds, teamContacts] = await Promise.all([
     supabase.from("site_content").select("content").eq("id", "site").maybeSingle(),
     supabase
       .from("events")
@@ -216,6 +277,7 @@ export async function readSiteContent(): Promise<SiteContent> {
       limit: 1000,
       sortBy: { column: "created_at", order: "asc" },
     }),
+    supabase.from("team_private_contacts").select("year,member_name,phone"),
   ]);
 
   if (site.error) throw new Error(site.error.message);
@@ -224,14 +286,35 @@ export async function readSiteContent(): Promise<SiteContent> {
   if (awards.error) throw new Error(awards.error.message);
   if (partners.error) throw new Error(partners.error.message);
   if (heroBackgrounds.error) throw new Error(heroBackgrounds.error.message);
+  if (teamContacts.error) throw new Error(teamContacts.error.message);
 
   const base = mergeContent(
     site.data?.content ? siteContentSchema.parse(site.data.content) : defaultSiteContent,
   );
   const award = awards.data?.[0];
+  const phoneByMember = new Map(
+    (teamContacts.data ?? []).map((contact) => [`${contact.year}:${contact.member_name}`, contact.phone]),
+  );
+  const teamPage = base.teamPage
+    ? {
+        ...base.teamPage,
+        yearlyTeams: base.teamPage.yearlyTeams?.map((team) => ({
+          ...team,
+          members: team.members.map((member) => ({
+            ...member,
+            phone: phoneByMember.get(`${team.year}:${member.name}`) ?? null,
+          })),
+        })),
+        currentMembers: base.teamPage.currentMembers.map((member) => ({
+          ...member,
+          phone: phoneByMember.get(`2026:${member.name}`) ?? null,
+        })),
+      }
+    : base.teamPage;
 
   return {
     ...base,
+    teamPage,
     hero: {
       ...base.hero,
       backgroundImages: (heroBackgrounds.data ?? [])
@@ -248,6 +331,7 @@ export async function readSiteContent(): Promise<SiteContent> {
           awardName: award.title,
           description: award.description,
           label: award.award_year ? String(award.award_year) : base.awards.label,
+          imageUrl: award.image_url ?? base.awards.imageUrl,
         }
       : base.awards,
     events: (events.data ?? []).map((event) => ({
@@ -314,6 +398,7 @@ export async function addContactMessage(input: unknown) {
     message: parsed.message || "",
   });
   if (error) throw new Error(error.message);
+  await sendContactNotification(parsed);
   return { ok: true };
 }
 

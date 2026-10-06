@@ -619,6 +619,8 @@ export { Awards } from "./awards";
 
 export { Partners } from "./partner-marquee";
 
+const whatsappChannelUrl = "https://whatsapp.com/channel/0029VbDKy6v3WHTaI7YQye33";
+
 export function StayConnected({ content }: { content: SiteContent["connected"] }) {
   return (
     <section id="whatsapp" className="bg-background px-5 py-20">
@@ -645,7 +647,9 @@ export function StayConnected({ content }: { content: SiteContent["connected"] }
             </p>
             <div className="mt-9 flex flex-wrap justify-center gap-4">
               <a
-                href="#contact"
+                href={whatsappChannelUrl}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="group inline-flex items-center gap-2.5 rounded-full bg-[image:var(--gradient-orange)] px-7 py-3.5 text-sm font-semibold text-white shadow-glow transition-transform duration-300 hover:-translate-y-0.5"
               >
                 <MessageCircle className="size-4.5" />
@@ -712,7 +716,18 @@ export function Contact({ content }: { content: SiteContent["contact"] }) {
                   <c.icon className="size-4.5" />
                 </div>
                 <div>
-                  <span className="block text-sm font-bold text-heading">{c.label}</span>
+                  {c.icon === MessageCircle ? (
+                    <a
+                      href={whatsappChannelUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block text-sm font-bold text-heading transition-colors hover:text-ieee"
+                    >
+                      {c.label}
+                    </a>
+                  ) : (
+                    <span className="block text-sm font-bold text-heading">{c.label}</span>
+                  )}
                   <span className="text-xs text-body">{c.desc}</span>
                 </div>
               </div>
@@ -739,7 +754,11 @@ export function Contact({ content }: { content: SiteContent["contact"] }) {
                   form.reset();
                   alert("Thank you! Your message has been received.");
                 })
-                .catch(() => alert("Sorry, your message could not be sent. Please try again."));
+                .catch((error: unknown) => {
+                  const message =
+                    error instanceof Error ? error.message : "Unknown contact form error.";
+                  alert(`Sorry, your message could not be sent.\n\n${message}`);
+                });
             }}
           >
             <div className="grid gap-4 sm:grid-cols-2">

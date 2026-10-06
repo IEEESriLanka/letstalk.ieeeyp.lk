@@ -17,7 +17,7 @@ export function AboutOverview({
   const statIcons = [Mic, Handshake, Users, GraduationCap];
 
   return (
-    <section id="about" aria-labelledby="about-heading" className="relative pt-32 pb-20 lg:pt-40 lg:pb-28">
+    <section id="about" aria-labelledby="about-heading" className="relative pt-20 pb-20 lg:pt-28 lg:pb-28">
       {/* Subtle brand ambient accents */}
       <div
         aria-hidden="true"

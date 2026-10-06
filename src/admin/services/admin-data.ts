@@ -225,11 +225,42 @@ export async function getSiteSettings(): Promise<SiteContent> {
 }
 
 export async function saveSiteSettings(content: SiteContent): Promise<SiteContent> {
+  const { data: existing, error: readError } = await supabase
+    .from("site_content")
+    .select("content")
+    .eq("id", "site")
+    .maybeSingle();
+  if (readError) throw new Error(readError.message);
+
+  const existingContent = existing?.content as SiteContent | undefined;
+  const existingMembers = new Map(
+    (existingContent?.teamPage?.yearlyTeams ?? []).flatMap((team) =>
+      team.members.map((member) => [`${team.year}:${member.name}`, member.imageUrl] as const),
+    ),
+  );
+  const contentToSave: SiteContent = {
+    ...content,
+    teamPage: content.teamPage
+      ? {
+          ...content.teamPage,
+          yearlyTeams: content.teamPage.yearlyTeams?.map((team) => ({
+            ...team,
+            members: team.members.map((member) => ({
+              ...member,
+              imageUrl:
+                member.imageUrl === undefined
+                  ? existingMembers.get(`${team.year}:${member.name}`) ?? null
+                  : member.imageUrl,
+            })),
+          })),
+        }
+      : content.teamPage,
+  };
   const { error } = await supabase
     .from("site_content")
-    .upsert({ id: "site", content, updated_at: new Date().toISOString() });
+    .upsert({ id: "site", content: contentToSave, updated_at: new Date().toISOString() });
   if (error) throw new Error(error.message);
-  return content;
+  return contentToSave;
 }
 
 export async function listAdminAccounts(): Promise<AdminAccount[]> {
