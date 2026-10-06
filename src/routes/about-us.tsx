@@ -41,7 +41,7 @@ function AboutUsPage() {
   return (
     <main id="top" className="min-h-screen overflow-hidden bg-background text-body">
       <SiteNav />
-      <AboutOverview content={content.about} stats={content.hero.stats} />
+      <AboutOverview content={content.about} />
 
       <section aria-labelledby="vision-mission-heading" className="relative border-y border-border/60 bg-gradient-to-b from-[#f8fbff] to-white py-20 lg:py-28">
         <div className="mx-auto max-w-7xl px-5 sm:px-8">

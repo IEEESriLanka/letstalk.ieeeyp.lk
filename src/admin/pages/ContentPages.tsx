@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Edit, Eye, EyeOff, Plus, Trash2, UploadCloud } from "lucide-react";
-import { FormEvent, useState, type ReactNode } from "react";
+import { FormEvent, useEffect, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { AdminLayout } from "@/admin/components/AdminLayout";
 import {
@@ -476,12 +476,28 @@ function SimpleFormModal<T extends SimpleRecord>({
   const queryClient = useQueryClient();
   const [form, setForm] = useState<Partial<T>>(record ?? ({ published: false } as Partial<T>));
   const [file, setFile] = useState<File | null>(null);
+  useEffect(() => {
+    if (open) {
+      setForm(record ?? ({ published: false } as Partial<T>));
+      setFile(null);
+    }
+  }, [open, record]);
   const mutation = useMutation({
     mutationFn: async () => {
       validateRequired(form.title, "Title");
       validateRequired(form.description, "Description");
       const imageUrl = file ? await uploadImage(bucket, file, folder) : form[imageField];
-      return save({ ...form, [imageField]: imageUrl } as Partial<T>);
+      const saved = await save({ ...form, [imageField]: imageUrl } as Partial<T>);
+
+      if (
+        file &&
+        record?.[imageField] &&
+        record[imageField] !== imageUrl
+      ) {
+        await deleteImage(bucket, String(record[imageField]));
+      }
+
+      return saved;
     },
     onSuccess: () => {
       toast.success("Content saved.");

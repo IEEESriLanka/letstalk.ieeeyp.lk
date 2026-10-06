@@ -6,6 +6,7 @@ import { Preloader } from "@/components/site/preloader";
 import { SiteNav } from "@/components/site/site-nav";
 import { MouseGlow } from "@/components/site/mouse-glow";
 import { Hero } from "@/components/site/hero";
+import { ImpactOverview } from "@/components/site/about-overview";
 import { LatestArticles } from "@/components/site/latest-articles";
 import { LatestVideos } from "@/components/site/latest-videos";
 import {
@@ -83,6 +84,7 @@ function Index() {
           </div>
         )}
         <Hero content={content.hero} />
+        <ImpactOverview content={content.about} />
         <Events events={content.events} />
         <PastSessions events={content.events} />
         <LatestArticles />
