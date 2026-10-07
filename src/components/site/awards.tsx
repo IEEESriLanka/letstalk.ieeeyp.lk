@@ -8,6 +8,8 @@ export function Awards({ content }: { content: SiteContent["awards"] }) {
   const awardTitle = highlightedEnding
     ? content.awardName.slice(0, -highlightedEnding.length).trim()
     : content.awardName;
+  const displayYear = content.label === "2024" || !content.label ? "2025" : content.label.replace(/\b2024\b/, "2025");
+  const displayProgram = content.program.replace(/^IEEE Sri Lanka Section Awards\s*[-–—:]\s*/i, "").trim();
 
   return (
     <section id="awards" aria-labelledby="awards-heading" className="recognition-section">
@@ -33,7 +35,7 @@ export function Awards({ content }: { content: SiteContent["awards"] }) {
               <div className="recognition-badge-row">
                 <span className="recognition-year">
                   <Trophy aria-hidden="true" />
-                  {content.label}
+                  {displayYear}
                 </span>
               </div>
               <p className="recognition-award-label">
@@ -44,7 +46,7 @@ export function Awards({ content }: { content: SiteContent["awards"] }) {
                 {awardTitle}
                 {highlightedEnding && <span>{highlightedEnding}</span>}
               </h3>
-              <p className="recognition-program">{content.program}</p>
+              <p className="recognition-program">{displayProgram}</p>
             </div>
           </article>
 

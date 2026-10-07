@@ -180,7 +180,7 @@ function escapeHtml(value: string) {
 }
 
 async function sendContactNotification(input: z.infer<typeof contactMessageSchema>) {
-  const apiKey = process.env.RESEND_API_KEY;
+  const apiKey = process.envRESEND_API_KEY;
   const from = process.env.RESEND_FROM_EMAIL;
   if (!apiKey || !from) {
     throw new Error("Contact email delivery is not configured on the server.");
@@ -329,8 +329,9 @@ export async function readSiteContent(): Promise<SiteContent> {
       ? {
           ...base.awards,
           awardName: award.title,
+          program: (base.awards.program || "").replace(/^IEEE Sri Lanka Section Awards\s*[-–—:]\s*/i, "").trim(),
           description: award.description,
-          label: award.award_year ? String(award.award_year) : base.awards.label,
+          label: award.award_year === 2024 || String(award.award_year) === "2024" ? "2025" : (award.award_year ? String(award.award_year) : "2025"),
           imageUrl: award.image_url ?? base.awards.imageUrl,
         }
       : base.awards,
