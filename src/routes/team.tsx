@@ -113,13 +113,32 @@ function TeamPage() {
             </p>
           )}
           <div className="mt-14 space-y-8">
-          {memberRows.map((row, rowIndex) => <RevealGroup key={`${year}-${rowIndex}`} className={`mx-auto grid w-full gap-5 ${rowIndex === 0 ? "max-w-2xl grid-cols-2" : rowIndex === 1 ? "max-w-5xl grid-cols-1 sm:grid-cols-3" : "max-w-6xl grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"}`}>
-            {row.map((member) => (
-              <motion.article
-                key={member.name}
-                variants={fadeUp}
-                className="group relative min-w-0 overflow-hidden rounded-3xl border border-white/80 border-b-[5px] border-b-slate-300/80 bg-white/70 shadow-[0_12px_30px_-6px_rgba(15,23,42,0.08),0_4px_8px_-2px_rgba(15,23,42,0.04),inset_0_1px_1px_0_rgba(255,255,255,0.95)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-2 hover:border-b-[5px] hover:border-b-orange hover:bg-white/85 hover:shadow-[0_24px_42px_-6px_rgba(255,115,0,0.24),0_10px_16px_-4px_rgba(15,23,42,0.06),inset_0_1px_1px_0_rgba(255,255,255,1)]"
+          {memberRows.map((row, rowIndex) => {
+            const isFourCol = row === otherMembers || rowIndex >= 2;
+            const isRemainderTwo = isFourCol && row.length % 4 === 2;
+
+            return (
+              <RevealGroup
+                key={`${year}-${rowIndex}`}
+                className={`mx-auto grid w-full gap-5 ${
+                  rowIndex === 0
+                    ? "max-w-2xl grid-cols-2"
+                    : rowIndex === 1
+                    ? "max-w-5xl grid-cols-1 sm:grid-cols-3"
+                    : "max-w-6xl grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+                }`}
               >
+                {row.map((member, memberIndex) => {
+                  const isCenteredPair = isRemainderTwo && memberIndex === row.length - 2;
+
+                  return (
+                    <motion.article
+                      key={member.name}
+                      variants={fadeUp}
+                      className={`group relative min-w-0 overflow-hidden rounded-3xl border border-white/80 border-b-[5px] border-b-slate-300/80 bg-white/70 shadow-[0_12px_30px_-6px_rgba(15,23,42,0.08),0_4px_8px_-2px_rgba(15,23,42,0.04),inset_0_1px_1px_0_rgba(255,255,255,0.95)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-2 hover:border-b-[5px] hover:border-b-orange hover:bg-white/85 hover:shadow-[0_24px_42px_-6px_rgba(255,115,0,0.24),0_10px_16px_-4px_rgba(15,23,42,0.06),inset_0_1px_1px_0_rgba(255,255,255,1)] ${
+                        isCenteredPair ? "lg:col-start-2" : ""
+                      }`}
+                    >
                 {/* Border Beam: Bold, radiant light line along the edge on hover */}
                 <div
                   aria-hidden
@@ -201,8 +220,11 @@ function TeamPage() {
                   </div>
                 </div>
               </motion.article>
-            ))}
-          </RevealGroup>)}
+            );
+          })}
+        </RevealGroup>
+      );
+    })}
           </div>
         </div>
       </section>
