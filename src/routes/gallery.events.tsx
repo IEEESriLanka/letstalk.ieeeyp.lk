@@ -39,7 +39,7 @@ function GalleryEventsPage() {
     <main id="top" className="min-h-screen overflow-hidden bg-background text-body">
       <SiteNav />
 
-      <section className="relative overflow-hidden bg-[linear-gradient(135deg,#f0f7ff_0%,#ffffff_50%,#fff7f2_100%)] pt-32 pb-20 text-heading border-b border-border/60 lg:pt-40 lg:pb-28">
+      {/* <section className="relative overflow-hidden bg-[linear-gradient(135deg,#f0f7ff_0%,#ffffff_50%,#fff7f2_100%)] pt-32 pb-20 text-heading border-b border-border/60 lg:pt-40 lg:pb-28">
         {heroImage ? (
           <img src={heroImage} alt="" className="absolute inset-0 size-full object-cover opacity-10 mix-blend-multiply" />
         ) : null}
@@ -93,7 +93,7 @@ function GalleryEventsPage() {
             </div>
           </Reveal>
         </div>
-      </section>
+      </section> */}
 
       <section className="bg-background py-20 lg:py-28">
         <div className="mx-auto max-w-6xl px-5">

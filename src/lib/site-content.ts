@@ -382,11 +382,10 @@ export const defaultSiteContent: SiteContent = {
   awards: {
     title: "Recognized for Creating Real Industry Impact.",
     awardName: "Best Industry Collaborative Project Award",
-    program:
-      "IEEE Sri Lanka Section Awards - Vision to Value - The Business Analysis Experience Program",
+    program: "Vision to Value - The Business Analysis Experience Program",
     description:
       "The recognition celebrates our success in bridging the gap between academia and industry through practical, experience-driven learning, meaningful industry collaboration, and career-focused skill development.",
-    label: "Award Winner",
+    label: "2025",
     imageUrl: "/awards/ieee-sri-lanka-section-awards-2025.png",
   },
   partners: [
