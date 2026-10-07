@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Menu, X } from "lucide-react";
 import letsTalkLogo from "@/assets/lets-talk-logo.png";
-import { useLocation } from "@tanstack/react-router";
+import { useLocation, useNavigate } from "@tanstack/react-router";
+import { scrollToHash } from "@/lib/scroll-utils";
 
 const links = [
   { label: "Home", href: "/#top" },
@@ -33,14 +34,34 @@ function NavLink({
 }) {
   const hash = getHrefHash(href);
   const pathname = useLocation({ select: (location) => location.pathname });
+  const navigate = useNavigate();
   const selected = hash
     ? (pathname === "/" && active === hash) || (hash === "#gallery" && pathname.startsWith("/gallery"))
     : pathname === href || (href !== "/" && pathname.startsWith(href));
 
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    onClick?.();
+    if (hash) {
+      e.preventDefault();
+      if (pathname === "/") {
+        try {
+          if (window.location.hash !== hash) {
+            window.history.pushState(null, "", hash);
+          }
+        } catch {
+          /* ignore */
+        }
+        scrollToHash(hash, true);
+      } else {
+        navigate({ to: "/", hash: hash.replace(/^#/, "") });
+      }
+    }
+  };
+
   return (
     <a
       href={href}
-      onClick={onClick}
+      onClick={handleClick}
       className={className}
       aria-current={selected ? "page" : undefined}
       data-active={selected ? "true" : undefined}
@@ -54,6 +75,7 @@ export function SiteNav() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState("#top");
+  const pathname = useLocation({ select: (location) => location.pathname });
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -64,20 +86,37 @@ export function SiteNav() {
 
   useEffect(() => {
     const sectionIds = links.map((link) => getHrefHash(link.href)).filter(Boolean);
-    const sections = sectionIds
-      .map((href) => document.querySelector(href))
-      .filter(Boolean) as Element[];
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-        if (visible) setActive(`#${visible.target.id}`);
-      },
-      { rootMargin: "-45% 0px -45% 0px", threshold: [0, 0.25, 0.5, 1] },
-    );
-    sections.forEach((s) => observer.observe(s));
-    return () => observer.disconnect();
+    let observer: IntersectionObserver | null = null;
+
+    const setupObserver = () => {
+      const sections = sectionIds
+        .map((href) => document.querySelector(href))
+        .filter(Boolean) as Element[];
+      if (!sections.length) return false;
+
+      observer?.disconnect();
+      observer = new IntersectionObserver(
+        (entries) => {
+          const visible = entries
+            .filter((e) => e.isIntersecting)
+            .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+          if (visible) setActive(`#${visible.target.id}`);
+        },
+        { rootMargin: "-30% 0px -30% 0px", threshold: [0, 0.25, 0.5] },
+      );
+      sections.forEach((s) => observer?.observe(s));
+      return true;
+    };
+
+    if (!setupObserver()) {
+      const timer = setTimeout(setupObserver, 250);
+      return () => {
+        clearTimeout(timer);
+        observer?.disconnect();
+      };
+    }
+
+    return () => observer?.disconnect();
   }, []);
 
   return (
@@ -87,7 +126,23 @@ export function SiteNav() {
           scrolled ? "glass-panel shadow-soft" : "border border-transparent bg-transparent"
         }`}
       >
-        <a href="/#top" className="group flex items-center gap-2.5">
+        <a
+          href="/#top"
+          onClick={(e) => {
+            if (pathname === "/") {
+              e.preventDefault();
+              try {
+                if (window.location.hash !== "#top") {
+                  window.history.pushState(null, "", "#top");
+                }
+              } catch {
+                /* ignore */
+              }
+              scrollToHash("#top", true);
+            }
+          }}
+          className="group flex items-center gap-2.5"
+        >
           <div className="grid size-10 place-items-center rounded-xl border border-white/80 bg-white/95 p-1 shadow-sm backdrop-blur-sm transition-transform duration-300 group-hover:scale-105">
             <img
               src={letsTalkLogo}

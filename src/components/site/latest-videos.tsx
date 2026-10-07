@@ -66,7 +66,7 @@ export function LatestVideos() {
     return id ? [{ id, title: video.title || "LETs Talk", url: `https://www.youtube.com/watch?v=${id}`, thumbnailUrl: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`, publishedAt: "", isShort: false }] : [];
   });
   return (
-    <section id="videos" aria-labelledby="videos-title" className="py-20 lg:py-28">
+    <section id="videos" aria-labelledby="videos-title" className="scroll-mt-24 py-20 lg:py-28">
       <div className="mx-auto max-w-7xl px-5">
         <Reveal className="mx-auto max-w-2xl text-center">
           <p className="text-xs font-semibold tracking-[0.16em] text-orange uppercase">

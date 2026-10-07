@@ -82,7 +82,7 @@ const journeyYears = ["2024", "2025", "2026"];
 
 export function About({ content }: { content: SiteContent["about"] }) {
   return (
-    <section id="about" className="relative overflow-hidden bg-ieee-tint py-24 lg:py-32">
+    <section id="about" className="relative scroll-mt-24 overflow-hidden bg-ieee-tint py-24 lg:py-32">
       <div
         aria-hidden
         className="absolute inset-0 bg-grid opacity-60 [mask-image:radial-gradient(60%_50%_at_50%_50%,black,transparent)]"
@@ -193,7 +193,7 @@ export function Events({ events }: { events: SiteContent["events"] }) {
     .sort((a, b) => a.dateLabel.localeCompare(b.dateLabel));
 
   return (
-    <section id="events" className="bg-background py-24 lg:py-32">
+    <section id="events" className="scroll-mt-24 bg-background py-24 lg:py-32">
       <div className="mx-auto max-w-6xl px-5">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <SectionHead
@@ -449,7 +449,7 @@ export function PastSessions({ events }: { events: SiteContent["events"] }) {
   const visibleEvents = pastEvents.slice(0, visibleCount);
 
   return (
-    <section id="journey" className="bg-orange-tint/40 py-24 lg:py-32">
+    <section id="journey" className="scroll-mt-24 bg-orange-tint/40 py-24 lg:py-32">
       <div className="mx-auto max-w-6xl px-5">
         <Reveal className="max-w-2xl">
           <span className="section-eyebrow">Milestones</span>
@@ -549,7 +549,7 @@ export function Gallery() {
   }, [visibleAlbums]);
 
   return (
-    <section id="gallery" className="bg-background py-24 lg:py-32">
+    <section id="gallery" className="scroll-mt-24 bg-background py-24 lg:py-32">
       <div className="mx-auto max-w-6xl px-5">
         <SectionHead
           center
@@ -677,7 +677,7 @@ export function StayConnected({ content }: { content: SiteContent["connected"] }
 
 export function Contact({ content }: { content: SiteContent["contact"] }) {
   return (
-    <section id="contact" className="relative overflow-hidden bg-ieee-tint py-24 lg:py-32">
+    <section id="contact" className="relative scroll-mt-24 overflow-hidden bg-ieee-tint py-24 lg:py-32">
       <div
         aria-hidden
         className="absolute -bottom-24 -left-16 size-[360px] rounded-full bg-[color-mix(in_oklab,var(--orange)_16%,transparent)] blur-[110px]"
@@ -698,7 +698,12 @@ export function Contact({ content }: { content: SiteContent["contact"] }) {
               {
                 icon: Mail,
                 label: "Email Us",
-                desc: "Official inquiries & proposals",
+                desc: (
+                  <>
+                    Mail us your inquiries & proposals at{" "}
+                    <span className="font-bold text-heading">{content.email}</span>
+                  </>
+                ),
                 href: `mailto:${content.email}`,
               },
               {

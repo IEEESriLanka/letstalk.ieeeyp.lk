@@ -60,7 +60,7 @@ export type SiteContent = {
     mission?: string;
     storyCards?: Array<{ title: string; copy: string }>;
     values?: Array<{ title: string; copy: string }>;
-    organizations?: Array<{ title: string; copy: string }>;
+    organizations?: Array<{ title: string; copy: string; logoUrl?: string | null }>;
     milestones?: string[];
     yearsOfImpact?: string;
     stats?: Array<{
@@ -156,11 +156,17 @@ export type ContactMessage = {
 export const defaultSiteContent: SiteContent = {
   hero: {
     eyebrow: "Professional Development Initiative",
-    title: "Where Future Professionals Meet",
-    highlightedTitle: "Industry Leaders",
+    title: "Leadership, Entrepreneurship,",
+    highlightedTitle: "Technology & Sustainability",
     description:
       "From inspiring leadership talks to hands-on workshops, IEEE LETs talk brings students and industry together to learn, collaborate, and create what's next. Experience real stories, real leaders, and real opportunities that shape the next generation of professionals with us.",
-    backgroundImages: [],
+    backgroundImages: [
+      "https://eesnqxheovublqojrgcu.supabase.co/storage/v1/object/public/gallery-images/hero-backgrounds/1790220746938.jpg.jpeg",
+      "https://eesnqxheovublqojrgcu.supabase.co/storage/v1/object/public/gallery-images/hero-backgrounds/WhatsApp%20Image%202026-10-08%20at%2003.01.45.jpeg",
+      "https://eesnqxheovublqojrgcu.supabase.co/storage/v1/object/public/gallery-images/hero-backgrounds/WhatsApp%20Image%202026-10-08%20at%2003.01.48.jpeg",
+      "https://eesnqxheovublqojrgcu.supabase.co/storage/v1/object/public/gallery-images/hero-backgrounds/ff42cb9e-9e87-45a7-82eb-83bc8a2ce8f1.png",
+      "https://eesnqxheovublqojrgcu.supabase.co/storage/v1/object/public/gallery-images/hero-backgrounds/WhatsApp%20Image%202026-10-08%20at%2003.01.43.jpeg",
+    ],
     stats: [
       { value: "50+", label: "Events" },
       { value: "4000+", label: "Participants" },
@@ -220,14 +226,17 @@ export const defaultSiteContent: SiteContent = {
       {
         title: "IEEE",
         copy: "IEEE is a global professional organization dedicated to advancing technology for the benefit of humanity. It connects professionals, researchers, and students worldwide through innovation, collaboration, standards, publications, and technical communities.",
+        logoUrl: "https://eesnqxheovublqojrgcu.supabase.co/storage/v1/object/public/IEEE-logos/ieee-logo.png",
       },
       {
         title: "IEEE Sri Lanka Section",
         copy: "IEEE Sri Lanka Section connects students, academics, professionals, and industry experts across the country. With a strong network of chapters and student branches, it promotes technological advancement, professional development, and collaboration within Sri Lanka.",
+        logoUrl: "https://eesnqxheovublqojrgcu.supabase.co/storage/v1/object/public/IEEE-logos/ieee-slsection-logo.png",
       },
       {
         title: "IEEE Young Professionals Sri Lanka",
         copy: "IEEE Young Professionals Sri Lanka supports young technology professionals through initiatives focused on career development, innovation, leadership, networking, and professional growth. It forms part of the global IEEE Young Professionals network.",
+        logoUrl: "https://eesnqxheovublqojrgcu.supabase.co/storage/v1/object/public/IEEE-logos/yp-logo.png",
       },
     ],
     milestones: [
