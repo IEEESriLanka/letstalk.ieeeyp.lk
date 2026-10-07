@@ -763,8 +763,7 @@ export function Contact({ content }: { content: SiteContent["contact"] }) {
             }}
           >
             <div className="mb-7">
-              <span className="section-eyebrow">LETs Talk</span>
-              <h3 className="mt-4 text-3xl font-bold tracking-tight text-heading">
+              <h3 className="text-3xl font-bold tracking-tight text-heading">
                 Start a <span className="text-gradient-orange">Conversation</span>
               </h3>
               <p className="mt-2 text-sm text-body">Send us a message and we’ll get back to you soon.</p>
