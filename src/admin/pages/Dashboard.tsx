@@ -62,9 +62,7 @@ export function Dashboard() {
       <section className="mt-6 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
         <div className="mb-5">
           <h2 className="text-lg font-bold text-slate-950">Recent Activity</h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Latest events, gallery uploads, and contact messages.
-          </p>
+          <p className="mt-1 text-sm text-slate-500">Latest events and contact messages.</p>
         </div>
 
         {activity.isLoading ? <LoadingSkeleton /> : null}
@@ -79,15 +77,6 @@ export function Dashboard() {
             <ActivityList
               title="Events"
               items={activity.data.events.map((item) => ({
-                id: item.id,
-                title: item.title,
-                meta: new Date(item.created_at).toLocaleDateString(),
-                status: <StatusBadge active={item.published} />,
-              }))}
-            />
-            <ActivityList
-              title="Gallery"
-              items={activity.data.gallery.map((item) => ({
                 id: item.id,
                 title: item.title,
                 meta: new Date(item.created_at).toLocaleDateString(),

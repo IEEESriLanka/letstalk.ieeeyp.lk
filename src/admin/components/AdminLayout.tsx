@@ -2,7 +2,6 @@ import { Link, Navigate, Outlet, useLocation } from "@tanstack/react-router";
 import {
   Bell,
   CalendarDays,
-  Database,
   GalleryHorizontalEnd,
   Home,
   History,
@@ -35,7 +34,6 @@ const navItems = [
   { label: "Partners", to: "/admin/partners", icon: UsersRound },
   { label: "Messages", to: "/admin/messages", icon: Inbox },
   { label: "Admin Manager", to: "/admin/admins", icon: ShieldCheck },
-  { label: "Database", to: "/admin/database", icon: Database },
 ] as const;
 
 export function ProtectedAdminRoute({ children }: { children?: ReactNode }) {
@@ -123,12 +121,14 @@ export function AdminLayout({
               </button>
               <div className="hidden items-center gap-3 rounded-md border border-slate-200 bg-white px-3 py-2 sm:flex">
                 <div className="flex size-8 items-center justify-center rounded-md bg-[#00629b] text-xs font-bold text-white">
-                  AD
+                  {access?.ok ? access.identity.name.slice(0, 2).toUpperCase() : "AD"}
                 </div>
                 <div>
-                  <p className="text-xs font-semibold text-slate-900">Administrator</p>
+                  <p className="text-xs font-semibold text-slate-900">
+                    {access?.ok ? access.identity.name : "Administrator"}
+                  </p>
                   <p className="text-xs text-slate-500">
-                    {access?.ok ? access.admin.role : "admin"}
+                    {access?.ok ? access.identity.email || access.admin.role : "admin"}
                   </p>
                 </div>
               </div>

@@ -171,6 +171,10 @@ function MemberEditor({ member, year, phone, onClose, onSave }: {
     try {
       const name = form.name.trim(), role = form.role.trim();
       if (!name || !role) throw new Error("Name and position are required.");
+      const email = form.email?.trim().toLowerCase() || null;
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        throw new Error("Enter a valid email address.");
+      }
       const linkedinUrl = form.linkedinUrl?.trim() || null;
       if (linkedinUrl) {
         const url = new URL(linkedinUrl);
@@ -181,8 +185,17 @@ function MemberEditor({ member, year, phone, onClose, onSave }: {
       const imageUrl = file ? await uploadImage("gallery-images", file, "team/" + year) : form.imageUrl ?? null;
       setForm((current) => ({ ...current, imageUrl })); setFile(null);
       await onSave(
-        { ...form, name, role, linkedinUrl, imageUrl, initials: name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase() },
-        privatePhone,
+        {
+          ...form,
+          name,
+          role,
+          email,
+          phone: privatePhone.trim() || null,
+          linkedinUrl,
+          imageUrl,
+          initials: name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase(),
+        },
+        privatePhone.trim() || null,
       );
     } catch (reason) { setError(reason instanceof Error ? reason.message : "Unable to save member."); }
     finally { setSaving(false); }
@@ -192,8 +205,18 @@ function MemberEditor({ member, year, phone, onClose, onSave }: {
       <fieldset disabled={saving} className="space-y-5">
         <FormField label="Name" required><input required className={fieldClass} value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} /></FormField>
         <FormField label="Position" required><input required className={fieldClass} value={form.role} onChange={(event) => setForm({ ...form, role: event.target.value })} /></FormField>
+        <FormField label="Public email address">
+          <input
+            type="email"
+            autoComplete="email"
+            placeholder="name@example.com"
+            className={fieldClass}
+            value={form.email ?? ""}
+            onChange={(event) => setForm({ ...form, email: event.target.value })}
+          />
+        </FormField>
         <FormField label="LinkedIn profile"><input type="url" placeholder="https://www.linkedin.com/in/..." className={fieldClass} value={form.linkedinUrl ?? ""} onChange={(event) => setForm({ ...form, linkedinUrl: event.target.value })} /></FormField>
-        <FormField label="Phone number (admin only)">
+        <FormField label="Public phone number">
           <div className="relative">
             <Phone aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-slate-400" />
             <input

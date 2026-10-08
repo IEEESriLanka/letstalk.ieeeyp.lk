@@ -7,7 +7,7 @@ import { SiteFooter } from "@/components/site/site-footer";
 import { SiteNav } from "@/components/site/site-nav";
 import { Reveal, RevealGroup, fadeUp } from "@/components/site/motion-primitives";
 import { getSiteContent } from "@/lib/content-actions";
-import { defaultSiteContent, getYearTeams } from "@/lib/site-content";
+import { defaultSiteContent, getYearTeams, isDatabaseImageUrl } from "@/lib/site-content";
 
 export const Route = createFileRoute("/team")({
   head: () => ({
@@ -155,7 +155,7 @@ function TeamPage() {
                 </div>
 
                 <div className="relative grid aspect-[4/5] place-items-center overflow-hidden bg-slate-100/60">
-                  {member.imageUrl ? (
+                  {isDatabaseImageUrl(member.imageUrl) ? (
                     <>
                       <img
                         src={member.imageUrl}
@@ -184,40 +184,7 @@ function TeamPage() {
                 <div className="border-t border-white/60 bg-gradient-to-b from-white/80 via-white/60 to-white/70 p-5 backdrop-blur-lg shadow-[inset_0_1px_0_0_rgba(255,255,255,0.9)]">
                   <h3 className="text-lg font-bold text-heading tracking-tight">{member.name}</h3>
                   <p className="mt-1 text-sm font-semibold text-ieee">{member.role}</p>
-                  <div className="mt-5 flex gap-2">
-                    {member.linkedinUrl &&
-                      /^https?:\/\/([a-z0-9-]+\.)*linkedin\.com\//i.test(member.linkedinUrl) && (
-                        <a
-                          href={member.linkedinUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label={`${member.name} LinkedIn`}
-                          className="grid size-9 place-items-center rounded-full border border-white/80 border-b-2 border-b-slate-300/80 bg-white/80 text-body shadow-xs backdrop-blur-md transition-all hover:-translate-y-0.5 hover:border-ieee hover:border-b-ieee hover:text-ieee hover:shadow-sm active:translate-y-0 active:border-b"
-                        >
-                          <Linkedin className="size-4" />
-                        </a>
-                      )}
-                    {member.email && (
-                      <a
-                        href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(member.email)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={`Email ${member.name} via Gmail`}
-                        className="grid size-9 place-items-center rounded-full border border-white/80 border-b-2 border-b-slate-300/80 bg-white/80 text-body shadow-xs backdrop-blur-md transition-all hover:-translate-y-0.5 hover:border-orange hover:border-b-orange hover:text-orange hover:shadow-sm active:translate-y-0 active:border-b"
-                      >
-                        <Mail className="size-4" />
-                      </a>
-                    )}
-                    {member.phone && (
-                      <a
-                        href={`tel:${member.phone}`}
-                        aria-label={`Call ${member.name}`}
-                        className="grid size-9 place-items-center rounded-full border border-white/80 border-b-2 border-b-slate-300/80 bg-white/80 text-body shadow-xs backdrop-blur-md transition-all hover:-translate-y-0.5 hover:border-ieee hover:border-b-ieee hover:text-ieee hover:shadow-sm active:translate-y-0 active:border-b"
-                      >
-                        <Phone className="size-4" />
-                      </a>
-                    )}
-                  </div>
+                  <MemberContactActions member={member} />
                 </div>
               </motion.article>
             );
@@ -251,5 +218,68 @@ function TeamPage() {
 
       <SiteFooter email={content.contact.email} />
     </main>
+  );
+}
+
+function MemberContactActions({
+  member,
+}: {
+  member: NonNullable<ReturnType<typeof getYearTeams>>[number]["members"][number];
+}) {
+  const [visibleContact, setVisibleContact] = useState<"email" | "phone" | null>(null);
+
+  const email = member.email?.trim();
+  const phone = member.phone?.trim();
+
+  return (
+    <div className="mt-5 flex flex-wrap items-center gap-2">
+      {member.linkedinUrl &&
+        /^https?:\/\/([a-z0-9-]+\.)*linkedin\.com\//i.test(member.linkedinUrl) && (
+          <a
+            href={member.linkedinUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`${member.name} LinkedIn`}
+            className="grid size-9 place-items-center rounded-full border border-white/80 border-b-2 border-b-slate-300/80 bg-white/80 text-body shadow-xs backdrop-blur-md transition-all hover:-translate-y-0.5 hover:border-ieee hover:border-b-ieee hover:text-ieee hover:shadow-sm active:translate-y-0 active:border-b"
+          >
+            <Linkedin className="size-4" />
+          </a>
+        )}
+      {email && (
+        <button
+          type="button"
+          onClick={() => setVisibleContact((current) => (current === "email" ? null : "email"))}
+          aria-expanded={visibleContact === "email"}
+          aria-label={`${visibleContact === "email" ? "Hide" : "Show"} ${member.name}'s email`}
+          className="grid size-9 place-items-center rounded-full border border-white/80 border-b-2 border-b-slate-300/80 bg-white/80 text-body shadow-xs backdrop-blur-md transition-all hover:-translate-y-0.5 hover:border-orange hover:border-b-orange hover:text-orange hover:shadow-sm active:translate-y-0 active:border-b"
+        >
+          <Mail className="size-4" />
+        </button>
+      )}
+      {phone && (
+        <button
+          type="button"
+          onClick={() => setVisibleContact((current) => (current === "phone" ? null : "phone"))}
+          aria-expanded={visibleContact === "phone"}
+          aria-label={`${visibleContact === "phone" ? "Hide" : "Show"} ${member.name}'s phone number`}
+          className="grid size-9 place-items-center rounded-full border border-white/80 border-b-2 border-b-slate-300/80 bg-white/80 text-body shadow-xs backdrop-blur-md transition-all hover:-translate-y-0.5 hover:border-ieee hover:border-b-ieee hover:text-ieee hover:shadow-sm active:translate-y-0 active:border-b"
+        >
+          <Phone className="size-4" />
+        </button>
+      )}
+    {visibleContact === "email" && (
+      <a
+        href={`mailto:${email}`}
+        className="max-w-full truncate text-xs font-semibold text-orange hover:underline"
+      >
+        {email}
+      </a>
+    )}
+    {visibleContact === "phone" && (
+      <a href={`tel:${phone}`} className="text-xs font-semibold text-ieee hover:underline">
+        {phone}
+      </a>
+    )}
+    </div>
   );
 }

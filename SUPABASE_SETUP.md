@@ -74,6 +74,8 @@ where email = 'your-email@example.com'
 on conflict (user_id) do update set role = 'admin';
 ```
 
+Use the email and password for this account at `/admin/login`. After the first administrator signs in, create additional editor or admin accounts from **Admin Manager**; those accounts are added to Supabase Auth and `public.admin_users` together.
+
 ## Environment Variables
 
 Set these in `.env.local` for local development and in your hosting provider for production:
@@ -82,10 +84,10 @@ Set these in `.env.local` for local development and in your hosting provider for
 VITE_SUPABASE_URL=https://your-project-ref.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
 SUPABASE_URL=https://your-project-ref.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=server-only-service-role-key
+SUPABASE_SECRET_KEY=server-only-secret-key
 ```
 
-Never expose `SUPABASE_SERVICE_ROLE_KEY` in a `VITE_` variable.
+Never expose `SUPABASE_SECRET_KEY` (or the legacy service-role key) in a `VITE_` variable. The admin account manager needs this server-only key to create and remove Auth users.
 
 ## Run Locally
 

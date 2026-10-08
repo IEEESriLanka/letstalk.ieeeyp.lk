@@ -2,8 +2,6 @@ import { supabase } from "@/lib/supabase";
 import { deleteImage } from "@/lib/storage";
 import { defaultSiteContent, type SiteContent } from "@/lib/site-content";
 import type {
-  AdminUser,
-  AdminAccessRequest,
   TeamPrivateContact,
   AwardRecord,
   ContactMessageRecord,
@@ -30,9 +28,6 @@ export type RecentActivity = {
   gallery: Pick<GalleryItem, "id" | "title" | "created_at" | "published">[];
   messages: Pick<ContactMessageRecord, "id" | "name" | "topic" | "created_at" | "read">[];
 };
-
-export type AdminAccount = Pick<AdminUser, "id" | "user_id" | "role" | "created_at">;
-export type AccessRequest = AdminAccessRequest;
 
 export async function listTeamPrivateContacts(): Promise<TeamPrivateContact[]> {
   const { data, error } = await supabase
@@ -249,7 +244,7 @@ export async function saveSiteSettings(content: SiteContent): Promise<SiteConten
               ...member,
               imageUrl:
                 member.imageUrl === undefined
-                  ? existingMembers.get(`${team.year}:${member.name}`) ?? null
+                  ? (existingMembers.get(`${team.year}:${member.name}`) ?? null)
                   : member.imageUrl,
             })),
           })),
@@ -261,78 +256,6 @@ export async function saveSiteSettings(content: SiteContent): Promise<SiteConten
     .upsert({ id: "site", content: contentToSave, updated_at: new Date().toISOString() });
   if (error) throw new Error(error.message);
   return contentToSave;
-}
-
-export async function listAdminAccounts(): Promise<AdminAccount[]> {
-  const { data, error } = await supabase
-    .from("admin_users")
-    .select("id,user_id,role,created_at")
-    .order("created_at", { ascending: true });
-  if (error) throw new Error(error.message);
-  return (data ?? []) as AdminAccount[];
-}
-
-export async function createAdminAccount(input: {
-  user_id: string;
-  role: "admin" | "editor";
-}): Promise<AdminAccount> {
-  const { data, error } = await supabase
-    .from("admin_users")
-    .insert({ user_id: input.user_id, role: input.role })
-    .select("id,user_id,role,created_at")
-    .single();
-  if (error) throw new Error(error.message);
-  return requireData(data as AdminAccount | null, "Admin account was not created.");
-}
-
-export async function deleteAdminAccount(id: string) {
-  const { error } = await supabase.from("admin_users").delete().eq("id", id);
-  if (error) throw new Error(error.message);
-}
-
-export async function listAccessRequests(): Promise<AccessRequest[]> {
-  const { data, error } = await supabase
-    .from("admin_access_requests")
-    .select("id,user_id,email,full_name,reason,status,reviewed_by,reviewed_at,created_at")
-    .order("created_at", { ascending: false });
-  if (error) throw new Error(error.message);
-  return (data ?? []) as AccessRequest[];
-}
-
-export async function approveAccessRequest(input: {
-  requestId: string;
-  userId: string;
-  role: "admin" | "editor";
-}) {
-  const { error: accountError } = await supabase
-    .from("admin_users")
-    .insert({ user_id: input.userId.trim(), role: input.role });
-  if (accountError) throw new Error(accountError.message);
-
-  const { error } = await supabase
-    .from("admin_access_requests")
-    .update({
-      status: "approved",
-      reviewed_by: (await supabase.auth.getUser()).data.user?.id ?? null,
-      reviewed_at: new Date().toISOString(),
-    })
-    .eq("id", input.requestId)
-    .eq("status", "pending");
-  if (error) throw new Error(error.message);
-}
-
-export async function rejectAccessRequest(id: string) {
-  const { data: user } = await supabase.auth.getUser();
-  const { error } = await supabase
-    .from("admin_access_requests")
-    .update({
-      status: "rejected",
-      reviewed_by: user.user?.id ?? null,
-      reviewed_at: new Date().toISOString(),
-    })
-    .eq("id", id)
-    .eq("status", "pending");
-  if (error) throw new Error(error.message);
 }
 
 export async function listEvents(search = "", status: PublishStatus = "all") {
@@ -421,7 +344,10 @@ export async function listGalleryAlbums() {
 
 export async function saveGalleryAlbum(input: Partial<GalleryAlbum>) {
   const slug = (input.slug || input.title || "")
-    .toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
   const payload = {
     title: input.title,
     slug,

@@ -1,5 +1,5 @@
 import { motion, useInView, useReducedMotion, type Variants } from "motion/react";
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -28,12 +28,8 @@ import {
 } from "lucide-react";
 import { Reveal, RevealGroup, fadeUp } from "./motion-primitives";
 import { submitContactMessage } from "@/lib/content-actions";
-import { getPublishedGalleryAlbums } from "@/lib/gallery-albums";
+import { getPublishedGalleryItems } from "@/lib/gallery-albums";
 import { defaultSiteContent, type SiteContent } from "@/lib/site-content";
-import g1 from "@/assets/gallery-1.jpg";
-import g2 from "@/assets/gallery-2.jpg";
-import g3 from "@/assets/gallery-3.jpg";
-import g4 from "@/assets/gallery-4.jpg";
 
 function SectionHead({
   eyebrow,
@@ -510,43 +506,12 @@ export function PastSessions({ events }: { events: SiteContent["events"] }) {
 }
 
 export function Gallery() {
-  const { data: albums = [], isLoading, isError } = useQuery({
-    queryKey: ["gallery-albums"],
-    queryFn: getPublishedGalleryAlbums,
+  const { data: photos = [], isLoading, isError } = useQuery({
+    queryKey: ["gallery-items-public"],
+    queryFn: getPublishedGalleryItems,
   });
 
-  const visibleAlbums = albums.filter((album) => album.images.length > 0);
-
-  // Statically pick 6 moments across albums (no dynamic swapping)
-  const staticPhotos = useMemo(() => {
-    const flagged = visibleAlbums.flatMap((album) =>
-      album.images
-        .filter((img) => img.show_in_moments)
-        .map((image) => ({ image, album })),
-    );
-
-    if (flagged.length >= 6) {
-      return flagged.slice(0, 6);
-    }
-
-    const result = [...flagged];
-    const seenIds = new Set(result.map((r) => r.image.id));
-
-    // Statically round-robin from available albums for a balanced preview
-    for (let photoIdx = 0; photoIdx < 4; photoIdx++) {
-      for (const album of visibleAlbums) {
-        if (result.length >= 6) break;
-        const img = album.images[photoIdx];
-        if (img && !seenIds.has(img.id)) {
-          seenIds.add(img.id);
-          result.push({ image: img, album });
-        }
-      }
-      if (result.length >= 6) break;
-    }
-
-    return result.slice(0, 6);
-  }, [visibleAlbums]);
+  const visiblePhotos = photos.slice(0, 6);
 
   return (
     <section id="gallery" className="scroll-mt-24 bg-background py-24 lg:py-32">
@@ -567,31 +532,31 @@ export function Gallery() {
             Unable to load photos.
           </p>
         ) : null}
-        {!isLoading && !isError && staticPhotos.length === 0 ? (
+        {!isLoading && !isError && visiblePhotos.length === 0 ? (
           <p className="mt-14 text-center text-body/70">No uploaded photos yet.</p>
         ) : null}
 
-        {staticPhotos.length > 0 && (
+        {visiblePhotos.length > 0 && (
           <div className="mt-14 grid auto-rows-[250px] grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
-            {staticPhotos.map(({ image, album }, index) => {
+            {visiblePhotos.map((image, index) => {
               const size =
-                index === 0 || index === 5
+                index === 0 || index === visiblePhotos.length - 1
                   ? "md:col-span-2 lg:col-span-2"
                   : "md:col-span-1 lg:col-span-1";
               return (
                 <div
-                  key={`${album.id}-${image.id}-${index}`}
+                  key={image.id}
                   className={`group relative overflow-hidden rounded-[2rem] border border-border bg-ieee-deep shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-lift ${size}`}
                 >
                   <img
                     src={image.image_url}
-                    alt={album.title}
+                    alt={image.caption || image.title}
                     loading="lazy"
                     className="size-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 flex flex-col justify-end bg-[linear-gradient(to_top,color-mix(in_oklab,var(--ieee-deep)_75%,transparent),transparent_60%)] p-6 text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                     <p className="text-xs font-bold tracking-[0.14em] text-orange-soft uppercase">
-                      {album.title}
+                      {image.title}
                     </p>
                   </div>
                 </div>

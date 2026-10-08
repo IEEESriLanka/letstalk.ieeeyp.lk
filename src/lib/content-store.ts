@@ -1,6 +1,11 @@
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
-import { defaultSiteContent, type ContactMessage, type SiteContent } from "./site-content";
+import {
+  defaultSiteContent,
+  isDatabaseImageUrl,
+  type ContactMessage,
+  type SiteContent,
+} from "./site-content";
 
 const iconSchemas = {
   event: z.enum(["mic", "brain", "lightbulb"]),
@@ -127,6 +132,7 @@ export const siteContentSchema: z.ZodType<SiteContent> = z.object({
                 imagePosition: z.string().nullable().optional(),
                 linkedinUrl: z.string().nullable().optional(),
                 email: z.string().nullable().optional(),
+                phone: z.string().nullable().optional(),
               }),
             ),
           }),
@@ -147,6 +153,7 @@ export const siteContentSchema: z.ZodType<SiteContent> = z.object({
             imagePosition: z.string().nullable().optional(),
             linkedinUrl: z.string().nullable().optional(),
             email: z.string().nullable().optional(),
+            phone: z.string().nullable().optional(),
           }),
         )
         .min(1),
@@ -331,12 +338,14 @@ export async function readSiteContent(): Promise<SiteContent> {
           ...team,
           members: team.members.map((member) => ({
             ...member,
-            phone: phoneByMember.get(`${team.year}:${member.name}`) ?? null,
+            phone: phoneByMember.get(`${team.year}:${member.name}`) ?? member.phone ?? null,
+            imageUrl: isDatabaseImageUrl(member.imageUrl) ? member.imageUrl : null,
           })),
         })),
         currentMembers: base.teamPage.currentMembers.map((member) => ({
           ...member,
-          phone: phoneByMember.get(`2026:${member.name}`) ?? null,
+          phone: phoneByMember.get(`2026:${member.name}`) ?? member.phone ?? null,
+          imageUrl: isDatabaseImageUrl(member.imageUrl) ? member.imageUrl : null,
         })),
       }
     : base.teamPage;

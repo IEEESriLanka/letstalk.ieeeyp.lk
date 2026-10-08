@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowRight,
-  Quote,
   Sparkles,
 } from "lucide-react";
 import { SiteNav } from "@/components/site/site-nav";
@@ -144,22 +143,6 @@ function AboutUsPage() {
                 Contact the team
                 <ArrowRight className="size-4" />
               </a>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      <section className="bg-surface-gray py-16">
-        <div className="mx-auto max-w-4xl px-5">
-          <Reveal>
-            <div className="card-surface flex flex-col gap-5 p-7 sm:flex-row sm:items-start">
-              <Quote className="size-8 shrink-0 text-orange" />
-              <div>
-                <p className="text-base leading-relaxed text-heading italic">
-                  "{content.about.quote}"
-                </p>
-                <p className="mt-3 text-sm font-semibold text-ieee">{content.about.quoteBy}</p>
-              </div>
             </div>
           </Reveal>
         </div>

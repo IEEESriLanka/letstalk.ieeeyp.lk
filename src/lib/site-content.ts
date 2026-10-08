@@ -10,6 +10,17 @@ export type TeamMember = {
   phone?: string | null;
 };
 
+export function isDatabaseImageUrl(url?: string | null): url is string {
+  if (!url) return false;
+
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "https:" && /\/storage\/v1\/object\/public\/gallery-images\//.test(parsed.pathname);
+  } catch {
+    return false;
+  }
+}
+
 export type YearTeam = { year: string; members: TeamMember[] };
 
 export function getYearTeams(team: NonNullable<SiteContent["teamPage"]>): YearTeam[] {
