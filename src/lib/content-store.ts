@@ -1,11 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
-import {
-  defaultSiteContent,
-  isDatabaseImageUrl,
-  type ContactMessage,
-  type SiteContent,
-} from "./site-content";
+import { defaultSiteContent, type ContactMessage, type SiteContent } from "./site-content";
 
 const iconSchemas = {
   event: z.enum(["mic", "brain", "lightbulb"]),
@@ -132,7 +127,6 @@ export const siteContentSchema: z.ZodType<SiteContent> = z.object({
                 imagePosition: z.string().nullable().optional(),
                 linkedinUrl: z.string().nullable().optional(),
                 email: z.string().nullable().optional(),
-                phone: z.string().nullable().optional(),
               }),
             ),
           }),
@@ -153,7 +147,6 @@ export const siteContentSchema: z.ZodType<SiteContent> = z.object({
             imagePosition: z.string().nullable().optional(),
             linkedinUrl: z.string().nullable().optional(),
             email: z.string().nullable().optional(),
-            phone: z.string().nullable().optional(),
           }),
         )
         .min(1),
@@ -262,6 +255,10 @@ function mergeContent(stored: SiteContent): SiteContent {
   };
 }
 
+function teamContactKey(year: string, memberName: string) {
+  return `${year.trim()}:${memberName.trim().replace(/\s+/g, " ").toLocaleLowerCase()}`;
+}
+
 export async function readSiteContent(): Promise<SiteContent> {
   const supabase = getSupabase();
   if (!supabase) return defaultSiteContent;
@@ -329,7 +326,10 @@ export async function readSiteContent(): Promise<SiteContent> {
   const base = mergeContent(storedContent);
   const award = awards.data?.[0];
   const phoneByMember = new Map(
-    (teamContacts.data ?? []).map((contact) => [`${contact.year}:${contact.member_name}`, contact.phone]),
+    (teamContacts.data ?? []).map((contact) => [
+      teamContactKey(contact.year, contact.member_name),
+      contact.phone?.trim() || null,
+    ]),
   );
   const teamPage = base.teamPage
     ? {
@@ -338,14 +338,12 @@ export async function readSiteContent(): Promise<SiteContent> {
           ...team,
           members: team.members.map((member) => ({
             ...member,
-            phone: phoneByMember.get(`${team.year}:${member.name}`) ?? member.phone ?? null,
-            imageUrl: isDatabaseImageUrl(member.imageUrl) ? member.imageUrl : null,
+            phone: phoneByMember.get(teamContactKey(team.year, member.name)) ?? null,
           })),
         })),
         currentMembers: base.teamPage.currentMembers.map((member) => ({
           ...member,
-          phone: phoneByMember.get(`2026:${member.name}`) ?? member.phone ?? null,
-          imageUrl: isDatabaseImageUrl(member.imageUrl) ? member.imageUrl : null,
+          phone: phoneByMember.get(teamContactKey("2026", member.name)) ?? null,
         })),
       }
     : base.teamPage;

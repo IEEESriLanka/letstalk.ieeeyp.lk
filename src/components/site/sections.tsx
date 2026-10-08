@@ -1,5 +1,5 @@
 import { motion, useInView, useReducedMotion, type Variants } from "motion/react";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -12,6 +12,7 @@ import {
   ChevronDown,
   Eye,
   Lightbulb,
+  Linkedin,
   Mail,
   MessageCircle,
   MessagesSquare,
@@ -28,8 +29,12 @@ import {
 } from "lucide-react";
 import { Reveal, RevealGroup, fadeUp } from "./motion-primitives";
 import { submitContactMessage } from "@/lib/content-actions";
-import { getPublishedGalleryItems } from "@/lib/gallery-albums";
+import { getPublishedGalleryAlbums } from "@/lib/gallery-albums";
 import { defaultSiteContent, type SiteContent } from "@/lib/site-content";
+import g1 from "@/assets/gallery-1.jpg";
+import g2 from "@/assets/gallery-2.jpg";
+import g3 from "@/assets/gallery-3.jpg";
+import g4 from "@/assets/gallery-4.jpg";
 
 function SectionHead({
   eyebrow,
@@ -201,15 +206,6 @@ export function Events({ events }: { events: SiteContent["events"] }) {
             }
             copy="Explore our upcoming leadership talks, industry workshops, and networking experiences designed to inspire, connect, and prepare the next generation of professionals."
           />
-          <Reveal delay={0.1}>
-            <a
-              href="#contact"
-              className="inline-flex items-center gap-2 rounded-full border border-ieee/30 bg-white px-5 py-3 text-sm font-semibold text-ieee shadow-sm transition-colors hover:bg-ieee-tint"
-            >
-              Get notified for sessions
-              <ArrowUpRight className="size-4" />
-            </a>
-          </Reveal>
         </div>
 
         {upcomingEvents.length > 0 ? (
@@ -395,9 +391,9 @@ function JourneyEvent({ event, last }: { event: SiteContent["events"][number]; l
   const active = inView || Boolean(reducedMotion);
 
   return (
-    <div ref={ref} className="relative grid min-h-[50vh] gap-8 py-8 pl-9 lg:grid-cols-[0.92fr_1.08fr] lg:items-center lg:gap-12 lg:pl-11">
+    <div ref={ref} className="relative grid min-h-[50vh] gap-8 py-8 pl-9 lg:grid-cols-[0.92fr_1.08fr] lg:items-center lg:gap-12 lg:pl-16">
       {!last && <div aria-hidden="true" className="absolute top-10 bottom-[-2.5rem] left-[9px] w-px bg-ieee/25" />}
-      <div aria-hidden="true" className={`absolute top-10 left-0 size-5 rounded-full border transition-colors ${active ? "border-ieee bg-ieee shadow-[0_0_0_6px_rgba(0,114,178,0.12)]" : "border-ieee/35 bg-white"}`} />
+      <div aria-hidden="true" className={`absolute top-44 left-0 size-5 rounded-full border transition-colors ${active ? "border-ieee bg-ieee shadow-[0_0_0_6px_rgba(0,114,178,0.12)]" : "border-ieee/35 bg-white"}`} />
       <motion.div
         initial={false}
         animate={{ opacity: active ? 1 : 0.34, y: active ? 0 : 12 }}
@@ -506,12 +502,43 @@ export function PastSessions({ events }: { events: SiteContent["events"] }) {
 }
 
 export function Gallery() {
-  const { data: photos = [], isLoading, isError } = useQuery({
-    queryKey: ["gallery-items-public"],
-    queryFn: getPublishedGalleryItems,
+  const { data: albums = [], isLoading, isError } = useQuery({
+    queryKey: ["gallery-albums"],
+    queryFn: getPublishedGalleryAlbums,
   });
 
-  const visiblePhotos = photos.slice(0, 6);
+  const visibleAlbums = albums.filter((album) => album.images.length > 0);
+
+  // Statically pick 6 moments across albums (no dynamic swapping)
+  const staticPhotos = useMemo(() => {
+    const flagged = visibleAlbums.flatMap((album) =>
+      album.images
+        .filter((img) => img.show_in_moments)
+        .map((image) => ({ image, album })),
+    );
+
+    if (flagged.length >= 6) {
+      return flagged.slice(0, 6);
+    }
+
+    const result = [...flagged];
+    const seenIds = new Set(result.map((r) => r.image.id));
+
+    // Statically round-robin from available albums for a balanced preview
+    for (let photoIdx = 0; photoIdx < 4; photoIdx++) {
+      for (const album of visibleAlbums) {
+        if (result.length >= 6) break;
+        const img = album.images[photoIdx];
+        if (img && !seenIds.has(img.id)) {
+          seenIds.add(img.id);
+          result.push({ image: img, album });
+        }
+      }
+      if (result.length >= 6) break;
+    }
+
+    return result.slice(0, 6);
+  }, [visibleAlbums]);
 
   return (
     <section id="gallery" className="scroll-mt-24 bg-background py-24 lg:py-32">
@@ -521,10 +548,9 @@ export function Gallery() {
           eyebrow="Visit our gallery"
           title={
             <>
-              Moments from the <span className="text-gradient-orange">community</span>
+              Moments from our <span className="text-gradient-orange">community</span>
             </>
           }
-          copy="Snapshots of passion, collaboration, and learning from IEEE LETs Talk sessions across Sri Lanka."
         />
         {isLoading ? <p className="mt-14 text-center text-body/70">Loading photos…</p> : null}
         {isError ? (
@@ -532,31 +558,31 @@ export function Gallery() {
             Unable to load photos.
           </p>
         ) : null}
-        {!isLoading && !isError && visiblePhotos.length === 0 ? (
+        {!isLoading && !isError && staticPhotos.length === 0 ? (
           <p className="mt-14 text-center text-body/70">No uploaded photos yet.</p>
         ) : null}
 
-        {visiblePhotos.length > 0 && (
+        {staticPhotos.length > 0 && (
           <div className="mt-14 grid auto-rows-[250px] grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
-            {visiblePhotos.map((image, index) => {
+            {staticPhotos.map(({ image, album }, index) => {
               const size =
-                index === 0 || index === visiblePhotos.length - 1
+                index === 0 || index === 5
                   ? "md:col-span-2 lg:col-span-2"
                   : "md:col-span-1 lg:col-span-1";
               return (
                 <div
-                  key={image.id}
+                  key={`${album.id}-${image.id}-${index}`}
                   className={`group relative overflow-hidden rounded-[2rem] border border-border bg-ieee-deep shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-lift ${size}`}
                 >
                   <img
                     src={image.image_url}
-                    alt={image.caption || image.title}
+                    alt={album.title}
                     loading="lazy"
                     className="size-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 flex flex-col justify-end bg-[linear-gradient(to_top,color-mix(in_oklab,var(--ieee-deep)_75%,transparent),transparent_60%)] p-6 text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                     <p className="text-xs font-bold tracking-[0.14em] text-orange-soft uppercase">
-                      {image.title}
+                      {album.title}
                     </p>
                   </div>
                 </div>
@@ -609,10 +635,10 @@ export function StayConnected({ content }: { content: SiteContent["connected"] }
               Official Channel
             </span>
             <h2 className="mx-auto mt-5 max-w-2xl text-3xl leading-tight font-bold text-white sm:text-[2.6rem]">
-              {content.title}
+              {content.title.replace(/LETs Talk/g, "LETs talk")}
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-[0.98rem] leading-relaxed text-white/85">
-              {content.copy}
+              {content.copy.replace(/LETs Talk/g, "LETs talk")}
             </p>
             <div className="mt-9 flex flex-wrap justify-center gap-4">
               <a
@@ -641,6 +667,10 @@ export function StayConnected({ content }: { content: SiteContent["connected"] }
 }
 
 export function Contact({ content }: { content: SiteContent["contact"] }) {
+  const contactEmail = "ieeeletstalksl@gmail.com";
+  const contactCopy =
+    "Reach out to propose a session topic, collaborate as an industry partner, or connect with LETs talk team.";
+
   return (
     <section id="contact" className="relative scroll-mt-24 overflow-hidden bg-ieee-tint py-24 lg:py-32">
       <div
@@ -650,13 +680,13 @@ export function Contact({ content }: { content: SiteContent["contact"] }) {
       <div className="relative mx-auto grid max-w-6xl gap-12 px-5 lg:grid-cols-[0.9fr_1.1fr]">
         <div>
           <SectionHead
-            eyebrow="LETs Talk"
+            eyebrow="Get in touch"
             title={
               <>
                 Have an idea? <span className="text-gradient-orange">Let’s talk</span>
               </>
             }
-            copy={content.copy}
+            copy={contactCopy}
           />
           <Reveal delay={0.1} className="mt-9 space-y-3">
             {[
@@ -666,10 +696,10 @@ export function Contact({ content }: { content: SiteContent["contact"] }) {
                 desc: (
                   <>
                     Mail us your inquiries & proposals at{" "}
-                    <span className="font-bold text-heading">{content.email}</span>
+                    <span className="font-bold text-heading">{contactEmail}</span>
                   </>
                 ),
-                href: `mailto:${content.email}`,
+                href: `mailto:${contactEmail}`,
               },
               {
                 icon: MessageCircle,
@@ -678,10 +708,10 @@ export function Contact({ content }: { content: SiteContent["contact"] }) {
                 href: whatsappChannelUrl,
               },
               {
-                icon: MessagesSquare,
-                label: content.organization,
-                desc: "National professional development platform",
-                href: "https://yp.ieee.org/",
+                icon: Linkedin,
+                label: "Connect with Lets talk LinkedIn",
+                desc: "Follow the LETs talk community",
+                href: "https://www.linkedin.com/company/ieee-young-professionals-sri-lanka/",
               },
             ].map((c) => (
               <a

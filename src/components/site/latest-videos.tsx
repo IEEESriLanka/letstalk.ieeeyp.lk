@@ -35,9 +35,6 @@ function VideoCard({ video }: { video: TalkVideo }) {
           >
             <Play className="ml-1 size-6 fill-current" />
           </span>
-          <span className="absolute top-3 left-3 rounded-full bg-white/95 px-3 py-1 text-[10px] font-bold tracking-wider text-ieee">
-            {video.isShort ? "LETs TALK CLIP" : "LETs TALK"}
-          </span>
         </div>
         <div className="flex flex-1 flex-col p-5">
           <h3 className="mt-3 text-lg font-bold leading-snug text-heading group-hover:text-ieee">
@@ -70,13 +67,13 @@ export function LatestVideos() {
       <div className="mx-auto max-w-7xl px-5">
         <Reveal className="mx-auto max-w-2xl text-center">
           <p className="text-xs font-semibold tracking-[0.16em] text-orange uppercase">
-            Watch &amp; learn
+            Press Play - Get Inspired
           </p>
           <h2
             id="videos-title"
             className="mt-3 text-3xl font-bold tracking-tight text-heading sm:text-5xl"
           >
-            LETs Talk Videos
+            Stories Worth Hearing
           </h2>
           <p className="mt-4 text-body">
             Conversations, leadership lessons, and highlights from our community.

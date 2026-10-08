@@ -3,20 +3,6 @@ import type { GalleryAlbum, GalleryItem } from "@/types/database";
 
 export type PublicGalleryAlbum = GalleryAlbum & { images: GalleryItem[] };
 
-export async function getPublishedGalleryItems(): Promise<GalleryItem[]> {
-  if (!isSupabaseConfigured) return [];
-
-  const { data, error } = await supabase
-    .from("gallery_items")
-    .select("*")
-    .eq("published", true)
-    .order("display_order", { ascending: true })
-    .order("created_at", { ascending: false });
-  if (error) throw new Error(error.message);
-
-  return (data ?? []) as GalleryItem[];
-}
-
 export async function getPublishedGalleryAlbums(): Promise<PublicGalleryAlbum[]> {
   if (!isSupabaseConfigured) return [];
 

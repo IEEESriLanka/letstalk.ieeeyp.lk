@@ -310,13 +310,7 @@ export function ImageLightbox({
 
           {/* Bottom Caption Bar */}
           <div className="relative z-20 border-t border-white/10 bg-black/40 px-6 py-3.5 text-center backdrop-blur-sm">
-            <h3 className="text-base font-semibold text-white">{currentImage.title}</h3>
-            {currentImage.caption ? (
-              <p className="mt-1 text-xs sm:text-sm text-white/70 max-w-2xl mx-auto">
-                {currentImage.caption}
-              </p>
-            ) : null}
-            <div className="mt-1 text-[11px] text-white/40 flex items-center justify-center gap-2">
+            <div className="text-[11px] text-white/40 flex items-center justify-center gap-2">
               <span>Double-click or scroll to zoom</span>
               {zoom > 1 && <span>• Drag to pan</span>}
             </div>

@@ -1,9 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import {
-  ArrowRight,
-  Sparkles,
-} from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { SiteNav } from "@/components/site/site-nav";
 import { AboutOverview } from "@/components/site/about-overview";
 import { SiteFooter } from "@/components/site/site-footer";
@@ -48,7 +45,7 @@ function AboutUsPage() {
               Our Vision & Mission
             </h2>
             <p className="mt-4 text-base leading-relaxed text-body sm:text-lg">
-              The strategic vision and foundational mission driving professional excellence across Sri Lanka.
+              The strategic vision and mission driving professional excellence.
             </p>
           </Reveal>
 
@@ -99,7 +96,7 @@ function AboutUsPage() {
               Our IEEE Network
             </h2>
             <p className="mt-4 text-base leading-relaxed text-body sm:text-lg">
-              LETs Talk is strengthened by the global, national, and professional communities that make learning and collaboration possible.
+              LETs talk is strengthened by the global, national, and professional communities that make learning and collaboration possible.
             </p>
           </Reveal>
 
@@ -129,7 +126,7 @@ function AboutUsPage() {
               Let us collaborate
             </span>
             <h2 className="mx-auto mt-5 max-w-3xl text-3xl leading-tight font-bold text-white sm:text-4xl">
-              Bring an industry story, workshop idea, or partnership opportunity to LETs Talk.
+              Bring an industry story, workshop idea, or partnership opportunity to LETs talk.
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-white/75">
               We welcome speakers, mentors, partners, student branches, and volunteers who want to
@@ -148,6 +145,7 @@ function AboutUsPage() {
         </div>
       </section>
 
+      <div aria-hidden="true" className="h-12 bg-white" />
       <SiteFooter email={content.contact.email} />
     </main>
   );

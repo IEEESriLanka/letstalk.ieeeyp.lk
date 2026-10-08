@@ -6,6 +6,8 @@ import type { SiteContent } from "@/lib/site-content";
 export function Hero({ content }: { content: SiteContent["hero"] }) {
   const reduceMotion = useReducedMotion();
   const hasPhotos = Boolean(content.backgroundImages?.length);
+  const descriptionParts = content.description.split("undergraduates and young professionals");
+  const titleParts = content.title.split("Entrepreneurship");
   return (
     <section
       id="top"
@@ -37,13 +39,28 @@ export function Hero({ content }: { content: SiteContent["hero"] }) {
             id="hero-title"
             className="mt-6 text-[clamp(2.6rem,4.5vw,4.5rem)] leading-[1.04] font-bold tracking-[-0.045em] text-[#071638] lg:mt-[clamp(1rem,3svh,2rem)] lg:text-[clamp(2.5rem,min(4.3vw,7svh),6rem)]"
           >
-            {content.title}{" "}
+            {titleParts.length > 1 ? (
+              <>
+                {titleParts[0]}
+                <br />
+                Entrepreneurship{titleParts.slice(1).join("Entrepreneurship")}
+              </>
+            ) : (
+              content.title
+            )}{" "}
             <span className="block text-[#ff6815]">
               {content.highlightedTitle.replace(/\.$/, "")}.
             </span>
           </h1>
           <p className="mt-6 max-w-xl text-base leading-relaxed text-[#596b8d] sm:text-lg lg:mt-[clamp(1rem,3svh,2rem)] lg:max-w-[38em] lg:text-[clamp(0.9375rem,min(1.1vw,2svh),1.25rem)]">
-            {content.description}
+            {descriptionParts.map((part, index) => (
+              <span key={`${part}-${index}`}>
+                {part}
+                {index < descriptionParts.length - 1 && (
+                  <span className="whitespace-nowrap">undergraduates and young professionals</span>
+                )}
+              </span>
+            ))}
           </p>
           <div className="mt-8 flex flex-wrap gap-3 sm:gap-4 lg:mt-[clamp(1.25rem,3.5svh,2.5rem)]">
             <a

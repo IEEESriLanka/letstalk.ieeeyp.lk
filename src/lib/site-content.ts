@@ -10,17 +10,6 @@ export type TeamMember = {
   phone?: string | null;
 };
 
-export function isDatabaseImageUrl(url?: string | null): url is string {
-  if (!url) return false;
-
-  try {
-    const parsed = new URL(url);
-    return parsed.protocol === "https:" && /\/storage\/v1\/object\/public\/gallery-images\//.test(parsed.pathname);
-  } catch {
-    return false;
-  }
-}
-
 export type YearTeam = { year: string; members: TeamMember[] };
 
 export function getYearTeams(team: NonNullable<SiteContent["teamPage"]>): YearTeam[] {
@@ -48,6 +37,37 @@ export function getYearTeams(team: NonNullable<SiteContent["teamPage"]>): YearTe
     }));
 
   return [...baseTeams, ...extraPast];
+}
+
+export function getDisplayYearTeams(team: NonNullable<SiteContent["teamPage"]>): YearTeam[] {
+  const teams = getYearTeams(team);
+  const fallbackTeams = new Map(
+    (defaultSiteContent.teamPage?.yearlyTeams ?? []).map((fallback) => [fallback.year, fallback]),
+  );
+
+  return teams.map((yearTeam) => {
+    const fallback = fallbackTeams.get(yearTeam.year);
+    if (!fallback) return yearTeam;
+
+    const isPlaceholderTeam =
+      yearTeam.members.length > 0 &&
+      yearTeam.members.every((member) => /^Past Member\s+\d+$/i.test(member.name.trim()));
+    if (isPlaceholderTeam) return { ...yearTeam, members: fallback.members };
+
+    const fallbackMembers = new Map(fallback.members.map((member) => [member.name.toLowerCase(), member]));
+    return {
+      ...yearTeam,
+      members: yearTeam.members.map((member) => {
+        const knownMember = fallbackMembers.get(member.name.trim().toLowerCase());
+        if (!knownMember || member.imageUrl || !knownMember.imageUrl) return member;
+        return {
+          ...member,
+          imageUrl: knownMember.imageUrl,
+          imagePosition: member.imagePosition ?? knownMember.imagePosition,
+        };
+      }),
+    };
+  });
 }
 
 export type SiteContent = {
@@ -189,7 +209,7 @@ export const defaultSiteContent: SiteContent = {
     title: "Empowering Careers Through",
     highlightedWords: "Conversations, Learning",
     accentWords: "Leadership",
-    copy: "IEEE LETs Talk is the flagship professional development initiative of IEEE Young Professionals Sri Lanka. Since 2017, it has connected students, graduates, and young professionals with industry experts through leadership talks, technical workshops, networking experiences, and career-focused learning opportunities that bridge the gap between academia and industry.",
+    copy: "Since 2017, IEEE LETs talk has created spaces where ideas are exchanged, experiences are shared, and aspiring professionals connect directly with the people shaping the industry. From thought-provoking discussions to hands-on learning, meaningful networking, and opportunities to strengthen essential soft skills, we turn conversations into clarity, connections into opportunities, and curiosity into career growth.",
     quote:
       "Bridging the gap between academia and industry by turning passion and curiosity into career-defining professional opportunities.",
     quoteBy: "IEEE Young Professionals Sri Lanka",
@@ -259,23 +279,23 @@ export const defaultSiteContent: SiteContent = {
     yearsOfImpact: "10 Years of Impact",
     stats: [
       {
-        value: "100+",
-        label: "Industry Speakers",
+        value: "60+",
+        label: "Speakers",
         description: "Founders, tech executives & domain leaders",
       },
       {
-        value: "30+",
-        label: "Partners & Collaborators",
+        value: "25+",
+        label: "Partners",
         description: "Corporate leaders & IEEE affinity units",
       },
       {
-        value: "10,000+",
-        label: "Total Registrations",
+        value: "3000+",
+        label: "Registrations",
         description: "Undergraduates & young professionals engaged",
       },
       {
         value: "20+",
-        label: "Universities Reached",
+        label: "University Reach",
         description: "Higher education institutes nationwide",
       },
     ],
@@ -417,8 +437,8 @@ export const defaultSiteContent: SiteContent = {
     "Industry Tech Partners",
   ],
   connected: {
-    title: "Stay Connected with LETs Talk.",
-    copy: "Be the first to hear about upcoming leadership talks, workshops, networking events, and exclusive opportunities. Join our WhatsApp Channel and stay connected with the LETs Talk community.",
+    title: "Stay Connected with LETs talk.",
+    copy: "Be the first to hear about upcoming leadership talks, workshops, networking events, and exclusive opportunities. Join our WhatsApp Channel and stay connected with the LETs talk community.",
     primaryCta: "Join Our WhatsApp Channel",
     secondaryCta: "Explore Events",
   },
@@ -426,12 +446,12 @@ export const defaultSiteContent: SiteContent = {
     email: "ieeeletstalksl@gmail.com",
     whatsappLabel: "Official WhatsApp Channel",
     organization: "IEEE Young Professionals Sri Lanka",
-    copy: "Reach out to propose a session topic, collaborate as an industry partner, or connect with the IEEE Young Professionals Sri Lanka team.",
+    copy: "Reach out to propose a session topic, collaborate as an industry partner, or connect with LETs talk team.",
   },
   teamPage: {
     eyebrow: "Meet the team",
     title: "The people behind",
-    highlightedTitle: "IEEE LETs Talk",
+    highlightedTitle: "IEEE LETs talk",
     description:
       "A volunteer-led organizing team building speaker sessions, workshops, partnerships, and community experiences for future professionals across Sri Lanka.",
     currentMembers: [
@@ -901,18 +921,6 @@ export const defaultSiteContent: SiteContent = {
           "Yashoda Kawindi",
           "Hiruni Senevirathne",
           "Dumindu Udara",
-        ],
-      },
-      {
-        year: "2023",
-        theme: "Built the foundation for a national learning platform",
-        members: [
-          "Past Member 16",
-          "Past Member 17",
-          "Past Member 18",
-          "Past Member 19",
-          "Past Member 20",
-          "Past Member 21",
         ],
       },
     ],

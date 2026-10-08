@@ -138,12 +138,6 @@ function AlbumPage() {
                       </span>
                     </div>
                   </div>
-                  <figcaption className="p-5">
-                    <h2 className="font-bold text-heading transition-colors group-hover:text-orange">
-                      {image.title}
-                    </h2>
-                    {image.caption ? <p className="mt-2 text-sm text-body">{image.caption}</p> : null}
-                  </figcaption>
                 </motion.figure>
               ))}
             </RevealGroup>

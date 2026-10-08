@@ -100,11 +100,8 @@ function GalleryEventsPage() {
           <Reveal className="mx-auto max-w-2xl text-center">
             <span className="section-eyebrow">Albums</span>
             <h2 className="mt-5 text-3xl leading-tight font-bold text-heading sm:text-4xl">
-              Moments from the <span className="text-orange">community.</span>
+              Moments from our <span className="text-orange">community</span>
             </h2>
-            <p className="mt-4 text-base leading-relaxed text-body">
-              Open an album to explore every uploaded photo from that event.
-            </p>
           </Reveal>
           {albumsLoading ? <p className="mt-14 text-center text-body/70">Loading albums…</p> : null}
           {albumsError ? (

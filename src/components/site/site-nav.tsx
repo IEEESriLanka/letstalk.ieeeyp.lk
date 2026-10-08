@@ -10,8 +10,8 @@ const links = [
   { label: "About Us", href: "/about-us" },
   { label: "Team", href: "/team" },
   { label: "Events", href: "/events" },
-  { label: "Gallery", href: "/#gallery" },
-  { label: "Contact", href: "/#contact" },
+  { label: "Gallery", href: "/gallery/events" },
+  { label: "Contact Us", href: "/#contact" },
 ];
 
 function getHrefHash(href: string) {

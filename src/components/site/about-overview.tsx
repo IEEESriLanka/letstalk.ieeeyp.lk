@@ -33,10 +33,12 @@ export function AboutOverview({
             {content.eyebrow}
           </p>
           <h1 id="about-heading" className="mt-5 text-[2.5rem] leading-[1.06] font-bold tracking-tight text-[#06172d] sm:text-5xl xl:text-[3.5rem]">
-            Empowering<br />careers through<br />
+            <span className="text-ieee">Empowering</span><br />
             <span className="text-gradient-orange">conversations<br />that matter.</span>
           </h1>
-          <p className="mt-6 max-w-xl text-base leading-relaxed text-body lg:text-lg">{content.copy}</p>
+          <p className="mt-6 max-w-xl text-base leading-relaxed text-body lg:text-lg">
+            Since 2017, IEEE LETs talk has created spaces where ideas are exchanged, experiences are shared, and aspiring professionals connect directly with the people shaping the industry. From thought-provoking discussions to hands-on learning, meaningful networking, and opportunities to strengthen essential soft skills, we turn conversations into clarity, connections into opportunities, and curiosity into career growth.
+          </p>
           <div className="mt-7 flex flex-wrap gap-4">
             <a href="/#events" className="inline-flex items-center justify-center gap-3 rounded-full bg-[image:var(--gradient-orange)] px-7 py-3.5 font-semibold text-white transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange">
               Explore Events <ArrowRight aria-hidden="true" className="size-5" />
@@ -85,14 +87,14 @@ export function AboutOverview({
             transition={{ duration: 0.6 }}
             className="absolute top-1/2 left-1/2 z-10 flex size-32 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 px-5 text-center text-sm font-bold leading-snug text-[#102d58] shadow-[0_10px_35px_-18px_rgba(7,22,56,0.55)]"
           >
-            Conversations that create <span className="text-orange">opportunities</span>
+            <span className="text-orange">Opportunities</span>
           </motion.div>
 
           {[
             { label: "Students & Graduates", position: "top-10 left-0", tone: "orange" },
             { label: "Industry Experts", position: "top-16 right-0", tone: "blue" },
             { label: "Meaningful Connections", position: "bottom-16 left-0", tone: "orange" },
-            { label: "Career Growth", position: "right-8 bottom-10", tone: "blue" },
+            { label: "Soft Skills", position: "right-8 bottom-18", tone: "blue" },
           ].map((item, index) => (
             <motion.div
               key={item.label}
@@ -130,17 +132,19 @@ export function ImpactOverview({ content }: { content: SiteContent["about"] }) {
       />
       <div className="relative mx-auto max-w-7xl px-5 sm:px-8">
         <div className="mx-auto max-w-4xl">
-          <div className="inline-flex items-center gap-2 rounded-full border border-orange/30 bg-orange-tint px-3.5 py-1.5 text-xs font-bold tracking-wider text-orange uppercase">
+          <div className="mx-auto flex w-fit items-center gap-2 rounded-full border border-orange/30 bg-orange-tint px-3.5 py-1.5 text-xs font-bold tracking-wider text-orange uppercase">
             <Sparkles className="size-3.5" />
             <span>{content.yearsOfImpact ?? "10 Years of Impact"}</span>
           </div>
-          <h2 id="impact-heading" className="mt-5 max-w-3xl text-3xl font-bold tracking-tight text-[#06172d] sm:text-4xl lg:text-5xl">
-            A decade of connecting future professionals with industry leaders.
+          <h2 id="impact-heading" className="mx-auto mt-5 max-w-5xl text-center text-3xl font-bold tracking-tight text-[#06172d] sm:text-4xl lg:text-5xl">
+            A decade of empowering
+            <br />
+            young professionals
           </h2>
-          <p className="mt-5 max-w-3xl text-base leading-relaxed text-body sm:text-lg">
-            Over ten years of continuous growth, IEEE LETs Talk has brought together undergraduates,
-            seasoned practitioners, and corporate partners to ignite careers and inspire technical
-            leadership across Sri Lanka.
+          <p className="mx-auto mt-5 max-w-3xl text-center text-base leading-relaxed text-body sm:text-lg">
+            IEEE LETs talk empowers undergraduates and young professionals through inspiring
+            conversations, practical learning, and industry connections, fostering professional
+            growth and shaping future leaders.
           </p>
           <dl className="mt-9 grid gap-4 border-t border-border/70 pt-7 sm:grid-cols-2 lg:grid-cols-4 lg:gap-3">
             {displayStats.map((stat, index) => {

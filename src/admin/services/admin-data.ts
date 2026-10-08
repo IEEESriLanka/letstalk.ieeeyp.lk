@@ -228,11 +228,20 @@ export async function saveSiteSettings(content: SiteContent): Promise<SiteConten
   if (readError) throw new Error(readError.message);
 
   const existingContent = existing?.content as SiteContent | undefined;
+  const teamMemberKey = (year: string, name: string) =>
+    `${year.trim()}:${name.trim().replace(/\s+/g, " ").toLocaleLowerCase()}`;
   const existingMembers = new Map(
     (existingContent?.teamPage?.yearlyTeams ?? []).flatMap((team) =>
-      team.members.map((member) => [`${team.year}:${member.name}`, member.imageUrl] as const),
+      team.members.map(
+        (member) => [teamMemberKey(team.year, member.name), member.imageUrl] as const,
+      ),
     ),
   );
+  for (const member of existingContent?.teamPage?.currentMembers ?? []) {
+    if (member.imageUrl) {
+      existingMembers.set(teamMemberKey("2026", member.name), member.imageUrl);
+    }
+  }
   const contentToSave: SiteContent = {
     ...content,
     teamPage: content.teamPage
@@ -244,9 +253,16 @@ export async function saveSiteSettings(content: SiteContent): Promise<SiteConten
               ...member,
               imageUrl:
                 member.imageUrl === undefined
-                  ? (existingMembers.get(`${team.year}:${member.name}`) ?? null)
+                  ? (existingMembers.get(teamMemberKey(team.year, member.name)) ?? null)
                   : member.imageUrl,
             })),
+          })),
+          currentMembers: content.teamPage.currentMembers.map((member) => ({
+            ...member,
+            imageUrl:
+              member.imageUrl === undefined
+                ? (existingMembers.get(teamMemberKey("2026", member.name)) ?? null)
+                : member.imageUrl,
           })),
         }
       : content.teamPage,

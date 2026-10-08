@@ -90,7 +90,7 @@ export function PhotoBackdrop({ images }: { images?: string[] | undefined }) {
                 src={src}
                 alt="IEEE LETs Talk community event"
                 draggable={false}
-                className="size-full object-cover"
+                className="size-full object-cover object-[35%_center]"
               />
             </div>
           ))}

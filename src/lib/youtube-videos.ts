@@ -1,5 +1,6 @@
 export const youtubeChannelId = "UC8LrGEKHHuzqiyj5BeU7uKQ";
-export const youtubeChannelUrl = "https://www.youtube.com/@ieeeypsl/videos";
+export const youtubeChannelUrl =
+  "https://youtube.com/playlist?list=PLfD2rmttsnHyr7J6tVklSwM9bgf1mUsbI&si=5H-Xj7oEEDqeu8q0";
 export const videoRefreshInterval = 5 * 60 * 1000;
 
 export type TalkVideo = {

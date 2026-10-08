@@ -19,9 +19,8 @@ export function Awards({ content }: { content: SiteContent["awards"] }) {
           <h2 id="awards-heading" className="mt-5 text-3xl leading-[1.14] font-bold tracking-tight sm:text-[2.6rem]">
             Recognized for <span className="text-gradient-orange">industry impact.</span>
           </h2>
-          <p className="mt-4 text-base leading-relaxed text-body">
-            Recognition for bridging academia and industry through practical, experience-driven
-            learning.
+          <p className="mt-4 text-base leading-relaxed text-body sm:text-lg">
+            Where dedication and meaningful contributions have earned recognition beyond our community.
           </p>
         </Reveal>
 
@@ -55,7 +54,6 @@ export function Awards({ content }: { content: SiteContent["awards"] }) {
               src={content.imageUrl ?? "/awards/ieee-sri-lanka-section-awards-2025.png"}
               alt="IEEE LETs Talk representatives receiving the IEEE Sri Lanka Section Awards 2025 Best Industry Collaborative Project Award"
             />
-            <figcaption>{content.description}</figcaption>
           </figure>
         </Reveal>
       </div>

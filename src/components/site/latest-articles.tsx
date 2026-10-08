@@ -23,9 +23,6 @@ function PublicationImage({ article }: { article: Publication }) {
           <Newspaper className="size-14" />
         </div>
       )}
-      <span className="absolute top-3 left-3 rounded-full bg-white/95 px-3 py-1 text-[10px] font-bold tracking-wider text-ieee shadow-sm">
-        LETs TALK
-      </span>
     </div>
   );
 }
