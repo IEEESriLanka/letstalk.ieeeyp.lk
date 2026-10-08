@@ -39,7 +39,7 @@ export function LatestArticles() {
   });
   const articles = query.data ?? [];
   return (
-    <section id="articles" aria-labelledby="articles-title" className="py-20 lg:py-28">
+    <section id="articles" aria-labelledby="articles-title" className="scroll-mt-24 py-20 lg:py-28">
       <div className="mx-auto max-w-7xl px-5">
         <Reveal className="text-center">
           <p className="text-xs font-semibold tracking-[0.16em] text-orange uppercase">

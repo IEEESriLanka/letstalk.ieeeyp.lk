@@ -1,7 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useLocation } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { motion } from "motion/react";
+import { scrollToHash } from "@/lib/scroll-utils";
 import { Preloader } from "@/components/site/preloader";
 import { SiteNav } from "@/components/site/site-nav";
 import { MouseGlow } from "@/components/site/mouse-glow";
@@ -53,10 +54,23 @@ export const Route = createFileRoute("/")({
 function Index() {
   const [initializing, setInitializing] = useState(true);
   const finishInitialization = useCallback(() => setInitializing(false), []);
+  const routerHash = useLocation({ select: (location) => location.hash });
   const { data: content = defaultSiteContent, isPending, fetchStatus, isError, refetch } = useQuery({
     queryKey: ["site-content"],
     queryFn: () => getSiteContent(),
   });
+
+  useEffect(() => {
+    if (initializing) return;
+    const targetHash = routerHash || (typeof window !== "undefined" ? window.location.hash : "");
+    if (!targetHash) return;
+
+    const timer = setTimeout(() => {
+      scrollToHash(targetHash, true);
+    }, 120);
+
+    return () => clearTimeout(timer);
+  }, [initializing, routerHash]);
 
   return (
     <>

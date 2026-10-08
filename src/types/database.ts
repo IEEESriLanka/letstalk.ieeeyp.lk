@@ -117,4 +117,9 @@ export type AdminManagedTable =
   "events" | "programs" | "gallery_albums" | "gallery_items" | "awards" | "partners" | "contact_messages";
 
 export type StorageBucket =
-  "event-images" | "program-images" | "gallery-images" | "award-images" | "partner-logos";
+  | "event-images"
+  | "program-images"
+  | "gallery-images"
+  | "award-images"
+  | "partner-logos"
+  | "IEEE-logos";

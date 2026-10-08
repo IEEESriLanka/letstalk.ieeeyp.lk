@@ -11,7 +11,7 @@ export function AboutOverview({
   const reduceMotion = useReducedMotion();
 
   return (
-    <section id="about" aria-labelledby="about-heading" className="relative pt-20 pb-20 lg:pt-28 lg:pb-28">
+    <section id="about" aria-labelledby="about-heading" className="relative scroll-mt-24 pt-20 pb-20 lg:pt-28 lg:pb-28">
       {/* Subtle brand ambient accents */}
       <div
         aria-hidden="true"
@@ -123,7 +123,7 @@ export function ImpactOverview({ content }: { content: SiteContent["about"] }) {
   const statIcons = [Mic, Handshake, Users, GraduationCap];
 
   return (
-    <section id="impact" aria-labelledby="impact-heading" className="relative overflow-hidden py-20 lg:py-28">
+    <section id="impact" aria-labelledby="impact-heading" className="relative scroll-mt-24 overflow-hidden py-20 lg:py-28">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-grid opacity-30 [mask-image:radial-gradient(ellipse_70%_70%_at_50%_50%,black,transparent)]"

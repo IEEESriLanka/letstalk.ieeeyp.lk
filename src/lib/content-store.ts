@@ -28,7 +28,15 @@ export const siteContentSchema: z.ZodType<SiteContent> = z.object({
     quoteBy: z.string().min(1),
     storyCards: z.array(z.object({ title: z.string().min(1), copy: z.string().min(1) })).optional(),
     values: z.array(z.object({ title: z.string().min(1), copy: z.string().min(1) })).optional(),
-    organizations: z.array(z.object({ title: z.string().min(1), copy: z.string().min(1) })).optional(),
+    organizations: z
+      .array(
+        z.object({
+          title: z.string().min(1),
+          copy: z.string().min(1),
+          logoUrl: z.string().nullable().optional(),
+        }),
+      )
+      .optional(),
     milestones: z.array(z.string().min(1)).optional(),
     pillars: z
       .array(
@@ -251,7 +259,7 @@ export async function readSiteContent(): Promise<SiteContent> {
   const supabase = getSupabase();
   if (!supabase) return defaultSiteContent;
 
-  const [site, events, gallery, awards, partners, heroBackgrounds, teamContacts] = await Promise.all([
+  const [site, events, gallery, awards, partners, heroBackgrounds, teamContacts, ieeeLogos] = await Promise.all([
     supabase.from("site_content").select("content").eq("id", "site").maybeSingle(),
     supabase
       .from("events")
@@ -278,6 +286,10 @@ export async function readSiteContent(): Promise<SiteContent> {
       sortBy: { column: "created_at", order: "asc" },
     }),
     supabase.from("team_private_contacts").select("year,member_name,phone"),
+    supabase.storage.from("IEEE-logos").list("", {
+      limit: 100,
+      sortBy: { column: "name", order: "asc" },
+    }),
   ]);
 
   if (site.error) throw new Error(site.error.message);
@@ -288,9 +300,26 @@ export async function readSiteContent(): Promise<SiteContent> {
   if (heroBackgrounds.error) throw new Error(heroBackgrounds.error.message);
   if (teamContacts.error) throw new Error(teamContacts.error.message);
 
-  const base = mergeContent(
-    site.data?.content ? siteContentSchema.parse(site.data.content) : defaultSiteContent,
-  );
+  let storedContent: SiteContent = defaultSiteContent;
+  if (site.data?.content) {
+    const parsed = siteContentSchema.safeParse(site.data.content);
+    if (parsed.success) {
+      storedContent = parsed.data;
+    } else {
+      console.warn("site_content schema validation warning:", parsed.error.issues);
+      storedContent = {
+        ...defaultSiteContent,
+        ...site.data.content,
+        hero: { ...defaultSiteContent.hero, ...(site.data.content.hero || {}) },
+        about: { ...defaultSiteContent.about, ...(site.data.content.about || {}) },
+        awards: { ...defaultSiteContent.awards, ...(site.data.content.awards || {}) },
+        connected: { ...defaultSiteContent.connected, ...(site.data.content.connected || {}) },
+        contact: { ...defaultSiteContent.contact, ...(site.data.content.contact || {}) },
+        teamPage: { ...defaultSiteContent.teamPage, ...(site.data.content.teamPage || {}) },
+      } as SiteContent;
+    }
+  }
+  const base = mergeContent(storedContent);
   const award = awards.data?.[0];
   const phoneByMember = new Map(
     (teamContacts.data ?? []).map((contact) => [`${contact.year}:${contact.member_name}`, contact.phone]),
@@ -312,18 +341,80 @@ export async function readSiteContent(): Promise<SiteContent> {
       }
     : base.teamPage;
 
+  const ieeeLogoFiles = (ieeeLogos?.data ?? []).filter((f) => f.name && !f.name.startsWith("."));
+  const resolveIeeeLogo = (title: string, existingLogo?: string | null) => {
+    if (existingLogo) return existingLogo;
+    const t = title.toLowerCase();
+    let file: { name: string } | undefined;
+    if (t.includes("section")) {
+      file = ieeeLogoFiles.find((f) => /section|sl/i.test(f.name));
+    } else if (t.includes("young") || t.includes("yp")) {
+      file = ieeeLogoFiles.find((f) => /yp|young/i.test(f.name));
+    } else {
+      file = ieeeLogoFiles.find((f) => !/section|sl|yp|young/i.test(f.name) && /ieee/i.test(f.name));
+    }
+    if (file) {
+      return supabase.storage.from("IEEE-logos").getPublicUrl(file.name).data.publicUrl;
+    }
+    return null;
+  };
+
+  const organizations = (base.about.organizations ?? defaultSiteContent.about.organizations ?? []).map((org) => ({
+    ...org,
+    logoUrl: resolveIeeeLogo(org.title, org.logoUrl) ?? org.logoUrl,
+  }));
+
+  const ORDERED_HERO_IMAGES = [
+    "1790220746938.jpg.jpeg",
+    "WhatsApp Image 2026-10-08 at 03.01.45.jpeg",
+    "WhatsApp Image 2026-10-08 at 03.01.48.jpeg",
+    "ff42cb9e-9e87-45a7-82eb-83bc8a2ce8f1.png",
+    "WhatsApp Image 2026-10-08 at 03.01.43.jpeg",
+  ];
+
+  const getHeroImagePriority = (nameOrUrl: string) => {
+    try {
+      const decoded = decodeURIComponent(nameOrUrl);
+      const idx = ORDERED_HERO_IMAGES.findIndex((target) => decoded.includes(target));
+      return idx === -1 ? 999 : idx;
+    } catch {
+      return 999;
+    }
+  };
+
+  const storageHeroImages = (heroBackgrounds.data ?? [])
+    .filter((image) => image.id && image.name)
+    .sort((a, b) => getHeroImagePriority(a.name) - getHeroImagePriority(b.name))
+    .map(
+      (image) =>
+        supabase.storage.from("gallery-images").getPublicUrl(`hero-backgrounds/${image.name}`)
+          .data.publicUrl,
+    );
+
+  const heroBackgroundImages = (
+    base.hero.backgroundImages && base.hero.backgroundImages.length > 0
+      ? [
+          ...base.hero.backgroundImages,
+          ...storageHeroImages.filter(
+            (sUrl) =>
+              !(base.hero.backgroundImages ?? []).some(
+                (bUrl) => decodeURIComponent(bUrl) === decodeURIComponent(sUrl),
+              ),
+          ),
+        ]
+      : storageHeroImages
+  ).sort((a, b) => getHeroImagePriority(a) - getHeroImagePriority(b));
+
   return {
     ...base,
+    about: {
+      ...base.about,
+      organizations,
+    },
     teamPage,
     hero: {
       ...base.hero,
-      backgroundImages: (heroBackgrounds.data ?? [])
-        .filter((image) => image.id && image.name)
-        .map(
-          (image) =>
-            supabase.storage.from("gallery-images").getPublicUrl(`hero-backgrounds/${image.name}`)
-              .data.publicUrl,
-        ),
+      backgroundImages: heroBackgroundImages,
     },
     awards: award
       ? {
