@@ -711,7 +711,7 @@ export function Contact({ content }: { content: SiteContent["contact"] }) {
                 icon: Linkedin,
                 label: "Connect with Lets talk LinkedIn",
                 desc: "Follow the LETs talk community",
-                href: "https://www.linkedin.com/company/ieee-young-professionals-sri-lanka/",
+                href: "https://www.linkedin.com/company/ieee-lets-talk/",
               },
             ].map((c) => (
               <a

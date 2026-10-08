@@ -73,7 +73,7 @@ export function SiteFooter({ email = "ieeeletstalksl@gmail.com" }: { email?: str
                   label: "WhatsApp",
                 },
                 { icon: Linkedin,
-                  href: "https://www.linkedin.com/company/ieee-lets-talk",
+                  href: "https://www.linkedin.com/company/ieee-lets-talk/",
                   label: "LinkedIn" },
 
                 { icon: FacebookIcon,
