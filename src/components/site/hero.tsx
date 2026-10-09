@@ -79,7 +79,7 @@ export function Hero({ content }: { content: SiteContent["hero"] }) {
         </motion.div>
       </div>
       {hasPhotos && (
-        <div className="relative h-[360px] sm:h-[460px] lg:absolute lg:top-[clamp(6rem,12svh,8rem)] lg:right-0 lg:bottom-0 lg:h-auto lg:w-[60%] lg:drop-shadow-[0_-14px_22px_rgba(255,104,21,0.65)]">
+        <div className="relative h-[360px] sm:h-[460px] lg:absolute lg:top-[clamp(6rem,12svh,8rem)] lg:right-0 lg:bottom-0 lg:h-auto lg:w-[60%]">
           <div className="absolute inset-0 [mask-image:linear-gradient(to_bottom,black_0%,black_calc(100%_-_120px),transparent_100%)]">
             <div className="absolute inset-0 lg:[clip-path:polygon(22%_0,100%_0,100%_100%,0_100%)] lg:[mask-image:radial-gradient(ellipse_80%_75%_at_0%_100%,transparent_0%,transparent_25%,black_80%)]">
               <PhotoBackdrop images={content.backgroundImages} />

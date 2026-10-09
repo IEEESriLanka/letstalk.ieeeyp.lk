@@ -46,6 +46,12 @@ export function getDisplayYearTeams(team: NonNullable<SiteContent["teamPage"]>):
   );
 
   return teams.map((yearTeam) => {
+    // 2026 is also represented by currentMembers for backward compatibility.
+    // If an incomplete yearlyTeams entry exists, keep the published current team visible.
+    if (yearTeam.year === "2026" && yearTeam.members.length === 0 && team.currentMembers.length > 0) {
+      return { ...yearTeam, members: team.currentMembers };
+    }
+
     const fallback = fallbackTeams.get(yearTeam.year);
     if (!fallback) return yearTeam;
 

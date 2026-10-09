@@ -220,7 +220,7 @@ function TeamPage() {
                       <button
                         type="button"
                         aria-expanded={visiblePhone === `${year}:${member.name}`}
-                        aria-label={`Show phone number for ${member.name}`}
+                        aria-label={`Toggle phone number for ${member.name}`}
                         onClick={() =>
                           setVisiblePhone((current) =>
                             current === `${year}:${member.name}` ? null : `${year}:${member.name}`,
@@ -231,14 +231,14 @@ function TeamPage() {
                         <Phone className="size-4" />
                       </button>
                     )}
-                    {member.phone && visiblePhone === `${year}:${member.name}` ? (
+                    {member.phone && visiblePhone === `${year}:${member.name}` && (
                       <a
                         href={`tel:${member.phone}`}
-                        className="self-center text-sm font-semibold text-ieee hover:underline"
+                        className="inline-flex min-h-9 items-center rounded-full border border-ieee bg-white/90 px-3 text-sm font-semibold text-ieee shadow-xs backdrop-blur-md hover:bg-blue-50"
                       >
                         {member.phone}
                       </a>
-                    ) : null}
+                    )}
                   </div>
                 </div>
               </motion.article>

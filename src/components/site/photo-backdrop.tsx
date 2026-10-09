@@ -1,16 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { useReducedMotion } from "motion/react";
-import { ArrowLeft, ArrowRight, Pause, Play } from "lucide-react";
-
-const controlClass =
-  "grid size-11 place-items-center rounded-full border border-white/50 bg-[#082447]/60 text-white hover:bg-[#082447] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white";
 
 export function PhotoBackdrop({ images }: { images?: string[] | undefined }) {
   const photos = images?.filter(Boolean) ?? [];
   const [viewportRef, carousel] = useEmblaCarousel({ loop: true });
   const [selected, setSelected] = useState(0);
-  const [paused, setPaused] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
   const reduceMotion = useReducedMotion();
@@ -47,10 +42,10 @@ export function PhotoBackdrop({ images }: { images?: string[] | undefined }) {
   }, [carousel, photoKey]);
 
   useEffect(() => {
-    if (!carousel || photos.length < 2 || paused || hovered || focused || reduceMotion) return;
+    if (!carousel || photos.length < 2 || hovered || focused || reduceMotion) return;
     const timer = window.setInterval(() => carousel.scrollNext(), 6000);
     return () => window.clearInterval(timer);
-  }, [carousel, photos.length, paused, hovered, focused, reduceMotion, selected]);
+  }, [carousel, photos.length, hovered, focused, reduceMotion, selected]);
 
   return (
     <div
@@ -105,7 +100,7 @@ export function PhotoBackdrop({ images }: { images?: string[] | undefined }) {
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_75%_65%_at_0%_100%,#fbfcff_0%,rgba(251,252,255,0.9)_18%,rgba(251,252,255,0.5)_42%,transparent_75%)]"
       />
       {photos.length > 1 && (
-        <div className="absolute right-6 bottom-32 left-6 flex flex-wrap items-center justify-end gap-4 lg:left-[30%]">
+        <div className="absolute right-6 bottom-[4.5rem] left-6 flex flex-wrap items-center justify-end gap-4 lg:right-12 lg:left-[30%]">
           <div className="flex flex-wrap items-center gap-1" aria-label="Choose photo">
             {photos.map((src, index) => (
               <button
@@ -121,34 +116,6 @@ export function PhotoBackdrop({ images }: { images?: string[] | undefined }) {
                 />
               </button>
             ))}
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              aria-label="Previous photo"
-              onClick={() => carousel?.scrollPrev(Boolean(reduceMotion))}
-              className={controlClass}
-            >
-              <ArrowLeft className="size-4" />
-            </button>
-            {!reduceMotion && (
-              <button
-                type="button"
-                aria-label={paused ? "Play slideshow" : "Pause slideshow"}
-                onClick={() => setPaused((value) => !value)}
-                className={controlClass}
-              >
-                {paused ? <Play className="size-4" /> : <Pause className="size-4" />}
-              </button>
-            )}
-            <button
-              type="button"
-              aria-label="Next photo"
-              onClick={() => carousel?.scrollNext(Boolean(reduceMotion))}
-              className={controlClass}
-            >
-              <ArrowRight className="size-4" />
-            </button>
           </div>
         </div>
       )}

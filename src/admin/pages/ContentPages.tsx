@@ -41,6 +41,7 @@ import {
   saveGalleryAlbum,
   savePartner,
   saveProgram,
+  saveSiteSettings,
   updateMessageStatus,
 } from "@/admin/services/admin-data";
 import { deleteImage, listPublicImages, uploadImage } from "@/lib/storage";
@@ -1206,13 +1207,48 @@ export function SettingsPage() {
 
     setBackgroundSaving(true);
     try {
+      const latest = await getSiteSettings();
+      const backgroundImages = (latest.hero.backgroundImages ?? []).filter((imageUrl) => {
+        try {
+          return decodeURIComponent(imageUrl) !== decodeURIComponent(url);
+        } catch {
+          return imageUrl !== url;
+        }
+      });
+      const updated = await saveSiteSettings({
+        ...latest,
+        hero: { ...latest.hero, backgroundImages },
+      });
       await deleteImage("gallery-images", url);
-      await queryClient.invalidateQueries({ queryKey: ["hero-background-uploads"] });
-      await queryClient.invalidateQueries({ queryKey: ["site-content"] });
+      const remainingUploads = await listPublicImages("gallery-images", "hero-backgrounds");
+      if (remainingUploads.some((imageUrl) => {
+        try {
+          return decodeURIComponent(imageUrl) === decodeURIComponent(url);
+        } catch {
+          return imageUrl === url;
+        }
+      })) {
+        throw new Error("The image is still in storage, so it is still appearing on the homepage.");
+      }
+      queryClient.setQueryData(["site-settings"], updated);
+      queryClient.setQueryData<string[]>(["hero-background-uploads"], (current) =>
+        current?.filter((imageUrl) => {
+          try {
+            return decodeURIComponent(imageUrl) !== decodeURIComponent(url);
+          } catch {
+            return imageUrl !== url;
+          }
+        }) ?? [],
+      );
       toast.success("Uploaded hero image removed.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Unable to remove hero image.");
     } finally {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["hero-background-uploads"] }),
+        queryClient.invalidateQueries({ queryKey: ["site-settings"] }),
+        queryClient.invalidateQueries({ queryKey: ["site-content"] }),
+      ]);
       setBackgroundSaving(false);
     }
   }

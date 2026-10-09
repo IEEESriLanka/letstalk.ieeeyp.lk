@@ -20,7 +20,12 @@ export function getStoragePathFromPublicUrl(url: string) {
   if (markerIndex === -1) return null;
   const path = url.slice(markerIndex + marker.length);
   const [, ...objectParts] = path.split("/");
-  return objectParts.join("/");
+  const objectPath = objectParts.join("/");
+  try {
+    return decodeURIComponent(objectPath);
+  } catch {
+    return objectPath;
+  }
 }
 
 export async function uploadImage(bucket: StorageBucket, file: File, folder: string) {

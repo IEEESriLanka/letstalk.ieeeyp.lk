@@ -127,6 +127,7 @@ export const siteContentSchema: z.ZodType<SiteContent> = z.object({
                 imagePosition: z.string().nullable().optional(),
                 linkedinUrl: z.string().nullable().optional(),
                 email: z.string().nullable().optional(),
+                phone: z.string().nullable().optional(),
               }),
             ),
           }),
@@ -147,6 +148,7 @@ export const siteContentSchema: z.ZodType<SiteContent> = z.object({
             imagePosition: z.string().nullable().optional(),
             linkedinUrl: z.string().nullable().optional(),
             email: z.string().nullable().optional(),
+            phone: z.string().nullable().optional(),
           }),
         )
         .min(1),
@@ -302,7 +304,11 @@ export async function readSiteContent(): Promise<SiteContent> {
   if (awards.error) throw new Error(awards.error.message);
   if (partners.error) throw new Error(partners.error.message);
   if (heroBackgrounds.error) throw new Error(heroBackgrounds.error.message);
-  if (teamContacts.error) throw new Error(teamContacts.error.message);
+  if (teamContacts.error) {
+    // Phone contacts are optional enrichment; a contact-table issue must not
+    // prevent the public team members from loading from site_content.
+    console.warn("Unable to load public team phone contacts:", teamContacts.error.message);
+  }
 
   let storedContent: SiteContent = defaultSiteContent;
   if (site.data?.content) {
@@ -338,12 +344,12 @@ export async function readSiteContent(): Promise<SiteContent> {
           ...team,
           members: team.members.map((member) => ({
             ...member,
-            phone: phoneByMember.get(teamContactKey(team.year, member.name)) ?? null,
+            phone: phoneByMember.get(teamContactKey(team.year, member.name)) ?? member.phone ?? null,
           })),
         })),
         currentMembers: base.teamPage.currentMembers.map((member) => ({
           ...member,
-          phone: phoneByMember.get(teamContactKey("2026", member.name)) ?? null,
+          phone: phoneByMember.get(teamContactKey("2026", member.name)) ?? member.phone ?? null,
         })),
       }
     : base.teamPage;

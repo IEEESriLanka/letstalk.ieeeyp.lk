@@ -77,7 +77,7 @@ export function TeamAdminPage() {
         if (JSON.stringify(target.members[change.index]) !== JSON.stringify(expected)) {
           throw new Error("This team changed. Refresh the page before saving.");
         }
-        if (change.member) target.members[change.index] = change.member;
+        if (change.member) target.members[change.index] = { ...change.member, phone: change.phone?.trim() || null };
         else target.members.splice(change.index, 1);
       }
       const content = await saveSiteSettings({ ...latest, teamPage: { ...teamPage, yearlyTeams } });
@@ -144,7 +144,7 @@ export function TeamAdminPage() {
     {editing && <MemberEditor
       member={editing.member}
       year={year}
-      phone={privateContacts.data?.find((contact) => contact.year === year && contact.member_name === editing.member.name)?.phone ?? ""}
+      phone={privateContacts.data?.find((contact) => contact.year === year && contact.member_name === editing.member.name)?.phone ?? editing.member.phone ?? ""}
       onClose={() => setEditing(null)}
       onSave={(member, phone) => mutation.mutateAsync({ index: editing.index, member, phone })}
     />}
@@ -161,7 +161,7 @@ function MemberEditor({ member, year, phone, onClose, onSave }: {
   member: TeamMember; year: string; phone: string; onClose: () => void; onSave: (member: TeamMember, phone: string | null) => Promise<unknown>;
 }) {
   const [form, setForm] = useState(member);
-  const [privatePhone, setPrivatePhone] = useState(phone);
+  const [publicPhone, setPublicPhone] = useState(phone);
   const [file, setFile] = useState<File | null>(null);
   const [photoVersion, setPhotoVersion] = useState(0);
   const [saving, setSaving] = useState(false);
@@ -178,11 +178,15 @@ function MemberEditor({ member, year, phone, onClose, onSave }: {
           throw new Error("Enter a valid https://www.linkedin.com/ profile link.");
         }
       }
+      const email = form.email?.trim() || null;
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        throw new Error("Enter a valid email address.");
+      }
       const imageUrl = file ? await uploadImage("gallery-images", file, "team/" + year) : form.imageUrl ?? null;
       setForm((current) => ({ ...current, imageUrl })); setFile(null);
       await onSave(
-        { ...form, name, role, linkedinUrl, imageUrl, initials: name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase() },
-        privatePhone,
+        { ...form, name, role, linkedinUrl, email, imageUrl, initials: name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase() },
+        publicPhone,
       );
     } catch (reason) { setError(reason instanceof Error ? reason.message : "Unable to save member."); }
     finally { setSaving(false); }
@@ -192,8 +196,9 @@ function MemberEditor({ member, year, phone, onClose, onSave }: {
       <fieldset disabled={saving} className="space-y-5">
         <FormField label="Name" required><input required className={fieldClass} value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} /></FormField>
         <FormField label="Position" required><input required className={fieldClass} value={form.role} onChange={(event) => setForm({ ...form, role: event.target.value })} /></FormField>
+        <FormField label="Email address"><input type="email" autoComplete="email" placeholder="name@example.com" className={fieldClass} value={form.email ?? ""} onChange={(event) => setForm({ ...form, email: event.target.value })} /></FormField>
         <FormField label="LinkedIn profile"><input type="url" placeholder="https://www.linkedin.com/in/..." className={fieldClass} value={form.linkedinUrl ?? ""} onChange={(event) => setForm({ ...form, linkedinUrl: event.target.value })} /></FormField>
-        <FormField label="Phone number (admin only)">
+        <FormField label="Phone number (shown publicly)">
           <div className="relative">
             <Phone aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-slate-400" />
             <input
@@ -201,8 +206,8 @@ function MemberEditor({ member, year, phone, onClose, onSave }: {
               autoComplete="tel"
               placeholder="+94 7X XXX XXXX"
               className={`${fieldClass} pl-10`}
-              value={privatePhone}
-              onChange={(event) => setPrivatePhone(event.target.value)}
+              value={publicPhone}
+              onChange={(event) => setPublicPhone(event.target.value)}
             />
           </div>
         </FormField>
