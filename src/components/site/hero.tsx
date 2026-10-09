@@ -27,7 +27,7 @@ export function Hero({ content }: { content: SiteContent["hero"] }) {
           initial={reduceMotion ? false : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
-          className={`relative z-10 py-10 sm:py-14 lg:py-[clamp(2rem,5svh,5rem)] ${hasPhotos ? "lg:w-1/2 lg:pr-[clamp(1rem,2vw,3rem)]" : "max-w-3xl"}`}
+          className={`relative z-10 py-10 sm:py-14 lg:py-[clamp(2rem,5svh,5rem)] ${hasPhotos ? "lg:w-2/5 lg:pr-[clamp(1rem,2vw,3rem)]" : "max-w-3xl"}`}
         >
           <p className="flex items-center gap-4 text-[0.65rem] font-bold tracking-[0.19em] text-[#53658b] uppercase sm:text-xs">
             <span aria-hidden className="h-0.5 w-8 shrink-0 bg-orange" />
@@ -79,16 +79,12 @@ export function Hero({ content }: { content: SiteContent["hero"] }) {
         </motion.div>
       </div>
       {hasPhotos && (
-        <div className="relative h-[360px] sm:h-[460px] lg:absolute lg:top-[clamp(6rem,12svh,8rem)] lg:right-0 lg:bottom-0 lg:h-auto lg:w-[51%]">
+        <div className="relative h-[360px] sm:h-[460px] lg:absolute lg:top-[clamp(6rem,12svh,8rem)] lg:right-0 lg:bottom-0 lg:h-auto lg:w-[60%] lg:drop-shadow-[0_-14px_22px_rgba(255,104,21,0.65)]">
           <div className="absolute inset-0 [mask-image:linear-gradient(to_bottom,black_0%,black_calc(100%_-_120px),transparent_100%)]">
-            <div className="absolute inset-0 lg:[clip-path:polygon(30%_0,100%_0,100%_100%,0_100%)] lg:[mask-image:radial-gradient(ellipse_80%_75%_at_0%_100%,transparent_0%,transparent_25%,black_80%)]">
+            <div className="absolute inset-0 lg:[clip-path:polygon(22%_0,100%_0,100%_100%,0_100%)] lg:[mask-image:radial-gradient(ellipse_80%_75%_at_0%_100%,transparent_0%,transparent_25%,black_80%)]">
               <PhotoBackdrop images={content.backgroundImages} />
             </div>
           </div>
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -top-2 left-[22%] hidden h-24 w-10 skew-x-[-26deg] rounded-xl bg-gradient-to-b from-[#ff9954] to-[#ff6815] lg:block"
-          />
           <svg
             aria-hidden="true"
             viewBox="0 0 1000 120"

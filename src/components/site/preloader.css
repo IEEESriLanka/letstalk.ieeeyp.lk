@@ -78,13 +78,16 @@
   color: #ff6b00;
 }
 .preloader-title {
-  color: #003b6f;
+  color: #00629b;
   margin: 18px 0 0;
   font-family: inherit;
   font-size: clamp(30px, 5vw, 48px);
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: -0.04em;
+}
+.preloader-title span:first-child {
+  color: #00629b;
 }
 .preloader-title span:nth-child(2) {
   color: #005d84;
