@@ -1,28 +1,41 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import tsConfigPaths from "vite-tsconfig-paths";
 import { nitro } from "nitro/vite";
+import path from "node:path";
 
-export default defineConfig(({ command }) => ({
-  plugins: [
-    tailwindcss(),
-    tsConfigPaths({ projects: ["./tsconfig.json"] }),
-    tanstackStart({
-      server: { entry: "server" },
-      router: { autoCodeSplitting: false },
-    }),
-    viteReact(),
-    command === "build" &&
-      nitro({
-        defaultPreset: "cloudflare-module",
+export default defineConfig(({ command, mode }) => {
+  // Vite exposes VITE_* to modules, but server-only code reads process.env.
+  const env = loadEnv(mode, process.cwd(), "");
+  for (const [key, value] of Object.entries(env)) {
+    if (process.env[key] === undefined) process.env[key] = value;
+  }
+  return {
+    plugins: [
+      tailwindcss(),
+      tsConfigPaths({ projects: ["./tsconfig.json"] }),
+      tanstackStart({
+        vite: { installDevServerMiddleware: true },
       }),
-  ].filter(Boolean),
-  server: {
-    port: 8080,
-    watch: {
-      ignored: ["**/.output/**", "**/.wrangler/**"],
+      viteReact(),
+      command === "build" &&
+        nitro({
+          preset: process.env.VERCEL ? "vercel" : "node-server",
+        }),
+    ].filter(Boolean),
+    server: {
+      port: 8080,
+      strictPort: true,
+      watch: {
+        ignored: ["**/.output/**", "**/.wrangler/**"],
+      },
     },
-  },
-}));
+    resolve: {
+      alias: {
+        "@": path.resolve(process.cwd(), "src"),
+      },
+    },
+  };
+});
