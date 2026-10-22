@@ -21,6 +21,7 @@ import { useState, type ReactNode } from "react";
 import { Toaster, toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { signOutAdmin } from "@/lib/auth";
+import { isSuperAdmin } from "@/lib/super-admin";
 
 const navItems = [
   { label: "Dashboard", to: "/admin", icon: Home },
@@ -62,10 +63,12 @@ export function AdminLayout({
   title,
   subtitle,
   children,
+  wide = false,
 }: {
   title: string;
   subtitle?: string;
   children: ReactNode;
+  wide?: boolean;
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { data: access } = useAuth();
@@ -84,19 +87,24 @@ export function AdminLayout({
       <Toaster richColors position="top-right" />
       <button
         type="button"
-        className="fixed top-4 left-4 z-50 inline-flex size-10 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-700 shadow-sm lg:hidden"
+        className={`fixed top-4 left-4 z-40 inline-flex size-10 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-700 shadow-sm ${wide ? "" : "lg:hidden"}`}
         onClick={() => setMobileOpen(true)}
         aria-label="Open admin navigation"
       >
         <Menu className="size-5" />
       </button>
 
-      <AdminSidebar open={mobileOpen} onClose={() => setMobileOpen(false)} onLogout={logout} />
+      <AdminSidebar
+        open={mobileOpen}
+        onClose={() => setMobileOpen(false)}
+        onLogout={logout}
+        wide={wide}
+      />
 
-      <div className="lg:pl-72">
+      <div className={wide ? "" : "lg:pl-72"}>
         <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur">
           <div className="flex min-h-20 flex-col gap-4 px-5 py-4 sm:px-8 lg:flex-row lg:items-center lg:justify-between">
-            <div className="pl-12 lg:pl-0">
+            <div className={wide ? "pl-12" : "pl-12 lg:pl-0"}>
               <p className="text-xs font-semibold tracking-[0.18em] text-[#00629b] uppercase">
                 IEEE LETs Talk CMS
               </p>
@@ -104,22 +112,28 @@ export function AdminLayout({
               {subtitle ? <p className="mt-1 text-sm text-slate-500">{subtitle}</p> : null}
             </div>
             <div className="flex items-center gap-3">
-              <label className="relative hidden min-w-72 md:block">
-                <span className="sr-only">Search admin content</span>
-                <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
-                <input
-                  className="h-10 w-full rounded-md border border-slate-200 bg-slate-50 pr-3 pl-9 text-sm outline-none transition focus:border-[#00629b] focus:bg-white focus:ring-2 focus:ring-[#00629b]/15"
-                  placeholder="Search content"
-                />
-              </label>
-              <button
-                type="button"
-                aria-label="Notifications"
+              {!wide && (
+                <label className="relative hidden min-w-72 md:block">
+                  <span className="sr-only">Search admin content</span>
+                  <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
+                  <input
+                    className="h-10 w-full rounded-md border border-slate-200 bg-slate-50 pr-3 pl-9 text-sm outline-none transition focus:border-[#00629b] focus:bg-white focus:ring-2 focus:ring-[#00629b]/15"
+                    placeholder="Search content"
+                  />
+                </label>
+              )}
+              <Link
+                to="/admin/messages"
+                aria-label="Open messages"
                 className="inline-flex size-10 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-600"
               >
                 <Bell className="size-4" />
-              </button>
-              <div className="hidden items-center gap-3 rounded-md border border-slate-200 bg-white px-3 py-2 sm:flex">
+              </Link>
+              <Link
+                to="/admin/settings"
+                aria-label="Account settings and password"
+                className="hidden items-center gap-3 rounded-md border border-slate-200 bg-white px-3 py-2 sm:flex"
+              >
                 <div className="flex size-8 items-center justify-center rounded-md bg-[#00629b] text-xs font-bold text-white">
                   {access?.ok ? access.identity.name.slice(0, 2).toUpperCase() : "AD"}
                 </div>
@@ -131,12 +145,16 @@ export function AdminLayout({
                     {access?.ok ? access.identity.email || access.admin.role : "admin"}
                   </p>
                 </div>
-              </div>
+              </Link>
             </div>
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-7xl px-5 py-6 sm:px-8">{children}</main>
+        <main
+          className={`mx-auto w-full px-5 py-6 sm:px-8 ${wide ? "max-w-[1600px]" : "max-w-7xl"}`}
+        >
+          {children}
+        </main>
       </div>
     </div>
   );
@@ -146,12 +164,16 @@ function AdminSidebar({
   open,
   onClose,
   onLogout,
+  wide = false,
 }: {
   open: boolean;
   onClose: () => void;
   onLogout: () => void;
+  wide?: boolean;
 }) {
   const location = useLocation();
+  const { data: access } = useAuth();
+  const canManageAccounts = access?.ok && isSuperAdmin(access.admin.role, access.identity.email);
   const sidebar = (
     <aside className="flex h-full w-72 flex-col border-r border-slate-800 bg-[#081625] text-white">
       <div className="flex h-20 items-center justify-between border-b border-white/10 px-5">
@@ -164,13 +186,19 @@ function AdminSidebar({
             <p className="text-xs font-semibold tracking-[0.18em] text-sky-200 uppercase">Admin</p>
           </div>
         </Link>
-        <button type="button" className="lg:hidden" onClick={onClose} aria-label="Close navigation">
+        <button
+          type="button"
+          className={wide ? "" : "lg:hidden"}
+          onClick={onClose}
+          aria-label="Close navigation"
+        >
           <X className="size-5" />
         </button>
       </div>
 
       <nav className="flex-1 space-y-1 px-3 py-5">
         {navItems.map((item) => {
+          if (item.to === "/admin/admins" && !canManageAccounts) return null;
           const active =
             item.to === "/admin"
               ? location.pathname === item.to
@@ -226,9 +254,9 @@ function AdminSidebar({
 
   return (
     <>
-      <div className="fixed inset-y-0 left-0 z-40 hidden lg:block">{sidebar}</div>
+      {!wide && <div className="fixed inset-y-0 left-0 z-40 hidden lg:block">{sidebar}</div>}
       {open ? (
-        <div className="fixed inset-0 z-50 lg:hidden">
+        <div className={`fixed inset-0 z-50 ${wide ? "" : "lg:hidden"}`}>
           <button
             type="button"
             className="absolute inset-0 bg-slate-950/60"

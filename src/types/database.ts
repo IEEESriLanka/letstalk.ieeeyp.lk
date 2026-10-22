@@ -1,4 +1,4 @@
-export type AdminRole = "admin" | "editor";
+export type AdminRole = "super_admin" | "admin" | "editor";
 
 export type PublishStatus = "all" | "published" | "draft";
 

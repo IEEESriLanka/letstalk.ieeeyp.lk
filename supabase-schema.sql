@@ -17,7 +17,7 @@ create table if not exists public.contact_messages (
 create table if not exists public.admin_users (
   id uuid primary key default gen_random_uuid(),
   user_id uuid unique not null references auth.users(id) on delete cascade,
-  role text not null default 'admin' check (role in ('admin', 'editor')),
+  role text not null default 'admin' check (role in ('super_admin', 'admin', 'editor')),
   created_at timestamptz not null default now()
 );
 
@@ -184,7 +184,7 @@ as $$
     select 1
     from public.admin_users
     where user_id = auth.uid()
-      and role in ('admin', 'editor')
+      and role in ('super_admin', 'admin', 'editor')
   );
 $$;
 
@@ -197,9 +197,11 @@ set search_path = public
 as $$
   select exists (
     select 1
-    from public.admin_users
-    where user_id = auth.uid()
-      and role = 'admin'
+    from public.admin_users a join auth.users u on u.id = a.user_id
+    where a.user_id = auth.uid()
+      and a.role = 'super_admin'
+      and lower(u.email) = 'ieeeletstalksl@gmail.com'
+      and u.email_confirmed_at is not null
   );
 $$;
 
@@ -228,7 +230,7 @@ with check (public.is_admin());
 drop policy if exists "Admins can read their admin record" on public.admin_users;
 create policy "Admins can read their admin record"
 on public.admin_users for select
-using (user_id = auth.uid() or public.is_admin());
+using (user_id = auth.uid() or public.is_super_admin());
 
 drop policy if exists "Admins manage admin users" on public.admin_users;
 create policy "Admins manage admin users"

@@ -3,6 +3,7 @@ import { Edit, Eye, EyeOff, Plus, Trash2, UploadCloud } from "lucide-react";
 import { FormEvent, useEffect, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { AdminLayout } from "@/admin/components/AdminLayout";
+import { ChangePassword } from "@/admin/components/ChangePassword";
 import {
   AdminModal,
   ConfirmDialog,
@@ -1256,15 +1257,7 @@ export function SettingsPage() {
   return (
     <AdminLayout title="Settings" subtitle="Admin profile and website settings.">
       <div className="grid gap-5 lg:grid-cols-2">
-        <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="text-lg font-bold text-slate-950">Admin Profile</h2>
-          <p className="mt-2 text-sm text-slate-500">
-            Admin accounts and sessions are stored in the local CMS database.
-          </p>
-          <a href="/admin/login" className={`${primaryButtonClass} mt-5`}>
-            Return to login
-          </a>
-        </section>
+        <ChangePassword />
         <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
           <h2 className="text-lg font-bold text-slate-950">Website Settings</h2>
           {settings.isLoading ? <LoadingSkeleton /> : null}

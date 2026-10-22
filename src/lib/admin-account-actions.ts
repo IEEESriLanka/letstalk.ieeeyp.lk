@@ -52,3 +52,16 @@ export const deleteAdminAccountSecurely = createServerFn({ method: "POST" })
     const { deleteAdminAccount } = await import("./admin-accounts.server");
     return deleteAdminAccount(data.accessToken, data.id);
   });
+
+export const updateAdminRoleSecurely = createServerFn({ method: "POST" })
+  .validator((input: unknown) => {
+    const data = credentialsSchema(input);
+    if (!("id" in data) || !("role" in data)) throw new Error("Choose an account and role.");
+    const role = String(data.role);
+    if (role !== "admin" && role !== "editor") throw new Error("Choose a valid role.");
+    return { accessToken: data.accessToken, id: String(data.id), role };
+  })
+  .handler(async ({ data }) => {
+    const { updateAdminRole } = await import("./admin-accounts.server");
+    return updateAdminRole(data.accessToken, data.id, data.role as "admin" | "editor");
+  });
