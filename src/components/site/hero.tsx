@@ -2,6 +2,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { ArrowRight } from "lucide-react";
 import { PhotoBackdrop } from "./photo-backdrop";
 import type { SiteContent } from "@/lib/site-content";
+import { scrollToHash } from "@/lib/scroll-utils";
 
 export function Hero({ content }: { content: SiteContent["hero"] }) {
   const reduceMotion = useReducedMotion();
@@ -12,7 +13,7 @@ export function Hero({ content }: { content: SiteContent["hero"] }) {
     <section
       id="top"
       aria-labelledby="hero-title"
-      className="relative isolate overflow-hidden bg-[#fbfcff] pt-28 pb-24 lg:min-h-svh lg:pt-[clamp(6rem,12svh,8rem)] lg:pb-0"
+      className="hero-scroll-scene relative isolate overflow-hidden bg-[#fbfcff] pt-28 pb-24 lg:min-h-svh lg:pt-[clamp(6rem,12svh,8rem)] lg:pb-0"
     >
       <div
         aria-hidden
@@ -82,7 +83,9 @@ export function Hero({ content }: { content: SiteContent["hero"] }) {
         <div className="relative h-[360px] sm:h-[460px] lg:absolute lg:top-[clamp(6rem,12svh,8rem)] lg:right-0 lg:bottom-0 lg:h-auto lg:w-[60%]">
           <div className="absolute inset-0 [mask-image:linear-gradient(to_bottom,black_0%,black_calc(100%_-_120px),transparent_100%)]">
             <div className="absolute inset-0 lg:[clip-path:polygon(22%_0,100%_0,100%_100%,0_100%)] lg:[mask-image:radial-gradient(ellipse_80%_75%_at_0%_100%,transparent_0%,transparent_25%,black_80%)]">
-              <PhotoBackdrop images={content.backgroundImages} />
+              <div className="hero-scroll-photo absolute inset-0">
+                <PhotoBackdrop images={content.backgroundImages} />
+              </div>
             </div>
           </div>
           <svg
@@ -105,7 +108,7 @@ export function Hero({ content }: { content: SiteContent["hero"] }) {
           const section = document.getElementById("events");
           if (section) {
             event.preventDefault();
-            section.scrollIntoView({ behavior: reduceMotion ? "instant" : "smooth", block: "start" });
+            scrollToHash("#events");
           }
         }}
         className="absolute bottom-6 left-1/2 z-20 flex h-16 w-12 -translate-x-1/2 items-center justify-center rounded-full text-[#222] transition-colors hover:text-orange focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ieee"

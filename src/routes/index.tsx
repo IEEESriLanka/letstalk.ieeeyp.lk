@@ -65,11 +65,7 @@ function Index() {
     const targetHash = routerHash || (typeof window !== "undefined" ? window.location.hash : "");
     if (!targetHash) return;
 
-    const timer = setTimeout(() => {
-      scrollToHash(targetHash, true);
-    }, 120);
-
-    return () => clearTimeout(timer);
+    return scrollToHash(targetHash, true);
   }, [initializing, routerHash]);
 
   return (

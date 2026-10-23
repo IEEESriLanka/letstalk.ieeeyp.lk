@@ -1,5 +1,6 @@
 import { ArrowRight, GraduationCap, Handshake, Mic, Sparkles, Users } from "lucide-react";
-import { motion, useReducedMotion } from "motion/react";
+import { animate, motion, useInView, useMotionValue, useReducedMotion, useTransform } from "motion/react";
+import { useEffect, useRef } from "react";
 import type { SiteContent } from "@/lib/site-content";
 import { defaultSiteContent } from "@/lib/site-content";
 
@@ -117,6 +118,43 @@ export function AboutOverview({
   );
 }
 
+function ImpactCount({ value, filled }: { value: string; filled: boolean }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, amount: 0.5 });
+  const reduceMotion = useReducedMotion();
+  const match = value.match(/^(\d[\d,]*(?:\.\d+)?)(.*)$/);
+  const numeric = match?.[1] ?? "";
+  const target = Number(numeric.replaceAll(",", ""));
+  const valid = Boolean(match) && Number.isFinite(target);
+  const suffix = match?.[2] ?? "";
+  const decimals = numeric.split(".")[1]?.length ?? 0;
+  const count = useMotionValue(0);
+  const text = useTransform(count, (current) => new Intl.NumberFormat("en-US", {
+    useGrouping: numeric.includes(","),
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  }).format(current));
+
+  useEffect(() => {
+    if (!valid || !inView || reduceMotion) return;
+    count.set(0);
+    const animation = animate(count, target, { duration: 1.2, ease: [0.22, 1, 0.36, 1] });
+    return () => animation.stop();
+  }, [count, inView, reduceMotion, target, valid]);
+
+  if (!valid) return <>{value}</>;
+  return (
+    <span ref={ref} className="inline-grid tabular-nums">
+      <span className="sr-only">{value}</span>
+      <span aria-hidden="true" className="invisible col-start-1 row-start-1">{value}</span>
+      <span aria-hidden="true" className="col-start-1 row-start-1">
+        {reduceMotion ? numeric : <motion.span>{text}</motion.span>}
+        {suffix ? <span className={filled ? "text-white/80" : "text-orange"}>{suffix}</span> : null}
+      </span>
+    </span>
+  );
+}
+
 export function ImpactOverview({ content }: { content: SiteContent["about"] }) {
   const reduceMotion = useReducedMotion();
   const displayStats =
@@ -150,9 +188,6 @@ export function ImpactOverview({ content }: { content: SiteContent["about"] }) {
           <dl className="mt-9 grid gap-4 border-t border-border/70 pt-7 sm:grid-cols-2 lg:grid-cols-4 lg:gap-3">
             {displayStats.map((stat, index) => {
               const Icon = statIcons[index % statIcons.length];
-              const match = stat.value.match(/^([^+-]+)(.*)$/);
-              const numPart = match ? match[1] : stat.value;
-              const suffixPart = match ? match[2] : "";
               const filled = index % 2 === 1;
 
               return (
@@ -177,8 +212,7 @@ export function ImpactOverview({ content }: { content: SiteContent["about"] }) {
                   </span>
                   <span className="min-w-0">
                     <dd className="text-2xl leading-none font-extrabold tracking-tight">
-                      {numPart}
-                      {suffixPart ? <span className={filled ? "text-white/80" : "text-orange"}>{suffixPart}</span> : null}
+                      <ImpactCount key={stat.value} value={stat.value} filled={filled} />
                     </dd>
                     <dt className={`mt-1 block text-[0.65rem] font-bold tracking-[0.08em] uppercase ${filled ? "text-white/80" : "text-[#53658b]"}`}>
                       {stat.label}

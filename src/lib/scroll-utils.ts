@@ -1,89 +1,51 @@
-/**
- * Robust scroll utility to accurately scroll to a target section by ID/hash.
- * 
- * Takes into account:
- * 1. Fixed floating header height and padding.
- * 2. Asynchronous layout shifts (lazy images loading, skeletons expanding/collapsing, dynamic queries).
- * 3. Does not fight or interfere with intentional user interactions (wheel, touch, keyboard).
- */
-export function scrollToHash(rawHash: string, smooth = true): void {
-  if (typeof window === "undefined" || !rawHash) return;
-  const id = rawHash.replace(/^#/, "");
-  if (!id) return;
+let cancelPendingScroll: (() => void) | undefined;
 
-  const target = document.getElementById(id);
-  if (!target) {
-    // If the element hasn't mounted yet, retry briefly
-    setTimeout(() => {
-      const retryTarget = document.getElementById(id);
-      if (retryTarget) {
-        scrollToHash(rawHash, smooth);
-      }
-    }, 80);
-    return;
+/** One native scroll per navigation. Pending work yields to user input. */
+export function scrollToHash(rawHash: string, smooth = true): () => void {
+  cancelPendingScroll?.();
+  if (typeof window === "undefined" || !rawHash) return () => {};
+  let id: string;
+  try {
+    id = decodeURIComponent(rawHash.replace(/^#/, ""));
+  } catch {
+    return () => {};
   }
-
-  const getHeaderHeight = () => {
-    const header = document.querySelector("header");
-    return header ? header.getBoundingClientRect().height : 76;
+  if (!id) return () => {};
+  let frame = 0;
+  let attempts = 0;
+  let cancelled = false;
+  const cancel = () => {
+    cancelled = true;
+    window.cancelAnimationFrame(frame);
+    window.removeEventListener("wheel", cancel);
+    window.removeEventListener("touchstart", cancel);
+    window.removeEventListener("keydown", cancel);
+    if (cancelPendingScroll === cancel) cancelPendingScroll = undefined;
   };
-
-  const getExpectedTop = () => {
-    return getHeaderHeight() + 16;
-  };
-
-  const getTargetScrollY = (el: HTMLElement) => {
-    return Math.max(0, el.getBoundingClientRect().top + window.scrollY - getExpectedTop());
-  };
-
-  // Perform initial scroll
-  const initialY = getTargetScrollY(target);
-  window.scrollTo({
-    top: initialY,
-    behavior: smooth ? "smooth" : "instant",
-  });
-
-  // Track if user manually scrolls so we don't disrupt their manual gesture
-  let userInterrupted = false;
-  const stopAdjustment = () => {
-    userInterrupted = true;
-  };
-
-  window.addEventListener("wheel", stopAdjustment, { once: true, passive: true });
-  window.addEventListener("touchmove", stopAdjustment, { once: true, passive: true });
-  window.addEventListener("keydown", stopAdjustment, { once: true, passive: true });
-
-  const adjustIfNeeded = () => {
-    if (userInterrupted) return;
-    const currentEl = document.getElementById(id);
-    if (!currentEl) return;
-
-    const currentTop = currentEl.getBoundingClientRect().top;
-    const expectedTop = getExpectedTop();
-    const diff = currentTop - expectedTop;
-
-    // If layout shifts caused the target to end up a bit above or below (> 10px discrepancy),
-    // smoothly align it with the expected position.
-    if (Math.abs(diff) > 10) {
-      window.scrollBy({
-        top: diff,
-        behavior: "smooth",
-      });
+  cancelPendingScroll = cancel;
+  window.addEventListener("wheel", cancel, { passive: true });
+  window.addEventListener("touchstart", cancel, { passive: true });
+  window.addEventListener("keydown", cancel);
+  const scroll = () => {
+    if (cancelled) return;
+    const target = document.getElementById(id);
+    // Allow a deferred mount, but never reposition after scrolling.
+    if (!target && attempts++ < 30) {
+      frame = window.requestAnimationFrame(scroll);
+      return;
     }
+    if (target) {
+      const nav = document.querySelector("header nav");
+      const offset = nav ? nav.getBoundingClientRect().bottom + 16 : 96;
+      const top = id === "top" ? 0 : Math.max(0, target.getBoundingClientRect().top + window.scrollY - offset);
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      window.scrollTo({ top, behavior: smooth && !reducedMotion ? "smooth" : "instant" });
+    }
+    cancel();
   };
-
-  // Run adaptive adjustments at strategic intervals while async content settles
-  const timeouts = [
-    setTimeout(adjustIfNeeded, 350),
-    setTimeout(adjustIfNeeded, 750),
-    setTimeout(adjustIfNeeded, 1200),
-  ];
-
-  setTimeout(() => {
-    window.removeEventListener("wheel", stopAdjustment);
-    window.removeEventListener("touchmove", stopAdjustment);
-    window.removeEventListener("keydown", stopAdjustment);
-    timeouts.forEach(clearTimeout);
-  }, 1600);
+  // Let the menu close and the document unlock before measuring.
+  frame = window.requestAnimationFrame(() => {
+    if (!cancelled) frame = window.requestAnimationFrame(scroll);
+  });
+  return cancel;
 }
-

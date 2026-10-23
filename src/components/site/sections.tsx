@@ -1,4 +1,4 @@
-import { motion, useInView, useReducedMotion, type Variants } from "motion/react";
+import { motion, useInView, useReducedMotion, useScroll, useSpring, type Variants } from "motion/react";
 import { useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
@@ -384,7 +384,7 @@ function EventCarousel({ events }: { events: SiteContent["events"] }) {
   );
 }
 
-function JourneyEvent({ event, last }: { event: SiteContent["events"][number]; last: boolean }) {
+function JourneyEvent({ event }: { event: SiteContent["events"][number] }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { margin: "-20% 0px -25% 0px" });
   const reducedMotion = useReducedMotion();
@@ -392,7 +392,6 @@ function JourneyEvent({ event, last }: { event: SiteContent["events"][number]; l
 
   return (
     <div ref={ref} className="relative grid min-h-[50vh] gap-8 py-8 pl-9 lg:grid-cols-[0.92fr_1.08fr] lg:items-center lg:gap-12 lg:pl-16">
-      {!last && <div aria-hidden="true" className="absolute top-10 bottom-[-2.5rem] left-[9px] w-px bg-ieee/25" />}
       <div aria-hidden="true" className={`absolute top-44 left-0 size-5 rounded-full border transition-colors ${active ? "border-ieee bg-ieee shadow-[0_0_0_6px_rgba(0,114,178,0.12)]" : "border-ieee/35 bg-white"}`} />
       <motion.div
         initial={false}
@@ -421,6 +420,29 @@ function JourneyEvent({ event, last }: { event: SiteContent["events"][number]; l
           </div>
         )}
       </motion.div>
+    </div>
+  );
+}
+
+function JourneyTimeline({ events }: { events: SiteContent["events"] }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const reducedMotion = useReducedMotion();
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start 65%", "end 65%"] });
+  const progress = useSpring(scrollYProgress, { stiffness: 140, damping: 32, restDelta: 0.001 });
+
+  return (
+    <div ref={ref} className="relative isolate overflow-x-clip">
+      <div aria-hidden="true" className="pointer-events-none absolute top-8 bottom-8 left-[9px] w-px bg-ieee/15">
+        {!reducedMotion && (
+          <motion.div
+            className="journey-scroll-progress absolute inset-0 origin-top bg-gradient-to-b from-ieee via-ieee to-orange shadow-[0_0_12px_rgba(0,98,155,0.2)]"
+            style={{ scaleY: progress }}
+          />
+        )}
+      </div>
+      {events.map((event, index) => (
+        <JourneyEvent key={`${event.dateLabel}-${event.title}-${index}`} event={event} />
+      ))}
     </div>
   );
 }
@@ -476,11 +498,7 @@ export function PastSessions({ events }: { events: SiteContent["events"] }) {
           {pastEvents.length === 0 ? (
             <p className="py-10 text-center text-body">No past events published for {year} yet.</p>
           ) : (
-            <div key={year} className="overflow-x-clip">
-              {visibleEvents.map((event, index) => (
-                <JourneyEvent key={`${event.dateLabel}-${event.title}-${index}`} event={event} last={index === visibleEvents.length - 1} />
-              ))}
-            </div>
+            <JourneyTimeline key={`${year}-${visibleCount}`} events={visibleEvents} />
           )}
         </div>
         {visibleEvents.length < pastEvents.length && (

@@ -136,6 +136,45 @@
   }
 }
 
+/* Native anchors share the floating navigation clearance on public pages. */
+.public-site [id] {
+  scroll-margin-top: 6rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Progressive enhancement: native scrolling remains unchanged. */
+@supports (animation-timeline: view()) {
+  @media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+    .hero-scroll-scene {
+      view-timeline-name: --hero-depth;
+      view-timeline-axis: block;
+    }
+
+    .hero-scroll-photo {
+      inset-block: -32px;
+      animation: hero-photo-depth linear both;
+      animation-timeline: --hero-depth;
+      animation-range: exit 0% exit 100%;
+    }
+  }
+}
+
+@keyframes hero-photo-depth {
+  from { transform: translateY(0); }
+  to { transform: translateY(28px); }
+}
+
+@media (max-width: 767px), (prefers-reduced-motion: reduce) {
+  .journey-scroll-progress {
+    display: none;
+  }
+}
+
 @utility text-gradient-orange {
   background: var(--gradient-orange);
   -webkit-background-clip: text;
