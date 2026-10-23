@@ -136,7 +136,7 @@ function TeamPage() {
                     <motion.article
                       key={member.name}
                       variants={fadeUp}
-                      className={`group relative min-w-0 overflow-hidden rounded-3xl border border-white/80 border-b-[5px] border-b-slate-300/80 bg-white/70 shadow-[0_12px_30px_-6px_rgba(15,23,42,0.08),0_4px_8px_-2px_rgba(15,23,42,0.04),inset_0_1px_1px_0_rgba(255,255,255,0.95)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-2 hover:border-b-[5px] hover:border-b-orange hover:bg-white/85 hover:shadow-[0_24px_42px_-6px_rgba(255,115,0,0.24),0_10px_16px_-4px_rgba(15,23,42,0.06),inset_0_1px_1px_0_rgba(255,255,255,1)] ${
+                      className={`group relative min-w-0 overflow-hidden rounded-3xl border border-white/80 border-b-[5px] border-b-slate-300/80 bg-white/70 shadow-[0_12px_30px_-6px_rgba(15,23,42,0.08),0_4px_8px_-2px_rgba(15,23,42,0.04),inset_0_1px_1px_0_rgba(255,255,255,0.95)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-[3px] hover:border-b-[5px] hover:border-b-orange hover:bg-white/85 hover:shadow-[0_24px_42px_-6px_rgba(255,115,0,0.24),0_10px_16px_-4px_rgba(15,23,42,0.06),inset_0_1px_1px_0_rgba(255,255,255,1)] ${
                         isCenteredPair ? "lg:col-start-2" : ""
                       }`}
                     >
@@ -164,7 +164,7 @@ function TeamPage() {
                       <img
                         src={member.imageUrl}
                         alt={member.name}
-                        className="absolute inset-0 size-full object-cover transition-transform duration-500 will-change-transform group-hover:scale-105"
+                        className="absolute inset-0 size-full object-cover transition-transform duration-[240ms] group-hover:scale-[1.02]"
                         style={{ objectPosition: member.imagePosition || "center 18%" }}
                         loading="lazy"
                         decoding="async"

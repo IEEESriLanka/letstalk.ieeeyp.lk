@@ -232,7 +232,7 @@ function EventCarousel({ events }: { events: SiteContent["events"] }) {
       y: 0,
       transition: {
         duration: reduceMotion ? 0 : 0.5,
-        delay: reduceMotion ? 0 : 0.18 + order * 0.09,
+        delay: reduceMotion ? 0 : Math.min(order * 0.06, 0.24),
         ease: [0.22, 1, 0.36, 1] as const,
       },
     }),
@@ -409,7 +409,7 @@ function JourneyEvent({ event }: { event: SiteContent["events"][number] }) {
       <motion.div
         initial={false}
         animate={{ opacity: active ? 1 : 0.18, x: active ? 0 : 24, scale: active ? 1 : 0.96 }}
-        transition={{ duration: reducedMotion ? 0 : 0.62, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: reducedMotion ? 0 : 0.5, ease: [0.22, 1, 0.36, 1] }}
         className="flex min-w-0 items-center justify-center py-4"
       >
         {event.imageUrl ? (

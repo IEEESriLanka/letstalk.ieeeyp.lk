@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { AdminLayout } from "@/admin/components/AdminLayout";
 import { ChangePassword } from "@/admin/components/ChangePassword";
+import { OrganizationLogos } from "@/admin/components/OrganizationLogos";
 import {
   AdminModal,
   ConfirmDialog,
@@ -1342,6 +1343,7 @@ export function SettingsPage() {
           {settings.data ? (
             <div className="mt-4">
               <AboutContentForm content={settings.data} />
+              <OrganizationLogos content={settings.data} />
               <div className="mt-6 mb-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>

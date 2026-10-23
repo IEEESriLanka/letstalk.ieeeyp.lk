@@ -51,9 +51,17 @@ test("respects reduced motion and explicit instant scrolling", () => {
   }
 });
 
+test("contact opens instantly below the navigation even when smooth scrolling is requested", () => {
+  const f = fixture(); f.scroll("#contact", true); f.flush();
+  assert.equal(f.calls.length, 1);
+  assert.equal(f.calls[0].top, 676);
+  assert.equal(f.calls[0].behavior, "instant");
+});
+
 test("new navigation supersedes pending work and top reaches page start", () => {
   const f = fixture(); f.scroll("#events"); f.scroll("#top"); f.flush();
   assert.equal(f.calls.length, 1); assert.equal(f.calls[0].top, 0);
+  assert.equal(f.calls[0].behavior, "instant");
 });
 
 test("user input and route cleanup cancel a pending navigation", () => {

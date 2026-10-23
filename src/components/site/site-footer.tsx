@@ -31,7 +31,7 @@ const groups: Array<{
       { label: "IEEE", href: "https://www.ieee.org/", external: true },
       { label: "IEEE Sri Lanka", href: "https://www.ieee.lk/", external: true },
       { label: "IEEE YP", href: "https://yp.ieee.org/", external: true },
-      { label: "IEEE R10", href: "https://r10.ieee.org/", external: true },
+      { label: "IEEE R10", href: "https://www.ieeer10.org/", external: true },
     ],
   },
 ];
@@ -56,7 +56,7 @@ export function SiteFooter({ email = "ieeeletstalksl@gmail.com" }: { email?: str
               </div>
               <div className="flex flex-col">
                 <span className="font-display text-base font-bold">
-                  <span className="text-ieee">IEEE</span>{" "}
+                  <span className="text-white">IEEE</span>{" "}
                   <span className="text-white">LETs</span>{" "}
                   <span className="text-orange">talk</span>
                 </span>

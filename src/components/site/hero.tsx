@@ -3,12 +3,19 @@ import { ArrowRight } from "lucide-react";
 import { PhotoBackdrop } from "./photo-backdrop";
 import type { SiteContent } from "@/lib/site-content";
 import { scrollToHash } from "@/lib/scroll-utils";
+import { motionTokens as timing } from "@/lib/motion-tokens";
 
 export function Hero({ content }: { content: SiteContent["hero"] }) {
   const reduceMotion = useReducedMotion();
   const hasPhotos = Boolean(content.backgroundImages?.length);
   const descriptionParts = content.description.split("undergraduates and young professionals");
   const titleParts = content.title.split("Entrepreneurship");
+  const entrance = {
+    hidden: { opacity: 0, y: timing.distance },
+    show: (order: number = 0) => ({ opacity: 1, y: 0, transition: {
+      duration: timing.hero, ease: timing.ease, delay: Math.min(order * timing.stagger, timing.maxStagger),
+    } }),
+  };
   return (
     <section
       id="top"
@@ -25,22 +32,21 @@ export function Hero({ content }: { content: SiteContent["hero"] }) {
       />
       <div className="relative mx-auto max-w-7xl px-6 sm:px-10 lg:flex lg:min-h-[calc(100svh-clamp(6rem,12svh,8rem))] lg:max-w-none lg:items-center lg:px-[clamp(2rem,6vw,10rem)]">
         <motion.div
-          initial={reduceMotion ? false : { opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
+          initial={reduceMotion ? false : "hidden"}
+          animate="show"
           className={`relative z-10 py-10 sm:py-14 lg:py-[clamp(2rem,5svh,5rem)] ${hasPhotos ? "lg:w-2/5 lg:pr-[clamp(1rem,2vw,3rem)]" : "max-w-3xl"}`}
         >
-          <p className="flex items-center gap-4 text-[0.65rem] font-bold tracking-[0.19em] text-[#53658b] uppercase sm:text-xs">
+          <motion.p variants={entrance} className="flex items-center gap-4 text-[0.65rem] font-bold tracking-[0.19em] text-[#53658b] uppercase sm:text-xs">
             <span aria-hidden className="h-0.5 w-8 shrink-0 bg-orange" />
             {content.eyebrow === "IEEE Young Professionals Sri Lanka"
               ? "Professional Development Initiative"
               : content.eyebrow}
-          </p>
+          </motion.p>
           <h1
             id="hero-title"
             className="mt-6 text-[clamp(2.6rem,4.5vw,4.5rem)] leading-[1.04] font-bold tracking-[-0.045em] text-[#071638] lg:mt-[clamp(1rem,3svh,2rem)] lg:text-[clamp(2.5rem,min(4.3vw,7svh),6rem)]"
           >
-            {titleParts.length > 1 ? (
+            <motion.span className="block" variants={entrance} custom={1}>{titleParts.length > 1 ? (
               <>
                 {titleParts[0]}
                 <br />
@@ -48,12 +54,12 @@ export function Hero({ content }: { content: SiteContent["hero"] }) {
               </>
             ) : (
               content.title
-            )}{" "}
-            <span className="block text-[#ff6815]">
+            )}</motion.span>
+            <motion.span variants={entrance} custom={2} className="block text-[#ff6815]">
               {content.highlightedTitle.replace(/\.$/, "")}.
-            </span>
+            </motion.span>
           </h1>
-          <p className="mt-6 max-w-xl text-base leading-relaxed text-[#596b8d] sm:text-lg lg:mt-[clamp(1rem,3svh,2rem)] lg:max-w-[38em] lg:text-[clamp(0.9375rem,min(1.1vw,2svh),1.25rem)]">
+          <motion.p variants={entrance} custom={3} className="mt-6 max-w-xl text-base leading-relaxed text-[#596b8d] sm:text-lg lg:mt-[clamp(1rem,3svh,2rem)] lg:max-w-[38em] lg:text-[clamp(0.9375rem,min(1.1vw,2svh),1.25rem)]">
             {descriptionParts.map((part, index) => (
               <span key={`${part}-${index}`}>
                 {part}
@@ -62,7 +68,7 @@ export function Hero({ content }: { content: SiteContent["hero"] }) {
                 )}
               </span>
             ))}
-          </p>
+          </motion.p>
           <div className="mt-8 flex flex-wrap gap-3 sm:gap-4 lg:mt-[clamp(1.25rem,3.5svh,2.5rem)]">
             <a
               href="/about-us"

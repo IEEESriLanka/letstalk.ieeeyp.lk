@@ -11,6 +11,7 @@ import {
 import { type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import { MotionConfig } from "motion/react";
 
 function NotFoundComponent() {
   return (
@@ -135,9 +136,11 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <div className={isAdmin ? "contents" : "public-site"}>
-        <Outlet />
-      </div>
+      <MotionConfig reducedMotion="user">
+        <div className={isAdmin ? "contents" : "public-site"}>
+          <Outlet />
+        </div>
+      </MotionConfig>
     </QueryClientProvider>
   );
 }
