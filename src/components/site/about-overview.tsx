@@ -3,7 +3,6 @@ import { animate, motion, useInView, useMotionValue, useReducedMotion, useTransf
 import { useEffect, useRef } from "react";
 import type { SiteContent } from "@/lib/site-content";
 import { defaultSiteContent } from "@/lib/site-content";
-import { motionTokens as timing } from "@/lib/motion-tokens";
 
 export function AboutOverview({
   content,
@@ -139,7 +138,7 @@ function ImpactCount({ value, filled }: { value: string; filled: boolean }) {
   useEffect(() => {
     if (!valid || !inView || reduceMotion) return;
     count.set(0);
-    const animation = animate(count, target, { duration: timing.counter, ease: timing.ease });
+    const animation = animate(count, target, { duration: 1.2, ease: [0.22, 1, 0.36, 1] });
     return () => animation.stop();
   }, [count, inView, reduceMotion, target, valid]);
 
@@ -198,8 +197,8 @@ export function ImpactOverview({ content }: { content: SiteContent["about"] }) {
                   whileInView={reduceMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
                   viewport={{ once: true, amount: 0.35 }}
                   transition={{
-                    duration: reduceMotion ? 0 : timing.reveal,
-                    delay: reduceMotion ? 0 : Math.min(index * timing.stagger, timing.maxStagger),
+                    duration: 0.55,
+                    delay: index * 0.1,
                     ease: [0.22, 1, 0.36, 1],
                   }}
                   className={`group flex min-h-[104px] items-center gap-3 rounded-3xl px-5 py-4 shadow-[0_12px_25px_-18px_rgba(7,22,56,0.55)] transition-transform duration-300 hover:-translate-y-1 ${

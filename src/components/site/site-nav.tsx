@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "motion/react";
-import { motionTokens as timing } from "@/lib/motion-tokens";
+import { motion, AnimatePresence } from "motion/react";
 import { Menu, X } from "lucide-react";
 import letsTalkLogo from "@/assets/lets-talk-logo.png";
 import { useLocation, useNavigate } from "@tanstack/react-router";
@@ -54,12 +53,7 @@ function NavLink({
         }
         scrollToHash(hash, true);
       } else {
-        navigate({
-          to: "/",
-          hash: hash.replace(/^#/, ""),
-          hashScrollIntoView: false,
-          resetScroll: false,
-        });
+        navigate({ to: "/", hash: hash.replace(/^#/, "") });
       }
     }
   };
@@ -78,7 +72,6 @@ function NavLink({
 }
 
 export function SiteNav() {
-  const reduceMotion = useReducedMotion();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState("#top");
@@ -192,10 +185,9 @@ export function SiteNav() {
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={reduceMotion ? false : { opacity: 0, y: -8 }}
+            initial={{ opacity: 0, y: -12 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: reduceMotion ? 0 : -8 }}
-            transition={{ duration: reduceMotion ? 0 : timing.menu, ease: timing.ease }}
+            exit={{ opacity: 0, y: -12 }}
             className="glass-panel mx-auto mt-2 max-w-6xl rounded-3xl p-4 lg:hidden"
           >
             <div className="grid gap-1">

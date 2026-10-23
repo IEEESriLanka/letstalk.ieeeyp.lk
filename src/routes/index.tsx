@@ -21,13 +21,9 @@ import {
 } from "@/components/site/sections";
 import { SiteFooter } from "@/components/site/site-footer";
 import { getSiteContent } from "@/lib/content-actions";
+import { defaultSiteContent } from "@/lib/site-content";
 
 export const Route = createFileRoute("/")({
-  loader: ({ context }) => context.queryClient.fetchQuery({
-    queryKey: ["site-content"],
-    queryFn: () => getSiteContent(),
-    staleTime: 60_000,
-  }),
   head: () => ({
     meta: [
       {
@@ -59,14 +55,9 @@ function Index() {
   const [initializing, setInitializing] = useState(true);
   const finishInitialization = useCallback(() => setInitializing(false), []);
   const routerHash = useLocation({ select: (location) => location.hash });
-  const initialContent = Route.useLoaderData();
-  const { data: content, isPending, fetchStatus, isError, refetch } = useQuery({
+  const { data: content = defaultSiteContent, isPending, fetchStatus, isError, refetch } = useQuery({
     queryKey: ["site-content"],
     queryFn: () => getSiteContent(),
-    initialData: initialContent,
-    staleTime: 60_000,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {

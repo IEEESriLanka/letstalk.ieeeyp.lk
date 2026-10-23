@@ -166,43 +166,12 @@
 
 @keyframes hero-photo-depth {
   from { transform: translateY(0); }
-  to { transform: translateY(20px); }
+  to { transform: translateY(28px); }
 }
 
 @media (max-width: 767px), (prefers-reduced-motion: reduce) {
   .journey-scroll-progress {
     display: none;
-  }
-}
-
-/* Public interaction timing; admin controls retain their own styling. */
-.public-site :is(a, button),
-.public-site :is(a, button) svg {
-  transition-duration: 160ms;
-  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.public-site :is(article, .card-surface),
-.public-site a:has(> img) {
-  transition-duration: 240ms;
-}
-
-.public-site .link-underline:focus-visible::after {
-  transform: scaleX(1);
-  transform-origin: left;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .public-site *,
-  .public-site *::before,
-  .public-site *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-
-  .public-site .card-surface:is(:hover, :focus-within) {
-    transform: none;
   }
 }
 
@@ -272,13 +241,12 @@
   border-radius: 24px;
   box-shadow: var(--shadow-soft);
   transition:
-    transform 0.24s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.24s cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 0.24s ease;
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.4s ease;
 
-  &:hover,
-  &:focus-within {
-    transform: translateY(-3px);
+  &:hover {
+    transform: translateY(-6px);
     border-color: oklch(0.6691 0.1734 47.28 / 0.28);
     box-shadow:
       var(--shadow-lift),
@@ -299,7 +267,7 @@
     transform: scaleX(0);
     transform-origin: right;
     background: var(--color-orange);
-    transition: transform 0.16s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   &:hover::after,

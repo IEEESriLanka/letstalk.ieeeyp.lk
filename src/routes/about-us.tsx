@@ -9,11 +9,6 @@ import { getSiteContent } from "@/lib/content-actions";
 import { defaultSiteContent } from "@/lib/site-content";
 
 export const Route = createFileRoute("/about-us")({
-  loader: ({ context }) => context.queryClient.fetchQuery({
-    queryKey: ["site-content"],
-    queryFn: () => getSiteContent(),
-    staleTime: 60_000,
-  }),
   head: () => ({
     meta: [
       { title: "About Us | IEEE LETs Talk" },
@@ -28,14 +23,9 @@ export const Route = createFileRoute("/about-us")({
 });
 
 function AboutUsPage() {
-  const initialContent = Route.useLoaderData();
-  const { data: content } = useQuery({
+  const { data: content = defaultSiteContent } = useQuery({
     queryKey: ["site-content"],
     queryFn: () => getSiteContent(),
-    initialData: initialContent,
-    staleTime: 60_000,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
   });
   const organizations = (
     content.about.organizations?.length
@@ -111,12 +101,13 @@ function AboutUsPage() {
           </Reveal>
 
           <RevealGroup className="mx-auto mt-14 grid max-w-4xl lg:max-w-5xl gap-6">
-            {organizations.map((organization) => (
+            {organizations.map((organization, index) => (
               <OrganizationCard
                 key={organization.title}
                 title={organization.title}
                 copy={organization.copy}
                 logoUrl={organization.logoUrl}
+                warm={index % 2 === 1}
               />
             ))}
           </RevealGroup>
@@ -177,30 +168,52 @@ function OrganizationCard({
   title,
   copy,
   logoUrl,
+  warm = false,
 }: {
   title: string;
   copy: string;
   logoUrl?: string | null;
+  warm?: boolean;
 }) {
   const resolvedLogoUrl = logoUrl || getFallbackLogoUrl(title);
+  const isYp = /young|yp/i.test(title);
 
   return (
     <article
-      className="group relative isolate overflow-hidden rounded-3xl border border-[#e3eef9] bg-white p-6 sm:p-8 md:p-9 shadow-[0_5px_24px_-12px_#00629b20] transition-all duration-300 hover:-translate-y-1 hover:border-ieee/40 hover:shadow-[0_12px_36px_-12px_rgba(0,98,155,0.18)]"
+      className={`group relative isolate overflow-hidden rounded-3xl border bg-white p-6 sm:p-8 md:p-9 shadow-[0_5px_24px_-12px_#00629b20] transition-all duration-300 hover:-translate-y-1 ${
+        warm
+          ? "border-[#ffeddf] hover:border-orange/40 hover:shadow-[0_12px_36px_-12px_rgba(255,104,21,0.18)]"
+          : "border-[#e3eef9] hover:border-ieee/40 hover:shadow-[0_12px_36px_-12px_rgba(0,98,155,0.18)]"
+      }`}
     >
+      <div
+        aria-hidden="true"
+        className={`pointer-events-none absolute -top-12 -right-12 size-36 rounded-full blur-2xl ${
+          warm ? "bg-orange-tint/70" : "bg-ieee-tint/70"
+        }`}
+      />
       <div className="flex flex-col sm:flex-row items-center sm:items-center gap-6 sm:gap-8 md:gap-10">
-        <div className="flex h-28 w-full shrink-0 items-center justify-center rounded-2xl border border-[#e3eef9] bg-[#f8fbff] p-4 shadow-xs sm:h-32 sm:w-56 sm:p-5 md:w-64">
+        <div
+          className={`flex h-28 w-full sm:h-32 sm:w-56 md:w-64 shrink-0 items-center justify-center overflow-hidden rounded-2xl p-4 sm:p-5 transition-all duration-300 group-hover:scale-[1.02] ${
+            warm
+              ? "bg-[#fffaf5] border border-orange-100/80 shadow-xs"
+              : "bg-[#f8fbff] border border-[#e3eef9] shadow-xs"
+          }`}
+        >
           <img
             src={resolvedLogoUrl}
             alt={`${title} logo`}
-            className="h-auto max-h-full w-auto max-w-full shrink-0 flex-none border-0 bg-transparent object-contain shadow-none"
-            style={{ width: "auto", height: "auto", maxWidth: "100%", maxHeight: "100%" }}
+            className={`object-contain transition-transform duration-300 ${
+              isYp
+                ? "h-auto w-[190px] sm:w-[210px] md:w-[230px] max-w-none shrink-0"
+                : "max-h-16 sm:max-h-20 max-w-full w-auto"
+            }`}
             loading="lazy"
           />
         </div>
         <div className="min-w-0 flex-1 text-center sm:text-left">
           <h3 className="text-xl font-bold tracking-tight text-[#061025] sm:text-2xl">{title}</h3>
-          <span className="mt-2.5 block h-0.5 w-9 bg-ieee mx-auto sm:mx-0" aria-hidden="true" />
+          <span className="mt-2.5 block h-0.5 w-9 bg-orange mx-auto sm:mx-0" aria-hidden="true" />
           <p className="mt-3.5 text-base leading-relaxed text-body">{copy}</p>
         </div>
       </div>

@@ -1,21 +1,21 @@
-import { motion, useReducedMotion, type Variants } from "motion/react";
-import { Children, cloneElement, isValidElement, type ReactNode } from "react";
-import { motionTokens as timing } from "@/lib/motion-tokens";
+import { motion, type Variants } from "motion/react";
+import type { ReactNode } from "react";
 
-const easeOut = timing.ease;
+const easeOut = [0.22, 1, 0.36, 1] as const;
 
 export const fadeUp: Variants = {
-  hidden: { opacity: 0, y: timing.distance },
-  show: (index: number = 0) => ({
+  hidden: { opacity: 0, y: 28, filter: "blur(8px)" },
+  show: {
     opacity: 1,
     y: 0,
-    transition: { duration: timing.reveal, ease: easeOut, delay: Math.min(index * timing.stagger, timing.maxStagger) },
-  }),
+    filter: "blur(0px)",
+    transition: { duration: 0.7, ease: easeOut },
+  },
 };
 
 export const stagger: Variants = {
   hidden: {},
-  show: {},
+  show: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
 };
 
 export function Reveal({
@@ -27,19 +27,19 @@ export function Reveal({
   className?: string;
   delay?: number;
 }) {
-  const reduceMotion = useReducedMotion();
   return (
     <motion.div
       className={className}
-      initial={reduceMotion ? false : "hidden"}
+      initial="hidden"
       whileInView="show"
       viewport={{ once: true, margin: "-80px" }}
       variants={{
-        hidden: { opacity: 0, y: timing.distance },
+        hidden: { opacity: 0, y: 28, filter: "blur(8px)" },
         show: {
           opacity: 1,
           y: 0,
-          transition: { duration: reduceMotion ? 0 : timing.reveal, ease: easeOut, delay: reduceMotion ? 0 : Math.min(delay, timing.maxStagger) },
+          filter: "blur(0px)",
+          transition: { duration: 0.7, ease: easeOut, delay },
         },
       }}
     >
@@ -49,18 +49,15 @@ export function Reveal({
 }
 
 export function RevealGroup({ children, className }: { children: ReactNode; className?: string }) {
-  const reduceMotion = useReducedMotion();
   return (
     <motion.div
       className={className}
-      initial={reduceMotion ? false : "hidden"}
+      initial="hidden"
       whileInView="show"
       viewport={{ once: true, margin: "-80px" }}
       variants={stagger}
     >
-      {Children.map(children, (child, index) => isValidElement<{ custom?: number }>(child)
-        ? cloneElement(child, { custom: index })
-        : child)}
+      {children}
     </motion.div>
   );
 }
