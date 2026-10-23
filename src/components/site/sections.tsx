@@ -126,7 +126,7 @@ export function About({ content }: { content: SiteContent["about"] }) {
                 </span>
                 <div>
                   <span className="text-xs font-bold tracking-wider text-ieee uppercase">Vision</span>
-                  <h3 className="text-lg font-bold text-heading">Our Vision</h3>
+                  <h3 className="text-lg font-bold text-heading">{content.visionTitle ?? defaultSiteContent.about.visionTitle}</h3>
                 </div>
               </div>
               <p className="mt-4 text-sm leading-relaxed text-body sm:text-base">
@@ -145,7 +145,7 @@ export function About({ content }: { content: SiteContent["about"] }) {
                 </span>
                 <div>
                   <span className="text-xs font-bold tracking-wider text-orange uppercase">Mission</span>
-                  <h3 className="text-lg font-bold text-heading">Our Mission</h3>
+                  <h3 className="text-lg font-bold text-heading">{content.missionTitle ?? defaultSiteContent.about.missionTitle}</h3>
                 </div>
               </div>
               <p className="mt-4 text-sm leading-relaxed text-body sm:text-base">
@@ -667,6 +667,9 @@ export function StayConnected({ content }: { content: SiteContent["connected"] }
 }
 
 export function Contact({ content }: { content: SiteContent["contact"] }) {
+  const submittingRef = useRef(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submissionStatus, setSubmissionStatus] = useState<{ error: boolean; text: string } | null>(null);
   const contactEmail = "ieeeletstalksl@gmail.com";
   const contactCopy =
     "Reach out to propose a session topic, collaborate as an industry partner, or connect with LETs talk team.";
@@ -741,6 +744,10 @@ export function Contact({ content }: { content: SiteContent["contact"] }) {
             className="card-surface p-7 sm:p-9"
             onSubmit={(e) => {
               e.preventDefault();
+              if (submittingRef.current) return;
+              submittingRef.current = true;
+              setIsSubmitting(true);
+              setSubmissionStatus(null);
               const form = e.currentTarget as HTMLFormElement;
               const formData = new FormData(form);
               submitContactMessage({
@@ -753,12 +760,14 @@ export function Contact({ content }: { content: SiteContent["contact"] }) {
               })
                 .then(() => {
                   form.reset();
-                  alert("Thank you! Your message has been received.");
+                  setSubmissionStatus({ error: false, text: "Thank you! Your message has been received. We’ll reply to the email address you provided." });
                 })
-                .catch((error: unknown) => {
-                  const message =
-                    error instanceof Error ? error.message : "Unknown contact form error.";
-                  alert(`Sorry, your message could not be sent.\n\n${message}`);
+                .catch(() => {
+                  setSubmissionStatus({ error: true, text: "Sorry, we couldn’t confirm your submission. Please try again shortly or email ieeeletstalksl@gmail.com." });
+                })
+                .finally(() => {
+                  submittingRef.current = false;
+                  setIsSubmitting(false);
                 });
             }}
           >
@@ -778,6 +787,9 @@ export function Contact({ content }: { content: SiteContent["contact"] }) {
                   <input
                     required
                     name="name"
+                    minLength={2}
+                    maxLength={120}
+                    autoComplete="name"
                     className="w-full rounded-xl border border-border bg-surface py-3 pr-4 pl-11 text-sm text-heading outline-none transition-colors focus:border-ieee"
                     placeholder="Enter your name"
                   />
@@ -793,6 +805,8 @@ export function Contact({ content }: { content: SiteContent["contact"] }) {
                     required
                     name="email"
                     type="email"
+                    maxLength={180}
+                    autoComplete="email"
                     className="w-full rounded-xl border border-border bg-surface py-3 pr-4 pl-11 text-sm text-heading outline-none transition-colors focus:border-ieee"
                     placeholder="Enter your email address"
                   />
@@ -832,6 +846,7 @@ export function Contact({ content }: { content: SiteContent["contact"] }) {
                   rows={4}
                   required
                   name="message"
+                  maxLength={3000}
                   className="w-full resize-none rounded-xl border border-border bg-surface py-3 pr-4 pl-11 text-sm text-heading outline-none transition-colors focus:border-ieee"
                   placeholder="Tell us a little more about your idea or inquiry."
                 />
@@ -839,12 +854,19 @@ export function Contact({ content }: { content: SiteContent["contact"] }) {
             </label>
             <button
               type="submit"
+              disabled={isSubmitting}
+              aria-busy={isSubmitting}
               className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[image:var(--gradient-orange)] px-6 py-3.5 text-sm font-semibold text-white shadow-glow transition-transform duration-300 hover:-translate-y-0.5"
             >
               <Send className="size-4" />
-              Send Message
+              {isSubmitting ? "Sending…" : "Send Message"}
               <ArrowRight className="size-4" />
             </button>
+            {submissionStatus ? (
+              <p role={submissionStatus.error ? "alert" : "status"} className={`mt-4 text-sm ${submissionStatus.error ? "text-red-700" : "text-body"}`}>
+                {submissionStatus.text}
+              </p>
+            ) : null}
           </form>
         </Reveal>
       </div>

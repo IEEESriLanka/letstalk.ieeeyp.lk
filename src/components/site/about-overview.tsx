@@ -33,11 +33,12 @@ export function AboutOverview({
             {content.eyebrow}
           </p>
           <h1 id="about-heading" className="mt-5 text-[2.5rem] leading-[1.06] font-bold tracking-tight text-[#06172d] sm:text-5xl xl:text-[3.5rem]">
-            <span className="text-ieee">Empowering</span><br />
-            <span className="text-gradient-orange">conversations<br />that matter.</span>
+            <span className="text-ieee">{content.title}</span><br />
+            <span className="text-gradient-orange">{content.highlightedWords}</span>{" "}
+            <span className="text-gradient-orange">{content.accentWords}</span>
           </h1>
           <p className="mt-6 max-w-xl text-base leading-relaxed text-body lg:text-lg">
-            Since 2017, IEEE LETs talk has created spaces where ideas are exchanged, experiences are shared, and aspiring professionals connect directly with the people shaping the industry. From thought-provoking discussions to hands-on learning, meaningful networking, and opportunities to strengthen essential soft skills, we turn conversations into clarity, connections into opportunities, and curiosity into career growth.
+            {content.copy}
           </p>
           <div className="mt-7 flex flex-wrap gap-4">
             <a href="/#events" className="inline-flex items-center justify-center gap-3 rounded-full bg-[image:var(--gradient-orange)] px-7 py-3.5 font-semibold text-white transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange">

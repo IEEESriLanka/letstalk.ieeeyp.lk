@@ -26,6 +26,12 @@ export const siteContentSchema: z.ZodType<SiteContent> = z.object({
     copy: z.string().min(1),
     quote: z.string().min(1),
     quoteBy: z.string().min(1),
+    visionMissionTitle: z.string().trim().min(1).optional(),
+    visionMissionSubtitle: z.string().trim().min(1).optional(),
+    visionTitle: z.string().trim().min(1).optional(),
+    missionTitle: z.string().trim().min(1).optional(),
+    vision: z.string().trim().min(1).optional(),
+    mission: z.string().trim().min(1).optional(),
     storyCards: z.array(z.object({ title: z.string().min(1), copy: z.string().min(1) })).optional(),
     values: z.array(z.object({ title: z.string().min(1), copy: z.string().min(1) })).optional(),
     organizations: z
@@ -167,10 +173,10 @@ export const siteContentSchema: z.ZodType<SiteContent> = z.object({
 });
 
 export const contactMessageSchema = z.object({
-  name: z.string().min(2).max(120),
-  email: z.string().email().max(180),
-  topic: z.string().max(180).optional().default("General inquiry"),
-  message: z.string().max(3000).optional().default(""),
+  name: z.string().trim().min(2).max(120),
+  email: z.string().trim().email().max(180),
+  topic: z.string().trim().min(1).max(180).regex(/^[^\r\n]+$/),
+  message: z.string().trim().min(1).max(3000),
 });
 
 const contactNotificationRecipient = "ieeeletstalksl@gmail.com";
@@ -200,6 +206,7 @@ async function sendContactNotification(input: z.infer<typeof contactMessageSchem
   const message = input.message || "(No message provided)";
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
+    signal: AbortSignal.timeout(10_000),
     headers: {
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
@@ -228,8 +235,7 @@ async function sendContactNotification(input: z.infer<typeof contactMessageSchem
   });
 
   if (!response.ok) {
-    const details = await response.text();
-    throw new Error(`Contact email delivery failed: ${details}`);
+    throw new Error(`Contact email delivery failed (HTTP ${response.status}).`);
   }
 }
 
@@ -497,14 +503,25 @@ export async function addContactMessage(input: unknown) {
   if (!supabase) throw new Error("Supabase environment variables are missing.");
   const parsed = contactMessageSchema.parse(input);
   const { error } = await supabase.from("contact_messages").insert({
+    id: crypto.randomUUID(),
     name: parsed.name,
     email: parsed.email,
     topic: parsed.topic || "General inquiry",
     message: parsed.message || "",
   });
-  if (error) throw new Error(error.message);
-  await sendContactNotification(parsed);
-  return { ok: true };
+  if (error) {
+    console.error("Contact message storage failed:", error.code);
+    throw new Error("Your message could not be saved. Please try again shortly.");
+  }
+  // The admin inbox remains available even when the email provider is down.
+  // Do not ask the visitor to submit an already saved message again.
+  try {
+    await sendContactNotification(parsed);
+    return { ok: true, emailSent: true };
+  } catch (error) {
+    console.error("Contact notification failed:", error instanceof Error ? error.message : "Unknown error");
+    return { ok: true, emailSent: false };
+  }
 }
 
 export async function resetSiteContent(pin: string): Promise<SiteContent> {

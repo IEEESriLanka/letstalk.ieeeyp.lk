@@ -42,10 +42,10 @@ function AboutUsPage() {
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
           <Reveal className="mx-auto max-w-2xl text-center">
             <h2 id="vision-mission-heading" className="mt-4 text-3xl font-bold tracking-tight text-[#061025] sm:text-4xl lg:text-5xl">
-              Our Vision & Mission
+              {content.about.visionMissionTitle ?? defaultSiteContent.about.visionMissionTitle}
             </h2>
             <p className="mt-4 text-base leading-relaxed text-body sm:text-lg">
-              The strategic vision and mission driving professional excellence.
+              {content.about.visionMissionSubtitle ?? defaultSiteContent.about.visionMissionSubtitle}
             </p>
           </Reveal>
 
@@ -58,7 +58,7 @@ function AboutUsPage() {
                 />
                 <div>
                   <h3 className="text-2xl font-bold tracking-tight text-[#061025] sm:text-3xl">
-                    Our Vision
+                    {content.about.visionTitle ?? defaultSiteContent.about.visionTitle}
                   </h3>
                   <p className="mt-4 text-base leading-relaxed text-body sm:text-lg">
                     {content.about.vision ?? defaultSiteContent.about.vision}
@@ -75,7 +75,7 @@ function AboutUsPage() {
                 />
                 <div>
                   <h3 className="text-2xl font-bold tracking-tight text-[#061025] sm:text-3xl">
-                    Our Mission
+                    {content.about.missionTitle ?? defaultSiteContent.about.missionTitle}
                   </h3>
                   <p className="mt-4 text-base leading-relaxed text-body sm:text-lg">
                     {content.about.mission ?? defaultSiteContent.about.mission}

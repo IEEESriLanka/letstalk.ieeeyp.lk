@@ -93,6 +93,10 @@ export type SiteContent = {
     copy: string;
     quote: string;
     quoteBy: string;
+    visionMissionTitle?: string;
+    visionMissionSubtitle?: string;
+    visionTitle?: string;
+    missionTitle?: string;
     vision?: string;
     mission?: string;
     storyCards?: Array<{ title: string; copy: string }>;
@@ -219,6 +223,10 @@ export const defaultSiteContent: SiteContent = {
     quote:
       "Bridging the gap between academia and industry by turning passion and curiosity into career-defining professional opportunities.",
     quoteBy: "IEEE Young Professionals Sri Lanka",
+    visionMissionTitle: "Our Vision & Mission",
+    visionMissionSubtitle: "The strategic vision and mission driving professional excellence.",
+    visionTitle: "Our Vision",
+    missionTitle: "Our Mission",
     vision:
       "To be the best platform to sharpen the skill set of young professionals by sharing timely and valuable knowledge to the industry of Sri Lanka.",
     mission:

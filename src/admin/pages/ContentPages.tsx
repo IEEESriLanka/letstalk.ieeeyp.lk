@@ -46,6 +46,7 @@ import {
   updateMessageStatus,
 } from "@/admin/services/admin-data";
 import { deleteImage, listPublicImages, uploadImage } from "@/lib/storage";
+import { defaultSiteContent, type SiteContent } from "@/lib/site-content";
 import type {
   AwardRecord,
   ContactMessageRecord,
@@ -1074,6 +1075,7 @@ export function MessagesPage() {
   const query = useQuery({
     queryKey: ["messages", search, status],
     queryFn: () => listMessages(search, status),
+    refetchInterval: 30_000,
   });
   const statusMutation = useMutation({
     mutationFn: ({ id, read }: { id: string; read: boolean }) => updateMessageStatus(id, read),
@@ -1175,6 +1177,76 @@ export function MessagesPage() {
   );
 }
 
+const aboutContentFields = [
+  { key: "eyebrow", label: "About Us eyebrow" },
+  { key: "title", label: "About Us heading" },
+  { key: "highlightedWords", label: "About Us highlighted text" },
+  { key: "accentWords", label: "About Us accent text" },
+  { key: "copy", label: "About Us introduction", multiline: true },
+  { key: "visionMissionTitle", label: "Section heading" },
+  { key: "visionMissionSubtitle", label: "Section subtitle" },
+  { key: "visionTitle", label: "Vision title" },
+  { key: "vision", label: "Vision text", multiline: true },
+  { key: "missionTitle", label: "Mission title" },
+  { key: "mission", label: "Mission text", multiline: true },
+] as const;
+
+function AboutContentForm({ content }: { content: SiteContent }) {
+  const queryClient = useQueryClient();
+  const [form, setForm] = useState(() => Object.fromEntries(
+    aboutContentFields.map(({ key }) => [key, content.about?.[key] ?? defaultSiteContent.about[key] ?? ""]),
+  ) as Record<(typeof aboutContentFields)[number]["key"], string>);
+  const save = useMutation({
+    mutationFn: async () => {
+      for (const { key, label } of aboutContentFields) validateRequired(form[key], label);
+      const latest = await getSiteSettings();
+      const values = Object.fromEntries(Object.entries(form).map(([key, value]) => [key, value.trim()]));
+      return saveSiteSettings({
+        ...latest,
+        about: { ...defaultSiteContent.about, ...latest.about, ...values },
+      });
+    },
+    onSuccess: (updated) => {
+      queryClient.setQueryData(["site-settings"], updated);
+      void queryClient.invalidateQueries({ queryKey: ["site-content"] });
+      toast.success("About Us content saved.");
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
+  return (
+    <section className="mt-6 border-t border-slate-200 pt-6">
+      <h3 className="font-bold text-slate-900">About Us content</h3>
+      <p className="mt-1 mb-4 text-sm text-slate-500">
+        Edit the About Us heading, introduction, and Vision & Mission section. Shared content also updates on the homepage.
+      </p>
+      <ManagedForm onSubmit={() => save.mutate()} submitting={save.isPending}>
+        {aboutContentFields.map((field) => (
+          <FormField key={field.key} label={field.label} required>
+            {"multiline" in field ? (
+              <textarea
+                className={textAreaClass}
+                value={form[field.key]}
+                required
+                disabled={save.isPending}
+                onChange={(event) => setForm({ ...form, [field.key]: event.target.value })}
+              />
+            ) : (
+              <input
+                className={fieldClass}
+                value={form[field.key]}
+                required
+                disabled={save.isPending}
+                onChange={(event) => setForm({ ...form, [field.key]: event.target.value })}
+              />
+            )}
+          </FormField>
+        ))}
+      </ManagedForm>
+    </section>
+  );
+}
+
 export function SettingsPage() {
   const queryClient = useQueryClient();
   const settings = useQuery({ queryKey: ["site-settings"], queryFn: getSiteSettings });
@@ -1269,7 +1341,8 @@ export function SettingsPage() {
           ) : null}
           {settings.data ? (
             <div className="mt-4">
-              <div className="mb-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
+              <AboutContentForm content={settings.data} />
+              <div className="mt-6 mb-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <h3 className="font-bold text-slate-900">Hero background images</h3>
