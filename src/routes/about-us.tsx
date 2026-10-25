@@ -88,7 +88,6 @@ function AboutUsPage() {
       </section>
 
       <section aria-labelledby="ieee-network-heading" className="relative overflow-hidden bg-[#f8fbff] py-20 lg:py-28">
-        <div className="pointer-events-none absolute -top-24 left-1/3 size-80 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(0,98,155,0.08),transparent_68%)]" />
         <div className="relative mx-auto max-w-7xl px-5 sm:px-8">
           <Reveal className="mx-auto max-w-3xl text-center">
             <span className="section-eyebrow">The IEEE Community Behind Us</span>

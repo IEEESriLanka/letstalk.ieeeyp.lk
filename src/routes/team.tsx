@@ -8,8 +8,13 @@ import { SiteNav } from "@/components/site/site-nav";
 import { Reveal, RevealGroup, fadeUp } from "@/components/site/motion-primitives";
 import { getSiteContent } from "@/lib/content-actions";
 import { defaultSiteContent, getDisplayYearTeams } from "@/lib/site-content";
+import { teamImageManifest } from "@/lib/team-image-manifest";
 
 export const Route = createFileRoute("/team")({
+  loader: ({ context }) => context.queryClient.ensureQueryData({
+    queryKey: ["site-content"],
+    queryFn: () => getSiteContent(),
+  }),
   head: () => ({
     meta: [
       { title: "Team | IEEE LETs Talk" },
@@ -131,6 +136,8 @@ function TeamPage() {
               >
                 {row.map((member, memberIndex) => {
                   const isCenteredPair = isRemainderTwo && memberIndex === row.length - 2;
+                  const image = member.imageUrl ? teamImageManifest[member.imageUrl] : undefined;
+                  const priority = rowIndex === 0 && memberIndex < 2;
 
                   return (
                     <motion.article
@@ -162,14 +169,27 @@ function TeamPage() {
                         {member.initials}
                       </span>
                       <img
-                        src={member.imageUrl}
+                        key={member.imageUrl}
+                        src={image?.src ?? member.imageUrl}
+                        srcSet={image?.srcSet}
+                        sizes={rowIndex === 0 ? "(min-width: 768px) 320px, 45vw" : rowIndex === 1 ? "(min-width: 640px) 33vw, 100vw" : "(min-width: 1024px) 280px, (min-width: 640px) 50vw, 100vw"}
+                        width={image?.width}
+                        height={image?.height}
                         alt={member.name}
                         className="absolute inset-0 size-full object-cover transition-transform duration-500 will-change-transform group-hover:scale-105"
                         style={{ objectPosition: member.imagePosition || "center 18%" }}
-                        loading="lazy"
+                        loading={priority ? "eager" : "lazy"}
+                        fetchPriority={priority ? "high" : "auto"}
                         decoding="async"
                         onError={(event) => {
-                          event.currentTarget.style.display = "none";
+                          const photo = event.currentTarget;
+                          if (image && photo.dataset["originalFallback"] !== "true") {
+                            photo.dataset["originalFallback"] = "true";
+                            photo.removeAttribute("srcset");
+                            photo.src = member.imageUrl!;
+                          } else {
+                            photo.style.display = "none";
+                          }
                         }}
                       />
                       <div
