@@ -9,6 +9,7 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { type ReactNode } from "react";
+import { SmoothScroll } from "@/components/site/smooth-scroll";
 
 import appCss from "../styles.css?url";
 
@@ -134,6 +135,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <SmoothScroll />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <div className={isAdmin ? "contents" : "public-site"}>
         <Outlet />

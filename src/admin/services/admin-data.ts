@@ -171,7 +171,6 @@ export async function getDatabaseStatus(): Promise<DatabaseStatus> {
     "partners",
     "contact_messages",
     "admin_users",
-    "admin_access_requests",
     "team_private_contacts",
   ];
   const requiredBuckets = [
@@ -184,19 +183,20 @@ export async function getDatabaseStatus(): Promise<DatabaseStatus> {
 
   const tables = await Promise.all(
     requiredTables.map(async (name) => {
-      const { error, data } = await supabase.from(name).select("id").limit(1);
+      const { error, count } = await supabase.from(name).select("id", { count: "exact", head: true });
       return error
         ? { name, ok: false, issue: `${error.code ? `${error.code}: ` : ""}${error.message}` }
-        : { name, ok: true, rows: data?.length ?? 0 };
+        : { name, ok: true, rows: count };
     }),
   );
 
-  const { data: bucketRows, error: bucketError } = await supabase.storage.listBuckets();
-  const buckets = requiredBuckets.map((name) => {
-    if (bucketError) return { name, ok: false, issue: bucketError.message };
-    const exists = (bucketRows ?? []).some((bucket) => bucket.name === name);
-    return exists ? { name, ok: true } : { name, ok: false, issue: "Missing storage bucket" };
-  });
+  // Test object access used by the CMS instead of privileged bucket metadata.
+  const buckets = await Promise.all(
+    requiredBuckets.map(async (name) => {
+      const { error } = await supabase.storage.from(name).list("", { limit: 1 });
+      return error ? { name, ok: false, issue: error.message } : { name, ok: true };
+    }),
+  );
 
   return {
     env: {

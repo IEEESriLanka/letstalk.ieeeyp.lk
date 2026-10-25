@@ -698,7 +698,7 @@ export function Contact({ content }: { content: SiteContent["contact"] }) {
         aria-hidden
         className="absolute -bottom-24 -left-16 size-[360px] rounded-full bg-[color-mix(in_oklab,var(--orange)_16%,transparent)] blur-[110px]"
       />
-      <div className="relative mx-auto grid max-w-6xl gap-12 px-5 lg:grid-cols-[0.9fr_1.1fr]">
+      <div id="contact-content" className="relative mx-auto grid max-w-6xl gap-12 px-5 lg:grid-cols-[0.9fr_1.1fr]">
         <div>
           <SectionHead
             eyebrow="Get in touch"

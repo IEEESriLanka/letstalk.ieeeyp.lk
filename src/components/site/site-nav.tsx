@@ -51,9 +51,9 @@ function NavLink({
         } catch {
           /* ignore */
         }
-        scrollToHash(hash, true);
+        scrollToHash(hash, hash !== "#top" && hash !== "#contact");
       } else {
-        navigate({ to: "/", hash: hash.replace(/^#/, "") });
+        navigate({ to: "/", hash: hash.replace(/^#/, ""), hashScrollIntoView: false });
       }
     }
   };
@@ -138,7 +138,7 @@ export function SiteNav() {
               } catch {
                 /* ignore */
               }
-              scrollToHash("#top", true);
+              scrollToHash("#top", false);
             }
           }}
           className="group flex items-center gap-2.5"

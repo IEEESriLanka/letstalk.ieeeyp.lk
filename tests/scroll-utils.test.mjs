@@ -22,7 +22,7 @@ function fixture({ reduced = false, mounted = true } = {}) {
     scrollTo: (options) => calls.push(options),
   };
   const context = { exports: {}, window, document: {
-    getElementById: () => mounted ? { getBoundingClientRect: () => ({ top: 500 }) } : null,
+    getElementById: (id) => mounted ? { getBoundingClientRect: () => ({ top: id === "contact-content" ? 628 : 500 }) } : null,
     querySelector: () => ({ getBoundingClientRect: () => ({ bottom: 80 }) }),
   } };
   vm.runInNewContext(compiled, context);
@@ -49,6 +49,13 @@ test("respects reduced motion and explicit instant scrolling", () => {
     const f = fixture({ reduced }); f.scroll("#events", !reduced ? false : true); f.flush();
     assert.equal(f.calls[0].behavior, "instant");
   }
+});
+
+test("Contact Us lands on the content row below the fixed navigation instantly", () => {
+  const f = fixture(); f.scroll("#contact", false); f.flush();
+  assert.equal(f.calls.length, 1);
+  assert.equal(f.calls[0].top, 732);
+  assert.equal(f.calls[0].behavior, "instant");
 });
 
 test("new navigation supersedes pending work and top reaches page start", () => {

@@ -37,7 +37,9 @@ export function scrollToHash(rawHash: string, smooth = true): () => void {
     if (target) {
       const nav = document.querySelector("header nav");
       const offset = nav ? nav.getBoundingClientRect().bottom + 16 : 96;
-      const top = id === "top" ? 0 : Math.max(0, target.getBoundingClientRect().top + window.scrollY - offset);
+      // Land on the heading/form row, skipping the contact section's large top padding.
+      const landingTarget = id === "contact" ? document.getElementById("contact-content") ?? target : target;
+      const top = id === "top" ? 0 : Math.max(0, landingTarget.getBoundingClientRect().top + window.scrollY - offset);
       const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       window.scrollTo({ top, behavior: smooth && !reducedMotion ? "smooth" : "instant" });
     }

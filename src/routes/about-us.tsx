@@ -194,11 +194,7 @@ function OrganizationCard({
       />
       <div className="flex flex-col sm:flex-row items-center sm:items-center gap-6 sm:gap-8 md:gap-10">
         <div
-          className={`flex h-28 w-full sm:h-32 sm:w-56 md:w-64 shrink-0 items-center justify-center overflow-hidden rounded-2xl p-4 sm:p-5 transition-all duration-300 group-hover:scale-[1.02] ${
-            warm
-              ? "bg-[#fffaf5] border border-orange-100/80 shadow-xs"
-              : "bg-[#f8fbff] border border-[#e3eef9] shadow-xs"
-          }`}
+          className="flex h-28 w-full sm:h-32 sm:w-56 md:w-64 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-[#e3eef9] bg-[#f8fbff] p-4 sm:p-5 shadow-xs transition-all duration-300 group-hover:scale-[1.02]"
         >
           <img
             src={resolvedLogoUrl}

@@ -65,7 +65,8 @@ function Index() {
     const targetHash = routerHash || (typeof window !== "undefined" ? window.location.hash : "");
     if (!targetHash) return;
 
-    return scrollToHash(targetHash, true);
+    const id = targetHash.replace(/^#/, "");
+    return scrollToHash(targetHash, id !== "top" && id !== "contact");
   }, [initializing, routerHash]);
 
   return (

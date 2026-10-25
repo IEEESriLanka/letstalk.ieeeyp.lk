@@ -14,6 +14,7 @@ let failed = false;
 for (const table of [
   "site_content",
   "events",
+  "programs",
   "gallery_albums",
   "gallery_items",
   "awards",
@@ -29,6 +30,17 @@ if (secret) {
   const { error } = await admin.from("admin_users").select("id").limit(1);
   console.log(`Server admin credentials: ${error ? error.message : "OK"}`);
   if (error) failed = true;
+  for (const table of ["contact_messages", "team_private_contacts"]) {
+    const { error } = await admin.from(table).select("id").limit(1);
+    console.log(`${table}: ${error ? error.message : "OK"}`);
+    if (error) failed = true;
+  }
+  const { data: buckets, error: bucketError } = await admin.storage.listBuckets();
+  for (const name of ["event-images", "program-images", "gallery-images", "award-images", "partner-logos"]) {
+    const issue = bucketError?.message || (!buckets?.some((bucket) => bucket.id === name) ? "Missing storage bucket" : null);
+    console.log(`${name}: ${issue || "OK"}`);
+    if (issue) failed = true;
+  }
 } else {
   console.log("Server admin credentials: not configured (required for account management only)");
 }
