@@ -23,6 +23,11 @@ export default defineConfig(({ command, mode }) => {
       command === "build" &&
         nitro({
           preset: process.env.VERCEL ? "vercel" : "node-server",
+          routeRules: {
+            "/team/optimized/**": {
+              headers: { "cache-control": "public, max-age=31536000, immutable" },
+            },
+          },
         }),
     ].filter(Boolean),
     server: {

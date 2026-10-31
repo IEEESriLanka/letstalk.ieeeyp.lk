@@ -8,8 +8,15 @@ import { SiteNav } from "@/components/site/site-nav";
 import { Reveal, RevealGroup, fadeUp } from "@/components/site/motion-primitives";
 import { getSiteContent } from "@/lib/content-actions";
 import { defaultSiteContent, getDisplayYearTeams } from "@/lib/site-content";
+import { getOptimizedTeamImage } from "@/lib/team-image-manifest";
 
 export const Route = createFileRoute("/team")({
+  loader: async ({ context }) => {
+    await context.queryClient.ensureQueryData({
+      queryKey: ["site-content"],
+      queryFn: () => getSiteContent(),
+    });
+  },
   head: () => ({
     meta: [
       { title: "Team | IEEE LETs Talk" },
@@ -17,6 +24,20 @@ export const Route = createFileRoute("/team")({
         name: "description",
         content:
           "Meet the IEEE LETs Talk team and the past members who helped shape the national project.",
+      },
+    ],
+    links: [
+      {
+        rel: "preload",
+        as: "image",
+        href: "/team/optimized/8914778c4e394e460f1d-640.webp",
+        type: "image/webp",
+      },
+      {
+        rel: "preload",
+        as: "image",
+        href: "/team/optimized/96c95d797b19ef4f462d-640.webp",
+        type: "image/webp",
       },
     ],
   }),
@@ -131,6 +152,8 @@ function TeamPage() {
               >
                 {row.map((member, memberIndex) => {
                   const isCenteredPair = isRemainderTwo && memberIndex === row.length - 2;
+                  const image = getOptimizedTeamImage(member.imageUrl);
+                  const isPriority = rowIndex === 0;
 
                   return (
                     <motion.article
@@ -162,14 +185,33 @@ function TeamPage() {
                         {member.initials}
                       </span>
                       <img
-                        src={member.imageUrl}
+                        key={member.imageUrl}
+                        src={image?.src ?? member.imageUrl}
+                        srcSet={image?.srcSet}
+                        sizes={
+                          rowIndex === 0
+                            ? "(min-width: 768px) 320px, 45vw"
+                            : rowIndex === 1
+                            ? "(min-width: 640px) 33vw, 100vw"
+                            : "(min-width: 1024px) 280px, (min-width: 640px) 50vw, 100vw"
+                        }
+                        width={image?.width}
+                        height={image?.height}
                         alt={member.name}
                         className="absolute inset-0 size-full object-cover transition-transform duration-500 will-change-transform group-hover:scale-105"
                         style={{ objectPosition: member.imagePosition || "center 18%" }}
-                        loading="lazy"
+                        loading={isPriority ? "eager" : "lazy"}
+                        fetchPriority={isPriority ? "high" : "auto"}
                         decoding="async"
                         onError={(event) => {
-                          event.currentTarget.style.display = "none";
+                          const photo = event.currentTarget;
+                          if (image && photo.dataset["fallback"] !== "true") {
+                            photo.dataset["fallback"] = "true";
+                            photo.removeAttribute("srcset");
+                            photo.src = member.imageUrl!;
+                          } else {
+                            photo.style.display = "none";
+                          }
                         }}
                       />
                       <div
