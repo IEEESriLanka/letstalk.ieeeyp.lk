@@ -13,18 +13,6 @@
   animation: partner-loop 45s linear infinite;
 }
 
-.partner-track.track-0 {
-  animation-duration: 45s;
-}
-
-.partner-track.track-1 {
-  animation-duration: 48s;
-}
-
-.partner-track.track-2 {
-  animation-duration: 52s;
-}
-
 .partner-track.move-right {
   animation-direction: reverse;
 }
