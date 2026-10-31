@@ -28,45 +28,13 @@ export function getStoragePathFromPublicUrl(url: string) {
   }
 }
 
-async function prepareImageForUpload(file: File): Promise<File> {
-  if (typeof window === "undefined" || !file.type.startsWith("image/")) return file;
-  try {
-    const bitmap = await createImageBitmap(file);
-    const maxDimension = 1200;
-    let { width, height } = bitmap;
-    if (width > maxDimension || height > maxDimension) {
-      if (width > height) {
-        height = Math.round((height * maxDimension) / width);
-        width = maxDimension;
-      } else {
-        width = Math.round((width * maxDimension) / height);
-        height = maxDimension;
-      }
-    }
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return file;
-    ctx.drawImage(bitmap, 0, 0, width, height);
-    const blob = await new Promise<Blob | null>((resolve) =>
-      canvas.toBlob(resolve, "image/webp", 0.82),
-    );
-    if (!blob || blob.size >= file.size) return file;
-    return new File([blob], file.name.replace(/\.[^.]+$/, ".webp"), { type: "image/webp" });
-  } catch {
-    return file;
-  }
-}
-
 export async function uploadImage(bucket: StorageBucket, file: File, folder: string) {
   validateImage(file);
-  const processedFile = await prepareImageForUpload(file);
-  const extension = processedFile.name.split(".").pop()?.toLowerCase() || "webp";
+  const extension = file.name.split(".").pop()?.toLowerCase() || "webp";
   const path = `${folder}/${crypto.randomUUID()}.${extension}`;
 
-  const { error } = await supabase.storage.from(bucket).upload(path, processedFile, {
-    cacheControl: "31536000",
+  const { error } = await supabase.storage.from(bucket).upload(path, file, {
+    cacheControl: "3600",
     upsert: false,
   });
 
