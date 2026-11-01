@@ -3,6 +3,8 @@ import test from "node:test";
 import { readFile } from "node:fs/promises";
 import ts from "typescript";
 import { z } from "zod";
+import { speakerCommentsSchema } from "../src/lib/testimonials.ts";
+import { defaultSiteContent } from "../src/lib/site-content.ts";
 
 // Run the real submission flow with fake transports: no live messages or emails.
 const source = await readFile(new URL("../src/lib/content-store.ts", import.meta.url), "utf8");
@@ -14,6 +16,7 @@ async function fixture({ databaseError = null, emailStatus = 200, configured = t
   const key = `__contactTest${sequence++}`;
   globalThis[key] = {
     z,
+    speakerCommentsSchema,
     createClient: () => ({ from: (table) => ({ insert: async (row) => {
       writes.push({ table, row });
       return { error: databaseError };
@@ -25,6 +28,7 @@ async function fixture({ databaseError = null, emailStatus = 200, configured = t
     process: { env: { SUPABASE_URL: "https://example.test", VITE_SUPABASE_PUBLISHABLE_KEY: "test-key", ...(configured ? { RESEND_API_KEY: "test-only", RESEND_FROM_EMAIL: "LETs Talk <contact@example.com>" } : {}) } },
   };
   const mocked = source
+    .replace(/import .*? from "\.\/testimonials";/, `const { speakerCommentsSchema } = globalThis.${key};`)
     .replace(/import .*? from "@supabase\/supabase-js";/, `const { createClient, fetch, process, z } = globalThis.${key};`)
     .replace(/import .*? from "zod";/, "")
     .replace(/import .*? from "\.\/site-content";/, "const defaultSiteContent = {};");
@@ -73,5 +77,14 @@ test("rejects blank, oversized, invalid-email and header-injection submissions b
     }
     assert.equal(f.writes.length, 0);
     assert.equal(f.emails.length, 0);
+  } finally { f.cleanup(); }
+});
+
+test("website content validation preserves speaker comments and accepts older content", async () => {
+  const f = await fixture();
+  try {
+    const speakerComments = [{ id: "bfbe311a-d7de-4d0e-8f10-81029d11d312", name: "Speaker", designation: "Engineer", comment: "Thank you for the conversation.", imageUrl: "", published: true }];
+    assert.deepEqual(f.api.siteContentSchema.parse({ ...defaultSiteContent, speakerComments }).speakerComments, speakerComments);
+    assert.equal(f.api.siteContentSchema.safeParse(defaultSiteContent).success, true);
   } finally { f.cleanup(); }
 });

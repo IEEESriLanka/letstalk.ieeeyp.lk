@@ -65,6 +65,22 @@ Use the committed lockfile with `npm ci` for repeatable installs. After deployin
 these changes, verify the deployed login page and Vercel runtime logs as well;
 the build check does not exercise database credentials or email delivery.
 
+### Speaker comments
+
+Open **Admin → Speaker Comments** to add a speaker's name, designation, comment,
+and optional photo. Upload JPG/PNG/WebP photos up to 5MB or provide an HTTPS image
+URL. Photos use the existing `gallery-images` bucket under `speaker-comments/`.
+Use the arrows to reorder cards, check **Published on About Us**, then **Save
+comments**. Unpublished cards remain in the admin list. Removing a card takes
+effect only after saving; **Discard changes** restores the saved list.
+
+Published cards rotate at the bottom of About Us, above the footer, every six seconds, with swipe,
+dots. Rotation pauses on hover/focus and is disabled
+for reduced-motion preferences. Empty/older content hides the section; no sample
+endorsements are published. Comments use the existing `site_content.content` JSON
+and its admin permissions, so no database migration or environment changes are
+needed. Test publishing and image upload on a Preview with test data before release.
+
 ### Contact form on Vercel
 
 Messages are stored in the existing Supabase `contact_messages` table and appear

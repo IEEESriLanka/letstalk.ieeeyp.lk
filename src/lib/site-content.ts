@@ -1,3 +1,5 @@
+import type { SpeakerComment } from "./testimonials";
+
 export type TeamMember = {
   name: string;
   role: string;
@@ -151,6 +153,7 @@ export type SiteContent = {
   };
   partners: string[];
   videoLinks?: Array<{ url: string; title: string }>;
+  speakerComments?: SpeakerComment[];
   partnerLogos?: Array<{ name: string; logoUrl: string }>;
   connected: {
     title: string;

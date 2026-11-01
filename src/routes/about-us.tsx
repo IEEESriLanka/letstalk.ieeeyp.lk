@@ -4,6 +4,7 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import { SiteNav } from "@/components/site/site-nav";
 import { AboutOverview } from "@/components/site/about-overview";
 import { SiteFooter } from "@/components/site/site-footer";
+import { SpeakerComments } from "@/components/site/speaker-comments";
 import { Reveal, RevealGroup } from "@/components/site/motion-primitives";
 import { getSiteContent } from "@/lib/content-actions";
 import { defaultSiteContent } from "@/lib/site-content";
@@ -145,7 +146,7 @@ function AboutUsPage() {
         </div>
       </section>
 
-      <div aria-hidden="true" className="h-12 bg-white" />
+      <SpeakerComments comments={content.speakerComments} />
       <SiteFooter email={content.contact.email} />
     </main>
   );
