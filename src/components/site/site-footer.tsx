@@ -56,7 +56,7 @@ export function SiteFooter({ email = "ieeeletstalksl@gmail.com" }: { email?: str
               </div>
               <div className="flex flex-col">
                 <span className="font-display text-base font-bold">
-                  <span className="text-ieee">IEEE</span>{" "}
+                  <span className="text-white">IEEE</span>{" "}
                   <span className="text-white">LETs</span>{" "}
                   <span className="text-orange">talk</span>
                 </span>
