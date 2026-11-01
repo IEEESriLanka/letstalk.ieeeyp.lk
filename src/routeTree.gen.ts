@@ -20,6 +20,7 @@ import { Route as AdminAdminsRouteImport } from './routes/admin.admins'
 import { Route as AdminAwardsRouteImport } from './routes/admin.awards'
 import { Route as AdminDatabaseRouteImport } from './routes/admin.database'
 import { Route as AdminEventsRouteImport } from './routes/admin.events'
+import { Route as AdminEventsHeroRouteImport } from './routes/admin.events-hero'
 import { Route as AdminGalleryRouteImport } from './routes/admin.gallery'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminMessagesRouteImport } from './routes/admin.messages'
@@ -87,6 +88,11 @@ const AdminDatabaseRoute = AdminDatabaseRouteImport.update({
 const AdminEventsRoute = AdminEventsRouteImport.update({
   id: '/events',
   path: '/events',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminEventsHeroRoute = AdminEventsHeroRouteImport.update({
+  id: '/events-hero',
+  path: '/events-hero',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminGalleryRoute = AdminGalleryRouteImport.update({
@@ -166,6 +172,7 @@ export interface FileRoutesByFullPath {
   '/admin/awards': typeof AdminAwardsRoute
   '/admin/database': typeof AdminDatabaseRoute
   '/admin/events': typeof AdminEventsRoute
+  '/admin/events-hero': typeof AdminEventsHeroRoute
   '/admin/gallery': typeof AdminGalleryRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/messages': typeof AdminMessagesRoute
@@ -191,6 +198,7 @@ export interface FileRoutesByTo {
   '/admin/awards': typeof AdminAwardsRoute
   '/admin/database': typeof AdminDatabaseRoute
   '/admin/events': typeof AdminEventsRoute
+  '/admin/events-hero': typeof AdminEventsHeroRoute
   '/admin/gallery': typeof AdminGalleryRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/messages': typeof AdminMessagesRoute
@@ -218,6 +226,7 @@ export interface FileRoutesById {
   '/admin/awards': typeof AdminAwardsRoute
   '/admin/database': typeof AdminDatabaseRoute
   '/admin/events': typeof AdminEventsRoute
+  '/admin/events-hero': typeof AdminEventsHeroRoute
   '/admin/gallery': typeof AdminGalleryRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/messages': typeof AdminMessagesRoute
@@ -246,6 +255,7 @@ export interface FileRouteTypes {
     | '/admin/awards'
     | '/admin/database'
     | '/admin/events'
+    | '/admin/events-hero'
     | '/admin/gallery'
     | '/admin/login'
     | '/admin/messages'
@@ -271,6 +281,7 @@ export interface FileRouteTypes {
     | '/admin/awards'
     | '/admin/database'
     | '/admin/events'
+    | '/admin/events-hero'
     | '/admin/gallery'
     | '/admin/login'
     | '/admin/messages'
@@ -297,6 +308,7 @@ export interface FileRouteTypes {
     | '/admin/awards'
     | '/admin/database'
     | '/admin/events'
+    | '/admin/events-hero'
     | '/admin/gallery'
     | '/admin/login'
     | '/admin/messages'
@@ -401,6 +413,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminEventsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/events-hero': {
+      id: '/admin/events-hero'
+      path: '/events-hero'
+      fullPath: '/admin/events-hero'
+      preLoaderRoute: typeof AdminEventsHeroRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/gallery': {
       id: '/admin/gallery'
       path: '/gallery'
@@ -500,6 +519,7 @@ interface AdminRouteChildren {
   AdminAwardsRoute: typeof AdminAwardsRoute
   AdminDatabaseRoute: typeof AdminDatabaseRoute
   AdminEventsRoute: typeof AdminEventsRoute
+  AdminEventsHeroRoute: typeof AdminEventsHeroRoute
   AdminGalleryRoute: typeof AdminGalleryRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminMessagesRoute: typeof AdminMessagesRoute
@@ -518,6 +538,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAwardsRoute: AdminAwardsRoute,
   AdminDatabaseRoute: AdminDatabaseRoute,
   AdminEventsRoute: AdminEventsRoute,
+  AdminEventsHeroRoute: AdminEventsHeroRoute,
   AdminGalleryRoute: AdminGalleryRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminMessagesRoute: AdminMessagesRoute,

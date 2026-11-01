@@ -65,6 +65,21 @@ Use the committed lockfile with `npm ci` for repeatable installs. After deployin
 these changes, verify the deployed login page and Vercel runtime logs as well;
 the build check does not exercise database credentials or email delivery.
 
+### Events page hero
+
+Open **Admin → Events Hero** to edit the Events heading and description, upload
+photos (JPG/PNG/WebP, up to 5MB each), or add HTTPS image URLs. Add up to eight
+photos, add a heading and description for each photo, reorder them with the arrows,
+and select **Save Events hero** to publish. Blank per-photo text uses the default
+heading/description. Each slide's text fades in over two seconds, holds for three,
+then advances to the next photo and text (a five-second cycle),
+with swipe and dot navigation. Reordering/removing photos keeps their text paired. Rotation
+pauses during interaction and respects reduced-motion preferences. This hero is
+independent of the homepage photos. Empty photo lists display a text-only hero.
+Settings use existing `site_content` JSON; uploads use `gallery-images/events-hero/`.
+No database migration or environment change is required. Verify admin save/upload
+and the public Events page on Preview before release.
+
 ### Speaker comments
 
 Open **Admin → Speaker Comments** to add a speaker's name, designation, comment,

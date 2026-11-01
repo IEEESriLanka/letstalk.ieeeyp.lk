@@ -2,7 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { useReducedMotion } from "motion/react";
 
-export function PhotoBackdrop({ images }: { images?: string[] | undefined }) {
+export function PhotoBackdrop({
+  images,
+  storageKey = "hero-background-photo",
+}: {
+  images?: string[] | undefined;
+  storageKey?: string;
+}) {
   const photos = images?.filter(Boolean) ?? [];
   const [viewportRef, carousel] = useEmblaCarousel({ loop: true });
   const [selected, setSelected] = useState(0);
@@ -19,7 +25,7 @@ export function PhotoBackdrop({ images }: { images?: string[] | undefined }) {
     if (!initialized.current) {
       initialized.current = true;
       try {
-        const previous = sessionStorage.getItem("hero-background-photo");
+        const previous = sessionStorage.getItem(storageKey);
         carousel.scrollTo((currentPhotos.indexOf(previous ?? "") + 1) % currentPhotos.length, true);
       } catch {
         /* Storage is optional. */
@@ -29,7 +35,7 @@ export function PhotoBackdrop({ images }: { images?: string[] | undefined }) {
       const index = carousel.selectedScrollSnap();
       setSelected(index);
       try {
-        sessionStorage.setItem("hero-background-photo", currentPhotos[index] ?? "");
+        sessionStorage.setItem(storageKey, currentPhotos[index] ?? "");
       } catch {
         /* Storage is optional. */
       }
@@ -39,7 +45,7 @@ export function PhotoBackdrop({ images }: { images?: string[] | undefined }) {
     return () => {
       carousel.off("select", sync).off("reInit", sync);
     };
-  }, [carousel, photoKey]);
+  }, [carousel, photoKey, storageKey]);
 
   useEffect(() => {
     if (!carousel || photos.length < 2 || hovered || focused || reduceMotion) return;
