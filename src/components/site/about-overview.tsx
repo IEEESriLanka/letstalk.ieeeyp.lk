@@ -201,7 +201,7 @@ export function ImpactOverview({ content }: { content: SiteContent["about"] }) {
                     delay: index * 0.1,
                     ease: [0.22, 1, 0.36, 1],
                   }}
-                  className={`group flex min-h-[104px] items-center gap-3 rounded-3xl px-5 py-4 shadow-[0_12px_25px_-18px_rgba(7,22,56,0.55)] transition-transform duration-300 hover:-translate-y-1 ${
+                  className={`group flex min-h-[104px] items-center gap-3 rounded-[5px] px-5 py-4 shadow-[0_12px_25px_-18px_rgba(7,22,56,0.55)] transition-transform duration-300 hover:-translate-y-1 ${
                     filled
                       ? "bg-[#ff6815] text-white"
                       : "border border-[#ff6815]/70 bg-white/80 text-[#102d58]"
