@@ -173,7 +173,10 @@ export function Partners({ logos }: { logos: NonNullable<SiteContent["partnerLog
           return (
             <div
               key={rowIndex}
-              className={`partner-track track-${rowIndex}${rowIndex === 1 ? " move-right" : ""}`}
+              className={`partner-track${rowIndex === 1 ? " move-right" : ""}`}
+              // Scale loop time with row length; give the middle row a slightly
+              // longer interval per logo so it moves about 15% slower.
+              style={{ animationDuration: `${displayRow.length * (rowIndex === 1 ? 3.5 : 3)}s` }}
             >
               {[0, 1].map((copy) => (
                 <div className="partner-group" key={copy} aria-hidden={copy === 1 ? true : undefined}>
