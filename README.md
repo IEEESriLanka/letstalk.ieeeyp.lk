@@ -50,6 +50,10 @@ npm run preview
 
 ### Vercel server startup verification
 
+Follow [DEPLOYMENT.md](DEPLOYMENT.md) for required Preview checks, release gates,
+and rollback steps. Development rules for future contributors and coding agents
+are in [AGENTS.md](AGENTS.md).
+
 Vercel builds use Nitro's Vercel preset with server dynamic imports inlined.
 This avoids a generated circular import that previously caused
 `TypeError: createCsrfMiddleware is not a function` on the first request.
