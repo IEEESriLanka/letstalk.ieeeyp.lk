@@ -27,6 +27,7 @@ import { Route as AdminPartnersRouteImport } from './routes/admin.partners'
 import { Route as AdminPastEventsRouteImport } from './routes/admin.past-events'
 import { Route as AdminProgramsRouteImport } from './routes/admin.programs'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminSpeakerCommentsRouteImport } from './routes/admin.speaker-comments'
 import { Route as AdminTeamRouteImport } from './routes/admin.team'
 import { Route as AdminVideosRouteImport } from './routes/admin.videos'
 import { Route as GalleryAlbumSlugRouteImport } from './routes/gallery.$albumSlug'
@@ -123,6 +124,11 @@ const AdminSettingsRoute = AdminSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminSpeakerCommentsRoute = AdminSpeakerCommentsRouteImport.update({
+  id: '/speaker-comments',
+  path: '/speaker-comments',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminTeamRoute = AdminTeamRouteImport.update({
   id: '/team',
   path: '/team',
@@ -167,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/admin/past-events': typeof AdminPastEventsRoute
   '/admin/programs': typeof AdminProgramsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/speaker-comments': typeof AdminSpeakerCommentsRoute
   '/admin/team': typeof AdminTeamRoute
   '/admin/videos': typeof AdminVideosRoute
   '/gallery/$albumSlug': typeof GalleryAlbumSlugRoute
@@ -191,6 +198,7 @@ export interface FileRoutesByTo {
   '/admin/past-events': typeof AdminPastEventsRoute
   '/admin/programs': typeof AdminProgramsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/speaker-comments': typeof AdminSpeakerCommentsRoute
   '/admin/team': typeof AdminTeamRoute
   '/admin/videos': typeof AdminVideosRoute
   '/gallery/$albumSlug': typeof GalleryAlbumSlugRoute
@@ -217,6 +225,7 @@ export interface FileRoutesById {
   '/admin/past-events': typeof AdminPastEventsRoute
   '/admin/programs': typeof AdminProgramsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/speaker-comments': typeof AdminSpeakerCommentsRoute
   '/admin/team': typeof AdminTeamRoute
   '/admin/videos': typeof AdminVideosRoute
   '/gallery/$albumSlug': typeof GalleryAlbumSlugRoute
@@ -244,6 +253,7 @@ export interface FileRouteTypes {
     | '/admin/past-events'
     | '/admin/programs'
     | '/admin/settings'
+    | '/admin/speaker-comments'
     | '/admin/team'
     | '/admin/videos'
     | '/gallery/$albumSlug'
@@ -268,6 +278,7 @@ export interface FileRouteTypes {
     | '/admin/past-events'
     | '/admin/programs'
     | '/admin/settings'
+    | '/admin/speaker-comments'
     | '/admin/team'
     | '/admin/videos'
     | '/gallery/$albumSlug'
@@ -293,6 +304,7 @@ export interface FileRouteTypes {
     | '/admin/past-events'
     | '/admin/programs'
     | '/admin/settings'
+    | '/admin/speaker-comments'
     | '/admin/team'
     | '/admin/videos'
     | '/gallery/$albumSlug'
@@ -438,6 +450,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSettingsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/speaker-comments': {
+      id: '/admin/speaker-comments'
+      path: '/speaker-comments'
+      fullPath: '/admin/speaker-comments'
+      preLoaderRoute: typeof AdminSpeakerCommentsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/team': {
       id: '/admin/team'
       path: '/team'
@@ -488,6 +507,7 @@ interface AdminRouteChildren {
   AdminPastEventsRoute: typeof AdminPastEventsRoute
   AdminProgramsRoute: typeof AdminProgramsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminSpeakerCommentsRoute: typeof AdminSpeakerCommentsRoute
   AdminTeamRoute: typeof AdminTeamRoute
   AdminVideosRoute: typeof AdminVideosRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -505,6 +525,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminPastEventsRoute: AdminPastEventsRoute,
   AdminProgramsRoute: AdminProgramsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
+  AdminSpeakerCommentsRoute: AdminSpeakerCommentsRoute,
   AdminTeamRoute: AdminTeamRoute,
   AdminVideosRoute: AdminVideosRoute,
   AdminIndexRoute: AdminIndexRoute,

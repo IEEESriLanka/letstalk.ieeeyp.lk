@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import { speakerCommentsSchema } from "./testimonials";
 import { defaultSiteContent, type ContactMessage, type SiteContent } from "./site-content";
 
 const iconSchemas = {
@@ -10,6 +11,7 @@ const iconSchemas = {
 };
 
 export const siteContentSchema: z.ZodType<SiteContent> = z.object({
+  speakerComments: speakerCommentsSchema.optional(),
   hero: z.object({
     eyebrow: z.string().min(1),
     title: z.string().min(1),
