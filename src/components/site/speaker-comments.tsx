@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { useReducedMotion } from "motion/react";
-import { Quote, Star } from "lucide-react";
+import { Quote } from "lucide-react";
 import { getPublishedComments, type SpeakerComment } from "@/lib/testimonials";
 
 function SpeakerCard({ speaker }: { speaker: SpeakerComment }) {
@@ -45,11 +45,6 @@ function SpeakerCard({ speaker }: { speaker: SpeakerComment }) {
       <blockquote className="mt-5 mb-6 whitespace-pre-line break-words text-sm leading-relaxed text-[#5b6069]">
         {speaker.comment}
       </blockquote>
-      <div aria-hidden="true" className="mt-auto flex gap-0.5 text-orange/85">
-        {Array.from({ length: 5 }, (_, index) => (
-          <Star key={index} className="size-3 fill-current" strokeWidth={0} />
-        ))}
-      </div>
     </figure>
   );
 }
