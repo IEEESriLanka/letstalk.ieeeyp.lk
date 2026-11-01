@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import ts from "typescript";
 import { z } from "zod";
 import { speakerCommentsSchema } from "../src/lib/testimonials.ts";
+import { eventsHeroSchema } from "../src/lib/events-hero.ts";
 import { defaultSiteContent } from "../src/lib/site-content.ts";
 
 // Run the real submission flow with fake transports: no live messages or emails.
@@ -17,6 +18,7 @@ async function fixture({ databaseError = null, emailStatus = 200, configured = t
   globalThis[key] = {
     z,
     speakerCommentsSchema,
+    eventsHeroSchema,
     createClient: () => ({ from: (table) => ({ insert: async (row) => {
       writes.push({ table, row });
       return { error: databaseError };
@@ -28,6 +30,7 @@ async function fixture({ databaseError = null, emailStatus = 200, configured = t
     process: { env: { SUPABASE_URL: "https://example.test", VITE_SUPABASE_PUBLISHABLE_KEY: "test-key", ...(configured ? { RESEND_API_KEY: "test-only", RESEND_FROM_EMAIL: "LETs Talk <contact@example.com>" } : {}) } },
   };
   const mocked = source
+    .replace(/import .*? from "\.\/events-hero";/, `const { eventsHeroSchema } = globalThis.${key};`)
     .replace(/import .*? from "\.\/testimonials";/, `const { speakerCommentsSchema } = globalThis.${key};`)
     .replace(/import .*? from "@supabase\/supabase-js";/, `const { createClient, fetch, process, z } = globalThis.${key};`)
     .replace(/import .*? from "zod";/, "")
@@ -86,5 +89,7 @@ test("website content validation preserves speaker comments and accepts older co
     const speakerComments = [{ id: "bfbe311a-d7de-4d0e-8f10-81029d11d312", name: "Speaker", designation: "Engineer", comment: "Thank you for the conversation.", imageUrl: "", published: true }];
     assert.deepEqual(f.api.siteContentSchema.parse({ ...defaultSiteContent, speakerComments }).speakerComments, speakerComments);
     assert.equal(f.api.siteContentSchema.safeParse(defaultSiteContent).success, true);
+    const eventsHero = { title: "Events", description: "Discover our sessions.", images: ["https://example.com/event.jpg"] };
+    assert.deepEqual(f.api.siteContentSchema.parse({ ...defaultSiteContent, eventsHero }).eventsHero, eventsHero);
   } finally { f.cleanup(); }
 });

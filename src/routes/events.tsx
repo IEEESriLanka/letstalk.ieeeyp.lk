@@ -9,6 +9,10 @@ import { defaultSiteContent } from "@/lib/site-content";
 import logo from "@/assets/lets-talk-logo.png";
 
 export const Route = createFileRoute("/events")({
+  loader: ({ context }) => context.queryClient.ensureQueryData({
+    queryKey: ["site-content"],
+    queryFn: () => getSiteContent(),
+  }),
   head: () => ({ meta: [{ title: "Events | IEEE LETs Talk" }] }),
   component: EventsPage,
 });
@@ -16,7 +20,8 @@ export const Route = createFileRoute("/events")({
 function EventsPage() {
   const [tab, setTab] = useState<"upcoming" | "past">("upcoming");
   const [selectedYear, setSelectedYear] = useState<string>("all");
-  const query = useQuery({ queryKey: ["site-content"], queryFn: () => getSiteContent() });
+  const initialContent = Route.useLoaderData();
+  const query = useQuery({ queryKey: ["site-content"], queryFn: () => getSiteContent(), initialData: initialContent, staleTime: 60_000 });
   const today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Colombo" });
 
   const allEvents = query.data?.events ?? [];
@@ -70,10 +75,10 @@ function EventsPage() {
     <>
       <SiteNav />
       <main className="min-h-screen bg-background pt-32 pb-20">
-        <div className="mx-auto max-w-7xl px-5">
-          <div className="mx-auto max-w-3xl text-center">
+        <div id="event-list" className="mx-auto max-w-7xl scroll-mt-28 px-5">
+          <div className="mx-auto max-w-3xl pt-8 text-center">
             <span className="section-eyebrow">IEEE LETs Talk</span>
-            <h1 className="mt-3 text-4xl font-bold text-heading sm:text-5xl">Events</h1>
+            <h1 className="mt-3 text-3xl font-bold text-heading sm:text-4xl">Explore our events</h1>
             <p className="mt-4 text-base leading-relaxed text-body">
               Stay updated with our latest workshops, seminars, and networking sessions designed to empower young professionals in Sri Lanka.
             </p>

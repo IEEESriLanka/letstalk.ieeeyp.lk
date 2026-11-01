@@ -1,4 +1,4 @@
-import { motion, useInView, useReducedMotion, useScroll, useSpring, type Variants } from "motion/react";
+import { motion, useReducedMotion, type Variants } from "motion/react";
 import { useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
@@ -79,7 +79,6 @@ const pillarIcons = {
 };
 
 const eventVisuals = [g1, g2, g3, g4];
-const journeyYears = ["2024", "2025", "2026"];
 
 export function About({ content }: { content: SiteContent["about"] }) {
   return (
@@ -384,140 +383,7 @@ function EventCarousel({ events }: { events: SiteContent["events"] }) {
   );
 }
 
-function JourneyEvent({ event }: { event: SiteContent["events"][number] }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { margin: "-20% 0px -25% 0px" });
-  const reducedMotion = useReducedMotion();
-  const active = inView || Boolean(reducedMotion);
-
-  return (
-    <div ref={ref} className="relative grid min-h-[50vh] gap-8 py-8 pl-9 lg:grid-cols-[0.92fr_1.08fr] lg:items-center lg:gap-12 lg:pl-16">
-      <div aria-hidden="true" className={`absolute top-44 left-0 size-5 rounded-full border transition-colors ${active ? "border-ieee bg-ieee shadow-[0_0_0_6px_rgba(0,114,178,0.12)]" : "border-ieee/35 bg-white"}`} />
-      <motion.div
-        initial={false}
-        animate={{ opacity: active ? 1 : 0.34, y: active ? 0 : 12 }}
-        transition={{ duration: reducedMotion ? 0 : 0.5 }}
-        className="min-w-0"
-      >
-        <time dateTime={event.dateLabel} className="text-sm font-semibold text-orange">
-          {new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(event.dateLabel))}
-        </time>
-        <h4 className="mt-3 break-words text-2xl font-bold text-heading">{event.title}</h4>
-        <p className="mt-2 break-words text-sm font-semibold text-ieee">{event.tag}</p>
-        <p className="mt-4 whitespace-pre-line break-words text-sm leading-relaxed text-body">{event.description}</p>
-      </motion.div>
-      <motion.div
-        initial={false}
-        animate={{ opacity: active ? 1 : 0.18, x: active ? 0 : 24, scale: active ? 1 : 0.96 }}
-        transition={{ duration: reducedMotion ? 0 : 0.62, ease: [0.22, 1, 0.36, 1] }}
-        className="flex min-w-0 items-center justify-center py-4"
-      >
-        {event.imageUrl ? (
-          <img src={event.imageUrl} alt={event.title} loading="lazy" className="block h-auto max-h-[280px] w-auto max-w-full rounded-sm object-contain shadow-[0_12px_28px_-8px_rgba(0,38,76,0.28)] sm:max-h-[320px] sm:max-w-[360px]" />
-        ) : (
-          <div className="grid aspect-[4/3] w-full max-w-[360px] place-items-center rounded-lg bg-ieee-tint" aria-hidden="true">
-            <CalendarDays className="size-12 text-ieee" />
-          </div>
-        )}
-      </motion.div>
-    </div>
-  );
-}
-
-function JourneyTimeline({ events }: { events: SiteContent["events"] }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const reducedMotion = useReducedMotion();
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start 65%", "end 65%"] });
-  const progress = useSpring(scrollYProgress, { stiffness: 140, damping: 32, restDelta: 0.001 });
-
-  return (
-    <div ref={ref} className="relative isolate overflow-x-clip">
-      <div aria-hidden="true" className="pointer-events-none absolute top-8 bottom-8 left-[9px] w-px bg-ieee/15">
-        {!reducedMotion && (
-          <motion.div
-            className="journey-scroll-progress absolute inset-0 origin-top bg-gradient-to-b from-ieee via-ieee to-orange shadow-[0_0_12px_rgba(0,98,155,0.2)]"
-            style={{ scaleY: progress }}
-          />
-        )}
-      </div>
-      {events.map((event, index) => (
-        <JourneyEvent key={`${event.dateLabel}-${event.title}-${index}`} event={event} />
-      ))}
-    </div>
-  );
-}
-
-export function PastSessions({ events }: { events: SiteContent["events"] }) {
-  const [year, setYear] = useState("2026");
-  const [visibleCount, setVisibleCount] = useState(3);
-  const today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Colombo" });
-  const availableYears = [...new Set([...journeyYears, ...events
-    .filter((event) => /^\d{4}-\d{2}-\d{2}$/.test(event.dateLabel) && event.dateLabel < today)
-    .map((event) => event.dateLabel.slice(0, 4))])]
-    .filter((item) => item !== "2023")
-    .sort((a, b) => b.localeCompare(a));
-  const pastEvents = events
-    .filter((event) => /^\d{4}-\d{2}-\d{2}$/.test(event.dateLabel) &&
-      event.dateLabel.startsWith(year + "-") && event.dateLabel < today)
-    .sort((a, b) => b.dateLabel.localeCompare(a.dateLabel));
-  const visibleEvents = pastEvents.slice(0, visibleCount);
-
-  return (
-    <section id="journey" className="scroll-mt-24 bg-orange-tint/40 py-24 lg:py-32">
-      <div className="mx-auto max-w-6xl px-5">
-        <Reveal className="max-w-2xl">
-          <span className="section-eyebrow">Milestones</span>
-          <h2 className="mt-5 text-3xl leading-[1.14] font-bold text-heading sm:text-[2.6rem]">
-            Our Journey <span className="text-gradient-orange">so far</span>
-          </h2>
-          <p className="mt-4 text-base leading-relaxed text-body">
-            Celebrating the events, conversations, and industry connections that bring our community together.
-          </p>
-        </Reveal>
-        <div role="group" aria-label="Event year" className="sticky top-20 z-20 mt-10 flex w-fit max-w-full flex-wrap gap-2 rounded-lg border border-border bg-white/95 p-1.5 shadow-soft backdrop-blur-xl">
-          {availableYears.map((item) => (
-            <button
-              key={item}
-              type="button"
-              aria-pressed={year === item}
-              aria-controls="journey-events"
-              onClick={() => {
-                if (item !== year) {
-                  setYear(item);
-                  setVisibleCount(3);
-                }
-              }}
-              className={`min-h-10 rounded-md px-2 py-2 text-sm font-bold transition-colors sm:px-6 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ieee ${year === item ? "bg-orange text-white" : "bg-ieee-tint text-ieee hover:bg-orange-tint"}`}
-            >
-              {item}
-            </button>
-          ))}
-        </div>
-        <div id="journey-events" aria-live="polite" className="mt-10 min-h-48">
-          <h3 className="mb-6 text-xl font-bold text-heading">{year} events</h3>
-          {pastEvents.length === 0 ? (
-            <p className="py-10 text-center text-body">No past events published for {year} yet.</p>
-          ) : (
-            <JourneyTimeline key={`${year}-${visibleCount}`} events={visibleEvents} />
-          )}
-        </div>
-        {visibleEvents.length < pastEvents.length && (
-          <div className="mt-8 flex justify-center">
-            <button
-              type="button"
-              aria-controls="journey-events"
-              onClick={() => setVisibleCount((count) => count + 3)}
-              className="inline-flex min-h-11 items-center justify-center rounded-full bg-orange px-7 py-3 text-sm font-semibold text-white shadow-soft transition-colors hover:bg-[#e85f00] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ieee"
-            >
-              Read more
-              <span className="sr-only"> events from {year}</span>
-            </button>
-          </div>
-        )}
-      </div>
-    </section>
-  );
-}
+export { PastSessions } from "./journey-carousel";
 
 export function Gallery() {
   const { data: albums = [], isLoading, isError } = useQuery({

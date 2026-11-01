@@ -1,4 +1,5 @@
 import type { SpeakerComment } from "./testimonials";
+import type { EventsHeroContent } from "./events-hero";
 
 export type TeamMember = {
   name: string;
@@ -154,6 +155,7 @@ export type SiteContent = {
   partners: string[];
   videoLinks?: Array<{ url: string; title: string }>;
   speakerComments?: SpeakerComment[];
+  eventsHero?: EventsHeroContent;
   partnerLogos?: Array<{ name: string; logoUrl: string }>;
   connected: {
     title: string;
