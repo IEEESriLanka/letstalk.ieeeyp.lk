@@ -1,18 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { motion } from "motion/react";
 import { ArrowRight, Linkedin, Mail, Phone } from "lucide-react";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteNav } from "@/components/site/site-nav";
-import { Reveal, RevealGroup, fadeUp } from "@/components/site/motion-primitives";
+import { Reveal } from "@/components/site/motion-primitives";
 import { getSiteContent } from "@/lib/content-actions";
 import { defaultSiteContent, getDisplayYearTeams } from "@/lib/site-content";
 import { getOptimizedTeamImage } from "@/lib/team-image-manifest";
 
 export const Route = createFileRoute("/team")({
   loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData({
+    // Return the content so Start serializes it for the first browser render.
+    // A server-only query cache is not automatically hydrated in this app.
+    return context.queryClient.ensureQueryData({
       queryKey: ["site-content"],
       queryFn: () => getSiteContent(),
     });
@@ -45,11 +46,14 @@ export const Route = createFileRoute("/team")({
 });
 
 function TeamPage() {
+  const initialContent = Route.useLoaderData();
   const [selectedYear, setYear] = useState<string | null>(null);
   const [visiblePhone, setVisiblePhone] = useState<string | null>(null);
-  const { data: content = defaultSiteContent } = useQuery({
+  const { data: content } = useQuery({
     queryKey: ["site-content"],
     queryFn: () => getSiteContent(),
+    initialData: initialContent,
+    staleTime: 60_000,
   });
   const teamPage = content.teamPage ?? defaultSiteContent.teamPage!;
   const teams = getDisplayYearTeams(teamPage);
@@ -140,7 +144,7 @@ function TeamPage() {
             const isRemainderTwo = isFourCol && row.length % 4 === 2;
 
             return (
-              <RevealGroup
+              <div
                 key={`${year}-${rowIndex}`}
                 className={`mx-auto grid w-full gap-5 ${
                   rowIndex === 0
@@ -156,9 +160,8 @@ function TeamPage() {
                   const isPriority = rowIndex === 0;
 
                   return (
-                    <motion.article
+                    <article
                       key={member.name}
-                      variants={fadeUp}
                       className={`group relative min-w-0 overflow-hidden rounded-3xl border border-white/80 border-b-[5px] border-b-slate-300/80 bg-white/70 shadow-[0_12px_30px_-6px_rgba(15,23,42,0.08),0_4px_8px_-2px_rgba(15,23,42,0.04),inset_0_1px_1px_0_rgba(255,255,255,0.95)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-2 hover:border-b-[5px] hover:border-b-orange hover:bg-white/85 hover:shadow-[0_24px_42px_-6px_rgba(255,115,0,0.24),0_10px_16px_-4px_rgba(15,23,42,0.06),inset_0_1px_1px_0_rgba(255,255,255,1)] ${
                         isCenteredPair ? "lg:col-start-2" : ""
                       }`}
@@ -283,10 +286,10 @@ function TeamPage() {
                     )}
                   </div>
                 </div>
-              </motion.article>
+              </article>
             );
           })}
-        </RevealGroup>
+        </div>
       );
     })}
           </div>
