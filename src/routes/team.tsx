@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, Linkedin, Mail, Phone } from "lucide-react";
+import { Linkedin, Mail, Phone } from "lucide-react";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteNav } from "@/components/site/site-nav";
 import { Reveal } from "@/components/site/motion-primitives";
@@ -293,26 +293,6 @@ function TeamPage() {
       );
     })}
           </div>
-        </div>
-      </section>
-
-      <section id="contact" className="bg-ieee-deep py-16 text-white">
-        <div className="mx-auto flex max-w-6xl flex-col gap-5 px-5 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
-          <div>
-            <p className="text-xs font-bold tracking-[0.18em] text-orange uppercase">
-              Join the story
-            </p>
-            <h2 className="mt-2 text-2xl font-bold text-white sm:text-3xl">
-              Want to collaborate with the LETs Talk team?
-            </h2>
-          </div>
-          <a
-            href="/#contact"
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-[image:var(--gradient-orange)] px-6 py-3 text-sm font-semibold text-white shadow-glow transition-transform duration-300 hover:-translate-y-0.5"
-          >
-            Contact us
-            <ArrowRight className="size-4" />
-          </a>
         </div>
       </section>
 
