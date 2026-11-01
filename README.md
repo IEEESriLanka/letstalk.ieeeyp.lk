@@ -48,6 +48,23 @@ To preview the built production bundle:
 npm run preview
 ```
 
+### Vercel server startup verification
+
+Vercel builds use Nitro's Vercel preset with server dynamic imports inlined.
+This avoids a generated circular import that previously caused
+`TypeError: createCsrfMiddleware is not a function` on the first request.
+Browser assets continue to use code splitting.
+
+`npm run build` also runs a smoke check when `VERCEL` is set. It loads the
+generated Vercel function, verifies the login page renders, and confirms
+cross-site server-function requests return HTTP 403. A failure exits the build
+with an error before deployment. To check an existing local Vercel build, run
+`node scripts/check-server-build.mjs --vercel`.
+
+Use the committed lockfile with `npm ci` for repeatable installs. After deploying
+these changes, verify the deployed login page and Vercel runtime logs as well;
+the build check does not exercise database credentials or email delivery.
+
 ### Contact form on Vercel
 
 Messages are stored in the existing Supabase `contact_messages` table and appear

@@ -23,6 +23,10 @@ export default defineConfig(({ command, mode }) => {
       command === "build" &&
         nitro({
           preset: process.env.VERCEL ? "vercel" : "node-server",
+          // Nitro's second bundling pass can create a circular import between
+          // the lazy Start entry and its CSRF middleware. Keep server modules
+          // together so cold starts initialize the middleware before using it.
+          inlineDynamicImports: true,
           routeRules: {
             "/team/optimized/**": {
               headers: { "cache-control": "public, max-age=31536000, immutable" },

@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "node scripts/dev-safe.mjs dev",
     "build": "vite build",
+    "postbuild": "node scripts/check-server-build.mjs",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
