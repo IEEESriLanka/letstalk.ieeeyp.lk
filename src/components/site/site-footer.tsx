@@ -66,7 +66,7 @@ export function SiteFooter({ email = "ieeeletstalksl@gmail.com" }: { email?: str
               </div>
             </div>
             <p className="mt-5 max-w-xs text-sm leading-relaxed">
-              A national project focused on developing soft skills of undergraduates and young professionals.
+              A national project focused on developing soft skills of undergraduates and young professionals since 2017
             </p>
             <div className="mt-6 flex gap-2">
               {[
