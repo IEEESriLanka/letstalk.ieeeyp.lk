@@ -11,7 +11,7 @@ const groups: Array<{
       { label: "Home", href: "/" },
       { label: "About Us", href: "/about-us" },
       { label: "Team", href: "/team" },
-      { label: "Event Timeline", href: "/#journey" },
+      { label: "Our Main Events", href: "/#journey" },
       { label: "Partners", href: "/#partners" },
     ],
   },
@@ -66,8 +66,7 @@ export function SiteFooter({ email = "ieeeletstalksl@gmail.com" }: { email?: str
               </div>
             </div>
             <p className="mt-5 max-w-xs text-sm leading-relaxed">
-              Where Future Professionals Meet Industry Leaders. Empowering careers through
-              conversations, learning, and leadership since 2017.
+              A national project focused on developing soft skills of undergraduates and young professionals.
             </p>
             <div className="mt-6 flex gap-2">
               {[

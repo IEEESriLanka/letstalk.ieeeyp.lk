@@ -74,7 +74,7 @@ export function Hero({ content }: { content: SiteContent["hero"] }) {
               href="/#journey"
               className="inline-flex min-h-14 items-center justify-center gap-4 rounded-2xl border border-[#254d80] bg-white/90 px-6 text-sm font-semibold text-[#102d58] transition-colors hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ieee sm:text-base"
             >
-              Explore Our Journey <ArrowRight className="size-5" />
+              Explore Our Main Events <ArrowRight className="size-5" />
             </a>
           </div>
         </motion.div>

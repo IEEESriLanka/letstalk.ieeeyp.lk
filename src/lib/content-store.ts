@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { speakerCommentsSchema } from "./testimonials";
 import { eventsHeroSchema } from "./events-hero";
+import { mainEventsSchema } from "./main-events";
 import { defaultSiteContent, type ContactMessage, type SiteContent } from "./site-content";
 
 const iconSchemas = {
@@ -12,6 +13,7 @@ const iconSchemas = {
 };
 
 export const siteContentSchema: z.ZodType<SiteContent> = z.object({
+  mainEvents: mainEventsSchema.optional(),
   speakerComments: speakerCommentsSchema.optional(),
   eventsHero: eventsHeroSchema.optional(),
   hero: z.object({
@@ -62,6 +64,8 @@ export const siteContentSchema: z.ZodType<SiteContent> = z.object({
   events: z
     .array(
       z.object({
+        id: z.string().optional(),
+        startTime: z.string().nullable().optional(),
         tag: z.string().min(1),
         title: z.string().min(1),
         description: z.string().min(1),
@@ -450,6 +454,8 @@ export async function readSiteContent(): Promise<SiteContent> {
         }
       : base.awards,
     events: (events.data ?? []).map((event) => ({
+      id: event.id,
+      startTime: event.start_time,
       tag: event.location,
       title: event.title,
       description: event.description,

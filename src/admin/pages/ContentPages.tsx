@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { Edit, Eye, EyeOff, Plus, Trash2, UploadCloud } from "lucide-react";
 import { FormEvent, useEffect, useState, type ReactNode } from "react";
 import { toast } from "sonner";
@@ -141,7 +142,7 @@ export function EventsPage({ pastOnly = false }: { pastOnly?: boolean }) {
   return (
     <PageShell
       title={pastOnly ? "Past Events" : "Events"}
-      subtitle={pastOnly ? "Add past events and publish them in Our journey so far." : "Create, publish, and maintain event listings."}
+      subtitle={pastOnly ? "Manage past event listings and their full detail pages." : "Manage event listings and their full detail pages."}
     >
       <Toolbar
         search={search}
@@ -176,6 +177,7 @@ export function EventsPage({ pastOnly = false }: { pastOnly?: boolean }) {
                 <div>
                   <p className="font-semibold text-slate-900">{event.title}</p>
                   <p className="line-clamp-1 text-sm text-slate-500">{event.description}</p>
+                  {event.published && <Link to="/events/$eventId" params={{ eventId: event.id }} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex text-sm font-semibold text-ieee hover:underline">View page<span className="sr-only"> for {event.title} (opens in a new tab)</span></Link>}
                 </div>
                 <p className="text-sm text-slate-600">{event.event_date}</p>
                 <p className="text-sm text-slate-600">{event.location}</p>
@@ -246,8 +248,9 @@ function EventFormModal({
 
   return (
     <AdminModal open={open} title={record?.id ? "Edit Event" : pastOnly ? "Add Past Event" : "Add Event"} onClose={onClose}>
-      {pastOnly ? <p className="px-6 pt-4 text-sm text-slate-600">Choose the original event date and upload its poster. Enable Published to show it under the matching year in Our journey so far.</p> : null}
+      {pastOnly ? <p className="px-6 pt-4 text-sm text-slate-600">Choose the original event date and upload its poster. Enable Published to show it on the Events page. The homepage cards are managed in Our Main Events.</p> : null}
       <ManagedForm onSubmit={() => mutation.mutate()} submitting={mutation.isPending}>
+        <p className="text-sm leading-relaxed text-slate-600">These fields update the public event detail page. Use Description for the full event story, speaker information, agenda, and organizer details. Line breaks are preserved. Registration closes automatically after the event date.</p>
         <FormField label="Title" required>
           <input
             className={fieldClass}
@@ -285,12 +288,14 @@ function EventFormModal({
             onChange={(e) => setForm({ ...form, registration_url: e.target.value })}
           />
         </FormField>
-        <FormField label="Description" required>
+        <FormField label="Full Event Description" required>
           <textarea
             className={textAreaClass}
+            rows={10}
             value={form.description ?? ""}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
           />
+          <p className="mt-2 text-xs leading-relaxed text-slate-500">Write the complete event details here. Cards show a short preview; Read more opens a separate page with this full description. Paragraph breaks are preserved.</p>
         </FormField>
         <FormField label="Cover Image">
           <ImageUploader

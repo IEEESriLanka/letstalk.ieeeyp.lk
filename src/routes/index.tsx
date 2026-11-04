@@ -97,7 +97,7 @@ function Index() {
         <Hero content={content.hero} />
         <ImpactOverview content={content.about} />
         <Events events={content.events} />
-        <PastSessions events={content.events} />
+        <PastSessions content={content} />
         <LatestArticles />
         <LatestVideos />
         <Gallery />

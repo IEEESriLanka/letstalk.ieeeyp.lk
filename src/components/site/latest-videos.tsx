@@ -58,10 +58,10 @@ export function LatestVideos() {
     refetchInterval: videoRefreshInterval,
     retry: 1,
   });
-  const videos: TalkVideo[] = (query.data?.videoLinks ?? []).slice(0, 6).flatMap((video) => {
+  const videos: TalkVideo[] = (query.data?.videoLinks ?? []).flatMap((video) => {
     const id = youtubeVideoId(video.url);
     return id ? [{ id, title: video.title || "LETs Talk", url: `https://www.youtube.com/watch?v=${id}`, thumbnailUrl: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`, publishedAt: "", isShort: false }] : [];
-  });
+  }).slice(0, 4);
   return (
     <section id="videos" aria-labelledby="videos-title" className="scroll-mt-24 py-20 lg:py-28">
       <div className="mx-auto max-w-7xl px-5">
@@ -80,9 +80,9 @@ export function LatestVideos() {
           </p>
         </Reveal>
         {query.isPending && (
-          <div role="status" className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div role="status" className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <span className="sr-only">Loading LETs Talk videos...</span>
-            {[0, 1, 2].map((key) => (
+            {[0, 1, 2, 3].map((key) => (
               <div
                 key={key}
                 aria-hidden="true"
@@ -109,7 +109,7 @@ export function LatestVideos() {
           </p>
         )}
         {videos.length > 0 && (
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {videos.map((video) => (
               <VideoCard key={video.id} video={video} />
             ))}

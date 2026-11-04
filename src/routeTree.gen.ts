@@ -23,6 +23,7 @@ import { Route as AdminEventsRouteImport } from './routes/admin.events'
 import { Route as AdminEventsHeroRouteImport } from './routes/admin.events-hero'
 import { Route as AdminGalleryRouteImport } from './routes/admin.gallery'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminMainEventsRouteImport } from './routes/admin.main-events'
 import { Route as AdminMessagesRouteImport } from './routes/admin.messages'
 import { Route as AdminPartnersRouteImport } from './routes/admin.partners'
 import { Route as AdminPastEventsRouteImport } from './routes/admin.past-events'
@@ -31,9 +32,11 @@ import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminSpeakerCommentsRouteImport } from './routes/admin.speaker-comments'
 import { Route as AdminTeamRouteImport } from './routes/admin.team'
 import { Route as AdminVideosRouteImport } from './routes/admin.videos'
+import { Route as EventsEventIdRouteImport } from './routes/events_.$eventId'
 import { Route as GalleryAlbumSlugRouteImport } from './routes/gallery.$albumSlug'
 import { Route as GalleryAlbumsRouteImport } from './routes/gallery.albums'
 import { Route as GalleryEventsRouteImport } from './routes/gallery.events'
+import { Route as MainEventsEventIdRouteImport } from './routes/main-events.$eventId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -105,6 +108,11 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminMainEventsRoute = AdminMainEventsRouteImport.update({
+  id: '/main-events',
+  path: '/main-events',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminMessagesRoute = AdminMessagesRouteImport.update({
   id: '/messages',
   path: '/messages',
@@ -145,6 +153,11 @@ const AdminVideosRoute = AdminVideosRouteImport.update({
   path: '/videos',
   getParentRoute: () => AdminRoute,
 } as any)
+const EventsEventIdRoute = EventsEventIdRouteImport.update({
+  id: '/events_/$eventId',
+  path: '/events/$eventId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GalleryAlbumSlugRoute = GalleryAlbumSlugRouteImport.update({
   id: '/$albumSlug',
   path: '/$albumSlug',
@@ -159,6 +172,11 @@ const GalleryEventsRoute = GalleryEventsRouteImport.update({
   id: '/events',
   path: '/events',
   getParentRoute: () => GalleryRoute,
+} as any)
+const MainEventsEventIdRoute = MainEventsEventIdRouteImport.update({
+  id: '/main-events/$eventId',
+  path: '/main-events/$eventId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -175,6 +193,7 @@ export interface FileRoutesByFullPath {
   '/admin/events-hero': typeof AdminEventsHeroRoute
   '/admin/gallery': typeof AdminGalleryRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/main-events': typeof AdminMainEventsRoute
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/partners': typeof AdminPartnersRoute
   '/admin/past-events': typeof AdminPastEventsRoute
@@ -183,9 +202,11 @@ export interface FileRoutesByFullPath {
   '/admin/speaker-comments': typeof AdminSpeakerCommentsRoute
   '/admin/team': typeof AdminTeamRoute
   '/admin/videos': typeof AdminVideosRoute
+  '/events/$eventId': typeof EventsEventIdRoute
   '/gallery/$albumSlug': typeof GalleryAlbumSlugRoute
   '/gallery/albums': typeof GalleryAlbumsRoute
   '/gallery/events': typeof GalleryEventsRoute
+  '/main-events/$eventId': typeof MainEventsEventIdRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
@@ -201,6 +222,7 @@ export interface FileRoutesByTo {
   '/admin/events-hero': typeof AdminEventsHeroRoute
   '/admin/gallery': typeof AdminGalleryRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/main-events': typeof AdminMainEventsRoute
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/partners': typeof AdminPartnersRoute
   '/admin/past-events': typeof AdminPastEventsRoute
@@ -209,9 +231,11 @@ export interface FileRoutesByTo {
   '/admin/speaker-comments': typeof AdminSpeakerCommentsRoute
   '/admin/team': typeof AdminTeamRoute
   '/admin/videos': typeof AdminVideosRoute
+  '/events/$eventId': typeof EventsEventIdRoute
   '/gallery/$albumSlug': typeof GalleryAlbumSlugRoute
   '/gallery/albums': typeof GalleryAlbumsRoute
   '/gallery/events': typeof GalleryEventsRoute
+  '/main-events/$eventId': typeof MainEventsEventIdRoute
   '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
@@ -229,6 +253,7 @@ export interface FileRoutesById {
   '/admin/events-hero': typeof AdminEventsHeroRoute
   '/admin/gallery': typeof AdminGalleryRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/main-events': typeof AdminMainEventsRoute
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/partners': typeof AdminPartnersRoute
   '/admin/past-events': typeof AdminPastEventsRoute
@@ -237,9 +262,11 @@ export interface FileRoutesById {
   '/admin/speaker-comments': typeof AdminSpeakerCommentsRoute
   '/admin/team': typeof AdminTeamRoute
   '/admin/videos': typeof AdminVideosRoute
+  '/events_/$eventId': typeof EventsEventIdRoute
   '/gallery/$albumSlug': typeof GalleryAlbumSlugRoute
   '/gallery/albums': typeof GalleryAlbumsRoute
   '/gallery/events': typeof GalleryEventsRoute
+  '/main-events/$eventId': typeof MainEventsEventIdRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
@@ -258,6 +285,7 @@ export interface FileRouteTypes {
     | '/admin/events-hero'
     | '/admin/gallery'
     | '/admin/login'
+    | '/admin/main-events'
     | '/admin/messages'
     | '/admin/partners'
     | '/admin/past-events'
@@ -266,9 +294,11 @@ export interface FileRouteTypes {
     | '/admin/speaker-comments'
     | '/admin/team'
     | '/admin/videos'
+    | '/events/$eventId'
     | '/gallery/$albumSlug'
     | '/gallery/albums'
     | '/gallery/events'
+    | '/main-events/$eventId'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -284,6 +314,7 @@ export interface FileRouteTypes {
     | '/admin/events-hero'
     | '/admin/gallery'
     | '/admin/login'
+    | '/admin/main-events'
     | '/admin/messages'
     | '/admin/partners'
     | '/admin/past-events'
@@ -292,9 +323,11 @@ export interface FileRouteTypes {
     | '/admin/speaker-comments'
     | '/admin/team'
     | '/admin/videos'
+    | '/events/$eventId'
     | '/gallery/$albumSlug'
     | '/gallery/albums'
     | '/gallery/events'
+    | '/main-events/$eventId'
     | '/admin'
   id:
     | '__root__'
@@ -311,6 +344,7 @@ export interface FileRouteTypes {
     | '/admin/events-hero'
     | '/admin/gallery'
     | '/admin/login'
+    | '/admin/main-events'
     | '/admin/messages'
     | '/admin/partners'
     | '/admin/past-events'
@@ -319,9 +353,11 @@ export interface FileRouteTypes {
     | '/admin/speaker-comments'
     | '/admin/team'
     | '/admin/videos'
+    | '/events_/$eventId'
     | '/gallery/$albumSlug'
     | '/gallery/albums'
     | '/gallery/events'
+    | '/main-events/$eventId'
     | '/admin/'
   fileRoutesById: FileRoutesById
 }
@@ -332,6 +368,8 @@ export interface RootRouteChildren {
   EventsRoute: typeof EventsRoute
   GalleryRoute: typeof GalleryRouteWithChildren
   TeamRoute: typeof TeamRoute
+  EventsEventIdRoute: typeof EventsEventIdRoute
+  MainEventsEventIdRoute: typeof MainEventsEventIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -434,6 +472,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/main-events': {
+      id: '/admin/main-events'
+      path: '/main-events'
+      fullPath: '/admin/main-events'
+      preLoaderRoute: typeof AdminMainEventsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/messages': {
       id: '/admin/messages'
       path: '/messages'
@@ -490,6 +535,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminVideosRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/events_/$eventId': {
+      id: '/events_/$eventId'
+      path: '/events/$eventId'
+      fullPath: '/events/$eventId'
+      preLoaderRoute: typeof EventsEventIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/gallery/$albumSlug': {
       id: '/gallery/$albumSlug'
       path: '/$albumSlug'
@@ -511,6 +563,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GalleryEventsRouteImport
       parentRoute: typeof GalleryRoute
     }
+    '/main-events/$eventId': {
+      id: '/main-events/$eventId'
+      path: '/main-events/$eventId'
+      fullPath: '/main-events/$eventId'
+      preLoaderRoute: typeof MainEventsEventIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -522,6 +581,7 @@ interface AdminRouteChildren {
   AdminEventsHeroRoute: typeof AdminEventsHeroRoute
   AdminGalleryRoute: typeof AdminGalleryRoute
   AdminLoginRoute: typeof AdminLoginRoute
+  AdminMainEventsRoute: typeof AdminMainEventsRoute
   AdminMessagesRoute: typeof AdminMessagesRoute
   AdminPartnersRoute: typeof AdminPartnersRoute
   AdminPastEventsRoute: typeof AdminPastEventsRoute
@@ -541,6 +601,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminEventsHeroRoute: AdminEventsHeroRoute,
   AdminGalleryRoute: AdminGalleryRoute,
   AdminLoginRoute: AdminLoginRoute,
+  AdminMainEventsRoute: AdminMainEventsRoute,
   AdminMessagesRoute: AdminMessagesRoute,
   AdminPartnersRoute: AdminPartnersRoute,
   AdminPastEventsRoute: AdminPastEventsRoute,
@@ -576,6 +637,8 @@ const rootRouteChildren: RootRouteChildren = {
   EventsRoute: EventsRoute,
   GalleryRoute: GalleryRouteWithChildren,
   TeamRoute: TeamRoute,
+  EventsEventIdRoute: EventsEventIdRoute,
+  MainEventsEventIdRoute: MainEventsEventIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

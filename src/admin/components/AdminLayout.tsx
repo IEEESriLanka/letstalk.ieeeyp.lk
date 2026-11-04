@@ -27,6 +27,7 @@ import { isSuperAdmin } from "@/lib/super-admin";
 const navItems = [
   { label: "Dashboard", to: "/admin", icon: Home },
   { label: "Events", to: "/admin/events", icon: CalendarDays },
+  { label: "Our Main Events", to: "/admin/main-events", icon: Sparkles },
   { label: "Events Hero", to: "/admin/events-hero", icon: GalleryHorizontalEnd },
   { label: "Past Events", to: "/admin/past-events", icon: History },
   { label: "Team", to: "/admin/team", icon: UsersRound },
