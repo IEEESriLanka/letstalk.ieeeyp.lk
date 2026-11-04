@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowUpRight, CalendarDays, MapPin } from "lucide-react";
 import { SiteNav } from "@/components/site/site-nav";
@@ -217,7 +217,7 @@ function EventsPage() {
                   return (
                     <article
                       key={event.title + event.dateLabel + index}
-                      className="flex h-[560px] min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-lift"
+                      className="flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-lift"
                     >
                       <div className="relative h-72 w-full shrink-0 overflow-hidden border-b border-border/50 bg-slate-950">
                         <img
@@ -251,7 +251,8 @@ function EventsPage() {
                         <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-body">
                           {event.description}
                         </p>
-                        <div className="mt-auto flex min-h-[2.5rem] items-center pt-3">
+                        <div className="mt-auto flex shrink-0 flex-wrap items-center justify-between gap-3 pt-5">
+                          <Link to="/events/$eventId" params={{ eventId: event.id || `${event.dateLabel}-${event.title}` }} aria-label={`Read more about ${event.title}`} className="inline-flex min-h-11 items-center gap-2 rounded-full bg-orange px-5 py-2.5 text-sm font-bold text-white transition-shadow hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange">Read more <ArrowUpRight className="size-4" aria-hidden="true" /></Link>
                           {!past && registration ? (
                             <a
                               href={registration}

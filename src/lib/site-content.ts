@@ -80,6 +80,7 @@ export function getDisplayYearTeams(team: NonNullable<SiteContent["teamPage"]>):
 }
 
 export type SiteContent = {
+  mainEvents?: Array<{ title?: string | undefined; description: string; imageUrl: string }> | undefined;
   hero: {
     eyebrow: string;
     title: string;
@@ -120,6 +121,8 @@ export type SiteContent = {
     }>;
   };
   events: Array<{
+    id?: string;
+    startTime?: string | null;
     tag: string;
     title: string;
     description: string;
