@@ -46,7 +46,7 @@ function JourneyCard({ event }: { event: JourneyEvent }) {
             {event.title}
           </h4>
           <p className="mt-4 line-clamp-6 whitespace-pre-line break-words text-sm leading-relaxed text-body sm:text-base">
-            {event.description}
+            {event.homepageContent ?? event.description}
           </p>
             <Link
               to="/main-events/$eventId"
