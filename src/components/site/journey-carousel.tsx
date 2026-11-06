@@ -18,7 +18,7 @@ function EventPhoto({ event, large = false }: { event: JourneyEvent; large?: boo
       className={
         large
           ? "max-h-[45vh] w-full rounded-[5px] bg-slate-50 object-contain"
-          : "max-h-[26rem] w-auto max-w-full rounded-[18px] object-contain"
+          : "w-full rounded-[18px] object-contain"
       }
     />
   ) : (
@@ -31,9 +31,9 @@ function EventPhoto({ event, large = false }: { event: JourneyEvent; large?: boo
 function JourneyCard({ event }: { event: JourneyEvent }) {
   return (
     <>
-      <article className="relative isolate grid h-full overflow-hidden rounded-[22px] border border-blue-100 bg-white bg-[linear-gradient(125deg,rgba(255,121,0,0.18)_0%,rgba(255,121,0,0.07)_40%,rgba(255,121,0,0.02)_70%,rgba(255,121,0,0.10)_100%)] p-6 shadow-[0_20px_45px_-20px_rgba(0,65,112,0.4)] sm:p-8 md:grid-cols-[2fr_3fr] lg:p-10">
-        <div className="relative flex items-center justify-center px-4 py-5 md:mr-8 md:border-r md:border-slate-200 md:pr-8">
-          <div className="relative w-fit max-w-full">
+      <article className="relative isolate grid h-full overflow-hidden rounded-[22px] border border-blue-100 bg-white bg-[linear-gradient(125deg,rgba(255,121,0,0.18)_0%,rgba(255,121,0,0.07)_40%,rgba(255,121,0,0.02)_70%,rgba(255,121,0,0.10)_100%)] p-6 shadow-[0_20px_45px_-20px_rgba(0,65,112,0.4)] sm:p-8 md:grid-cols-2 lg:p-10">
+        <div className="relative flex min-w-0 items-center justify-center py-3 md:mr-6 md:border-r md:border-slate-200 md:pr-6">
+          <div className="relative w-full">
             <div aria-hidden="true" className="absolute -top-3 -left-3 -z-10 h-1/2 w-1/2 rounded-[26px] bg-gradient-to-br from-ieee to-ieee-deep" />
             <div aria-hidden="true" className="absolute -right-3 -bottom-3 -z-10 h-1/3 w-1/2 rounded-[24px] bg-gradient-to-br from-ieee to-ieee-deep" />
             <div className="overflow-hidden rounded-[21px] border-2 border-orange bg-white p-0.5 shadow-xl">
