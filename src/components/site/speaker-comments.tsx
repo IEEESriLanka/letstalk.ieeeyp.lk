@@ -7,7 +7,7 @@ import { getPublishedComments, type SpeakerComment } from "@/lib/testimonials";
 function SpeakerCard({ speaker }: { speaker: SpeakerComment }) {
   const [failedImage, setFailedImage] = useState("");
   return (
-    <figure className="relative flex h-full min-h-[320px] flex-col rounded-[5px] border-b-[3px] border-orange bg-white px-6 pt-7 pb-5 shadow-[0_8px_24px_rgba(15,35,55,0.10)] sm:px-7">
+    <figure className="relative flex h-full flex-col rounded-[5px] border-b-[3px] border-orange bg-white px-6 py-5 shadow-[0_8px_24px_rgba(15,35,55,0.10)] sm:px-7">
       <Quote
         className="absolute top-4 right-4 size-6 fill-current text-orange/85"
         strokeWidth={0}
@@ -42,7 +42,7 @@ function SpeakerCard({ speaker }: { speaker: SpeakerComment }) {
           </span>
         </span>
       </figcaption>
-      <blockquote className="mt-5 mb-6 whitespace-pre-line break-words text-sm leading-relaxed text-[#5b6069]">
+      <blockquote className="mt-4 whitespace-pre-line break-words text-sm leading-relaxed text-[#5b6069]">
         {speaker.comment}
       </blockquote>
     </figure>
