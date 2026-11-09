@@ -351,7 +351,7 @@ function EventCarousel({ events }: { events: SiteContent["events"] }) {
                               href={event.registrationUrl || "#contact"}
                               className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-bold text-ieee shadow-soft transition-transform hover:-translate-y-0.5"
                             >
-                              Register Interest
+                              Register Now
                               <ArrowUpRight className="size-3.5" />
                             </a>
                           </motion.div>
